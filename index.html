@@ -135,7 +135,19 @@ footer a{color:var(--gold)}
   .cover{max-width:180px}
   .eval{grid-template-columns:1fr}
   .top .mark{display:none}
-  .top nav{margin-left:0}
+  .top nav{margin-left:0;gap:0;width:100%;justify-content:space-between}
+  .top nav a{padding:10px 7px;font-size:.86rem}
+  .card{padding:18px 16px}
+  .card h3{font-size:1.3rem}
+  .rows{grid-template-columns:1fr;gap:0}
+  .rows dt{margin-top:8px}
+  .btns{flex-direction:column}
+  .btn{justify-content:center;min-height:46px}
+  .next a.go{display:block;text-align:center;min-height:46px;line-height:26px}
+  details.act summary{padding:16px}
+  .act .body{padding:16px}
+  h2{font-size:1.75rem}
+  section.block{padding:44px 0 12px}
 }
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 @media print{.top,.next a.go{display:none}.hero{background:#fff;color:#000}.stop.is-past{opacity:1}}
@@ -316,8 +328,7 @@ footer a{color:var(--gold)}
 </footer>
 
 <script>
-/* Link da Sessão 1: substituir pelo arquivo local quando disponível (notas/estrategia-operacoes.html) */
-const NOTA_S1 = "https://claude.ai/public/artifacts/bbe48e3e-e148-43e7-8a83-a2ac015ca1f1";
+const NOTA_S1 = "notas/estrategia-operacoes.html";
 
 const S = [
  {n:"Sessão 1", d:"2026-10-10", h:"13h15 – 15h15", t:"Gestão estratégica de operações",

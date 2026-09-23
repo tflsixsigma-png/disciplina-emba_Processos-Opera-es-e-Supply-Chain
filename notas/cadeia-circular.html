@@ -298,6 +298,33 @@ background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui
 @media(max-width:560px){.disc-back .bk{display:none}header .header-meta{display:none}header .header-title{font-size:.95rem;line-height:1.2}}
 @media print{.disc-back{display:none}}
 </style>
+<style id="mobile-patch">
+@media (max-width:700px){
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+  th{font-size:12px!important} td{font-size:14px!important;line-height:1.5}
+  .tab-btn{font-size:14px!important;min-height:44px}
+}
+@media (max-width:760px){
+  header{height:auto!important;flex-wrap:wrap;padding:8px 10px 0!important;gap:8px 10px!important}
+  header .brand{flex:1;min-width:0}
+  header nav{order:10;flex:1 0 100%!important;margin:0 -10px!important;padding:0 10px 8px;border-top:1px solid var(--line);padding-top:8px}
+  header nav button{padding:9px 12px!important;font-size:13.5px!important;min-height:40px}
+  .helpbtn{min-width:40px;min-height:40px}
+  .view{inset:var(--hh,108px) 0 0 0!important}
+  #panel{top:var(--hh,108px)!important}
+  .legend{top:10px!important;left:10px!important;padding:8px 12px!important;max-width:72vw!important}
+  .legend h4{cursor:pointer;margin:0!important;font-size:12px!important}
+  .legend h4::after{content:" ▾";text-transform:none}
+  .legend.open h4{margin-bottom:8px!important}
+  .legend.open h4::after{content:" ▴"}
+  .legend:not(.open) #legendItems{display:none}
+  .legend .item{font-size:14px!important;padding:7px 6px!important}
+  .hint{display:none!important}
+  .pdesc,.pblock li{font-size:15.5px!important}
+  .pbody{padding:22px 18px 40px!important}
+  .pclose{width:40px!important;height:40px!important}
+}
+</style>
 </head>
 <body>
 <header>
@@ -869,7 +896,7 @@ const nodeById=Object.fromEntries(NODES.map(n=>[n.id,n]));
 const adj={}; NODES.forEach(n=>adj[n.id]=new Set());
 LINKS.forEach(([a,b])=>{adj[a].add(b);adj[b].add(a)});
 
-let W=innerWidth,H=innerHeight-62;
+let W=innerWidth,H=innerHeight-document.querySelector("header").offsetHeight;
 // initial positions: spread on a circle, core in middle
 NODES.forEach((n,i)=>{
   if(n.id==="cscm"){n.x=W/2;n.y=H/2;}
@@ -1141,7 +1168,7 @@ function switchView(v){
   document.querySelectorAll(".view").forEach(s=>s.classList.toggle("active",s.id==="view-"+v));
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
   document.getElementById("ctrls").style.display=v==="map"?"flex":"none";
-  if(v==="map"){W=innerWidth;H=innerHeight-62;reheat(0.4);}
+  if(v==="map"){W=innerWidth;H=innerHeight-document.querySelector("header").offsetHeight;reheat(0.4);}
 }
 document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
 
@@ -1178,8 +1205,18 @@ showIntro(); // abre o guia ao carregar
 document.querySelectorAll("#view-diagrama [data-go]").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
 document.querySelectorAll("#view-agenda [data-go]").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
 
-window.addEventListener("resize",()=>{W=innerWidth;H=innerHeight-62;});
+window.addEventListener("resize",()=>{W=innerWidth;H=innerHeight-document.querySelector("header").offsetHeight;});
 applyVP(); render(); reheat(1);
+</script>
+<script id="mobile-patch-js">
+(function(){
+  var h=document.querySelector('header');
+  function set(){document.documentElement.style.setProperty('--hh',h.offsetHeight+'px');}
+  set(); addEventListener('resize',set); addEventListener('orientationchange',set);
+  var lg=document.querySelector('.legend h4');
+  if(lg) lg.addEventListener('click',function(){lg.parentElement.classList.toggle('open');});
+  if(innerWidth>760 && lg) lg.parentElement.classList.add('open');
+})();
 </script>
 </body>
 </html>
