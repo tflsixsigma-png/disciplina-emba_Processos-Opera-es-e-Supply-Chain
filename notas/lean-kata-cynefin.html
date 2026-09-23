@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestão Ágil — Lean Thinking / Kata / Cynefin | EMBA</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628;
+    --navy-mid: #112240;
+    --navy-light: #1d3461;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-pale: #f5e9c8;
+    --cream: #faf6ef;
+    --white: #ffffff;
+    --text-dark: #0a1628;
+    --text-mid: #334155;
+    --text-light: #64748b;
+    --border: rgba(201,168,76,0.25);
+    --shadow: 0 4px 32px rgba(10,22,40,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 2px solid var(--gold);
+  }
+
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .header-badge {
+    background: var(--gold);
+    color: var(--navy);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    color: var(--white);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  .header-meta {
+    font-family: 'DM Mono', monospace;
+    color: var(--gold);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--navy);
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 30% 80%, rgba(201,168,76,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 75% 20%, rgba(29,52,97,0.8) 0%, transparent 70%);
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    color: var(--gold);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.1s forwards;
+    position: relative;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--white);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    max-width: 800px;
+    margin: 0 auto 1rem;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s forwards;
+    position: relative;
+  }
+
+  .hero h1 em {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .hero-sub {
+    color: rgba(255,255,255,0.6);
+    font-size: 1rem;
+    max-width: 540px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.3s forwards;
+    position: relative;
+  }
+
+  .hero-equation {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 0.75rem 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    color: var(--gold-light);
+    letter-spacing: 0.15em;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.4s forwards;
+    position: relative;
+  }
+
+  /* ── NAV TABS ── */
+  .nav-tabs {
+    background: var(--navy-mid);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .nav-tabs::-webkit-scrollbar { display: none; }
+
+  .nav-tabs-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    gap: 0;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.45);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+
+  .tab-btn:hover { color: rgba(255,255,255,0.8); }
+
+  .tab-btn.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  /* ── LAYOUT ── */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+  }
+
+  .module {
+    display: none;
+    padding-top: 3rem;
+    animation: fadeIn 0.35s ease;
+  }
+
+  .module.active { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── MODULE HEADER ── */
+  .mod-header {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+    align-items: start;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mod-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+    opacity: 0.3;
+    min-width: 80px;
+    text-align: right;
+  }
+
+  .mod-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+
+  .mod-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  /* ── CARDS ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .card {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.07);
+    padding: 1.75rem;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--gold);
+  }
+
+  .card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.75rem;
+  }
+
+  .card p {
+    font-size: 0.88rem;
+    color: var(--text-mid);
+    line-height: 1.7;
+  }
+
+  /* ── SECTION BLOCKS ── */
+  .section-block {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.07);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+
+  .section-block.gold-accent {
+    border-left: 4px solid var(--gold);
+  }
+
+  .section-block.navy-accent {
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .section-block h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 1rem;
+  }
+
+  .section-block.navy-accent h2 { color: var(--gold-light); }
+
+  .section-block p {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--text-mid);
+  }
+
+  .section-block.navy-accent p { color: rgba(255,255,255,0.75); }
+
+  /* ── TABLE ── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin: 1rem 0;
+  }
+
+  .data-table th {
+    background: var(--navy);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 500;
+  }
+
+  .data-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    color: var(--text-mid);
+    line-height: 1.5;
+    vertical-align: top;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:nth-child(even) td { background: rgba(201,168,76,0.04); }
+
+  .data-table td:first-child {
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  /* ── DILEMA ── */
+  .dilema-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .dilema-card {
+    background: var(--navy);
+    border: 1px solid rgba(201,168,76,0.2);
+    padding: 1.5rem;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .dilema-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-2px);
+  }
+
+  .dilema-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+  }
+
+  .dilema-card p {
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.7;
+  }
+
+  .dilema-card .dilema-reveal {
+    display: none;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(201,168,76,0.2);
+    font-size: 0.82rem;
+    color: var(--gold-pale);
+    line-height: 1.7;
+  }
+
+  .dilema-card.open .dilema-reveal { display: block; }
+
+  .dilema-toggle {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--gold);
+    margin-top: 0.75rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── QUOTE ── */
+  .quote-block {
+    border-left: 3px solid var(--gold);
+    padding: 1.25rem 1.75rem;
+    background: rgba(201,168,76,0.05);
+    margin: 1.5rem 0;
+  }
+
+  .quote-block blockquote {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--navy);
+    line-height: 1.7;
+    margin-bottom: 0.5rem;
+  }
+
+  .quote-block cite {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    font-style: normal;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── CASE STUDY ── */
+  .case-study {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 1.75rem;
+    margin: 1.5rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .case-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .case-study h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--white);
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .case-study p {
+    font-size: 0.87rem;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.7;
+  }
+
+  /* ── CYNEFIN DOMAINS ── */
+  .cynefin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .cynefin-cell {
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .c-simples   { background: var(--navy-light); border: 1px solid rgba(201,168,76,0.2); }
+  .c-complicado{ background: #1a3a2a;            border: 1px solid rgba(201,168,76,0.2); }
+  .c-complexo  { background: #5a1e14;            border: 1px solid rgba(201,168,76,0.2); }
+  .c-caotico   { background: #2d1f14;            border: 1px solid rgba(201,168,76,0.2); }
+
+  .c-confusao {
+    grid-column: 1 / -1;
+    background: var(--navy-mid);
+    border: 1px solid rgba(201,168,76,0.35);
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .cynefin-cell .domain-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 0.4rem;
+  }
+
+  .cynefin-cell .domain-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 0.4rem;
+  }
+
+  .cynefin-cell .domain-approach {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+  }
+
+  .cynefin-cell .domain-desc {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.6;
+  }
+
+  .c-confusao .domain-name { font-size: 1rem; }
+
+  /* ── KATA STEPS ── */
+  .kata-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(0,0,0,0.07);
+  }
+
+  .kata-step {
+    background: var(--white);
+    padding: 1.5rem;
+    border-right: 1px solid rgba(0,0,0,0.07);
+    position: relative;
+  }
+
+  .kata-step:last-child { border-right: none; }
+
+  .kata-step::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .kata-step:nth-child(1)::before { background: var(--navy-light); }
+  .kata-step:nth-child(2)::before { background: #2a7a50; }
+  .kata-step:nth-child(3)::before { background: var(--gold); }
+  .kata-step:nth-child(4)::before { background: #c0392b; }
+
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+
+  .step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.6rem;
+    line-height: 1.3;
+  }
+
+  .step-body {
+    font-size: 0.82rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+
+  /* ── SYNTHESIS MATRIX ── */
+  .synthesis-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .syn-cell {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.07);
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .syn-cell::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--gold);
+  }
+
+  .syn-cell.dark {
+    background: var(--navy);
+    border: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .syn-cell.dark::before { background: var(--gold); }
+
+  .syn-framework {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+  }
+
+  .syn-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.6rem;
+  }
+
+  .syn-cell.dark .syn-title { color: var(--white); }
+
+  .syn-body {
+    font-size: 0.84rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .syn-cell.dark .syn-body { color: rgba(255,255,255,0.65); }
+
+  .syn-metric {
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(0,0,0,0.07);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .syn-cell.dark .syn-metric { border-top-color: rgba(201,168,76,0.2); }
+
+  .syn-metric-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-light);
+  }
+
+  .syn-cell.dark .syn-metric-label { color: rgba(255,255,255,0.4); }
+
+  .syn-metric-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--navy);
+  }
+
+  .syn-cell.dark .syn-metric-value { color: var(--gold); }
+
+  /* ── PRINCIPLES LIST ── */
+  .principles {
+    counter-reset: principle;
+    list-style: none;
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .principles li {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: 1rem;
+    align-items: start;
+    background: var(--white);
+    padding: 1.25rem;
+    border: 1px solid rgba(0,0,0,0.06);
+    transition: border-color 0.2s;
+  }
+
+  .principles li:hover { border-color: var(--gold); }
+
+  .principles li::before {
+    counter-increment: principle;
+    content: counter(principle, decimal-leading-zero);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--gold);
+    font-weight: 500;
+    padding-top: 3px;
+    line-height: 1;
+  }
+
+  .prin-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .principles li strong {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .principles li span {
+    font-size: 0.84rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+
+  /* ── TAKEAWAY LIST ── */
+  .takeaway-list {
+    list-style: none;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .takeaway-list li {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.07);
+    padding: 1rem 1.25rem 1rem 2.5rem;
+    position: relative;
+    font-size: 0.88rem;
+    color: var(--text-mid);
+    line-height: 1.7;
+  }
+
+  .takeaway-list li::before {
+    content: '✦';
+    position: absolute;
+    left: 0.9rem;
+    top: 1rem;
+    color: var(--gold);
+    font-size: 0.7rem;
+  }
+
+  .takeaway-list li strong { color: var(--navy); font-weight: 600; }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--navy);
+    border-top: 1px solid rgba(201,168,76,0.2);
+    padding: 2rem;
+    text-align: center;
+    margin-top: 4rem;
+  }
+
+  .footer-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.1em;
+    line-height: 2;
+  }
+
+  .footer-text strong { color: var(--gold); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .cynefin-grid, .synthesis-grid { grid-template-columns: 1fr; }
+    .c-confusao { grid-column: 1; }
+    .kata-steps { grid-template-columns: 1fr 1fr; }
+    .kata-step { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.07); }
+    .kata-step:last-child { border-bottom: none; }
+  }
+
+  @media (max-width: 640px) {
+    .mod-header { grid-template-columns: 1fr; }
+    .mod-number { display: none; }
+    .kata-steps { grid-template-columns: 1fr; }
+    .hero { padding: 3rem 1.5rem 2.5rem; }
+    .main { padding: 0 1rem 3rem; }
+  }
+</style>
+<style id="disc-back-css">
+.disc-back{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-right:12px;padding:6px 11px;border-radius:6px;
+background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui,sans-serif;text-decoration:none!important;white-space:nowrap;letter-spacing:0;text-transform:none}
+.disc-back:hover{background:#fff}.disc-back:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.disc-back .bk{font-weight:500;opacity:.85}
+@media(max-width:560px){.disc-back .bk{display:none}header .header-meta{display:none}header .header-title{font-size:.95rem;line-height:1.2}}
+@media print{.disc-back{display:none}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+<a class="disc-back" href="../index.html" title="Voltar à página da disciplina">‹ Disciplina<span class="bk"> · Livro Cap. 3</span></a>
+    <div class="header-brand">
+      <span class="header-badge">EMBA</span>
+      <span class="header-title">Gestão Ágil — Lean / Kata / Cynefin</span>
+    </div>
+    <span class="header-meta">Prof. Dr. Thiago Lima</span>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">Processos, Operações e Supply Chain</p>
+  <h1>Excelência Operacional na Era<br>da <em>Complexidade</em></h1>
+  <p class="hero-sub">Cynefin, Lean Thinking, Lean Startup e Toyota Kata — quatro frameworks que formam um sistema integrado de decisão, valor e aprendizagem contínua.</p>
+  <div class="hero-equation">Sondar → Sentir → Responder</div>
+</section>
+
+<!-- NAV TABS -->
+<nav class="nav-tabs" id="nav-tabs">
+  <div class="nav-tabs-inner">
+    <button class="tab-btn active" onclick="showModule(0)">M1 · Novo Paradigma</button>
+    <button class="tab-btn" onclick="showModule(1)">M2 · Cynefin</button>
+    <button class="tab-btn" onclick="showModule(2)">M3 · Lean Thinking</button>
+    <button class="tab-btn" onclick="showModule(3)">M4 · Lean Startup</button>
+    <button class="tab-btn" onclick="showModule(4)">M5 · Toyota Kata</button>
+    <button class="tab-btn" onclick="showModule(5)">M6 · Aprendizagem Org.</button>
+    <button class="tab-btn" onclick="showModule(6)">M7 · Síntese</button>
+    <button class="tab-btn" onclick="showModule(7)">Conclusão</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ═══════════════════════════════
+       M1 — NOVO PARADIGMA
+  ════════════════════════════════ -->
+  <section class="module active" id="mod-0">
+    <div class="mod-header">
+      <div class="mod-number">01</div>
+      <div>
+        <div class="mod-title">O Novo Paradigma da Gestão Contemporânea</div>
+        <div class="mod-subtitle">Por que abordagens tradicionais falham — e o que o líder moderno precisa saber</div>
+      </div>
+    </div>
+
+    <div class="quote-block">
+      <blockquote>"O cenário empresarial moderno é caracterizado por um aumento exponencial na complexidade — um fenômeno exacerbado pela incerteza, volatilidade e pelo volume massivo de dados. Esse contexto desafia fundamentalmente as abordagens de gestão que se baseiam em previsibilidade."</blockquote>
+
+    </div>
+
+    <div class="section-block gold-accent">
+      <div class="section-label">Conceito Central</div>
+      <h2>O Colapso das "Melhores Práticas"</h2>
+      <p>Modelos de gestão tradicionais — como o processo linear de desenvolvimento stage-gate — operam sob a suposição de que a relação causa-efeito é clara e previsível. Essa premissa, adequada para ambientes estáveis, torna-se uma armadilha em contextos de alta incerteza. A inovação disruptiva, a transformação cultural e a globalização pertencem a um universo onde a solução correta só é visível em retrospecto — e onde a única resposta inteligente é a experimentação deliberada, não o planejamento rígido.</p>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-label">O Problema</div>
+        <h3>Stage-Gate: O Teatro da Inovação</h3>
+        <p>Eric Ries descobriu que a maioria das equipes contorna os processos stage-gate criando projetos paralelos "na surdina". O resultado: desperdício sistêmico, desonestidade organizacional e inibição da inovação real. As empresas tentam encaixar um círculo em um quadrado.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">A Solução</div>
+        <h3>Um Sistema Integrado de Quatro Frameworks</h3>
+        <p>Cynefin mapeia o terreno da incerteza. O Lean define a direção de valor. O Lean Startup oferece a metodologia para inovar. O Toyota Kata transforma melhoria em rotina diária. Juntos, formam um sistema coeso — não ferramentas isoladas.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">O Princípio Unificador</div>
+        <h3>Sondar → Sentir → Responder</h3>
+        <p>A abordagem do domínio Complexo do Cynefin é a lógica operacional de todo o sistema. Sondar = hipótese do Lean Startup e experimento do Kata. Sentir = aprendizado validado. Responder = iteração do MVP e próxima condição-alvo.</p>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Visão Estratégica — Impacto no P&L</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Framework</th><th>Nível de Atuação</th><th>O que o Líder Faz</th><th>Resultado Estratégico</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Cynefin</td><td>Diagnóstico estratégico</td><td>Classifica o problema antes de responder</td><td>Evita erro de aplicar solução errada ao contexto errado</td></tr>
+          <tr><td>Lean Thinking</td><td>Direção de valor</td><td>Serve a equipe; foco no cliente</td><td>Eliminação de desperdícios; ganho de margem e receita</td></tr>
+          <tr><td>Lean Startup</td><td>Inovação e hipóteses</td><td>Gerencia portfólio de experimentos</td><td>Validação rápida de valor; redução de risco de investimento</td></tr>
+          <tr><td>Toyota Kata</td><td>Execução diária</td><td>Faz perguntas, não dá respostas</td><td>Aprendizagem institucionalizada; vantagem composta no tempo</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-block navy-accent">
+      <div class="section-label">Dilemas Executivos</div>
+      <div class="dilema-grid">
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 01</div>
+          <p>Sua empresa investe em metodologias ágeis há 3 anos, mas os resultados são inconsistentes. Equipes usam o vocabulário correto (sprints, MVPs, retrospectivas), mas os processos de aprovação e incentivos não mudaram. Como você diagnostica essa contradição?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">O fenômeno é o que Ries chama de "cargo cult ágil": adoção das ferramentas sem mudança no sistema de gestão subjacente. A raiz é o desalinhamento entre a lógica de experimentação (aprendizado como métrica) e os incentivos vigentes (ROI de curto prazo, aprovação hierárquica de cada decisão). A solução passa por redesenhar o sistema de medição e autoridade — não por mais treinamentos em frameworks.</div>
+        </div>
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 02</div>
+          <p>O CEO quer "transformação digital" e "eficiência operacional" simultaneamente — com as mesmas equipes, métricas e estrutura de aprovação. Quais são os riscos de tentar gerenciar inovação e operação madura com a mesma lógica?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">Inovação (domínio Complexo) e operações maduras (domínios Simples/Complicado) requerem sistemas de gestão distintos. Misturar as métricas destrói projetos promissores de inovação prematuramente e contamina operações estabelecidas com incerteza desnecessária. Ries propõe tratar cada iniciativa como um portfólio com suas próprias métricas e nível de tolerância ao risco — exatamente como gestores de portfólio de investimentos diferenciam renda fixa de renda variável.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════
+       M2 — CYNEFIN
+  ════════════════════════════════ -->
+  <section class="module" id="mod-1">
+    <div class="mod-header">
+      <div class="mod-number">02</div>
+      <div>
+        <div class="mod-title">Cynefin — Mapeando o Terreno Antes de Agir</div>
+        <div class="mod-subtitle">O framework de percepção de contexto que evita o erro estratégico mais custoso da liderança</div>
+      </div>
+    </div>
+
+    <div class="quote-block">
+      <blockquote>"O maior erro de um líder não é tomar uma decisão ruim — é aplicar a abordagem de um domínio a uma situação que pertence a outro."</blockquote>
+      <cite>— Dave Snowden, criador do Framework Cynefin (HBR, 2007)</cite>
+    </div>
+
+    <div class="section-block gold-accent">
+      <div class="section-label">Conceito Central</div>
+      <h2>Percepção de Contexto como Competência de Liderança</h2>
+      <p>O Cynefin — palavra galesa que significa "habitat" — é uma ferramenta de <em>sense-making</em>: auxilia líderes a identificar o tipo de ambiente em que operam e a selecionar a abordagem mais adequada. Sua premissa central é que diferentes contextos exigem estilos de decisão fundamentalmente diferentes. A maioria dos líderes é treinada para o domínio Complicado (análise + expertise), mas os desafios mais críticos do presente — inovação, transformação cultural, crises — pertencem ao domínio Complexo.</p>
+    </div>
+
+    <div class="cynefin-grid">
+      <div class="cynefin-cell c-simples">
+        <p class="domain-label">Domínio 1</p>
+        <p class="domain-name">Simples</p>
+        <p class="domain-approach">Sentir → Categorizar → Responder</p>
+        <p class="domain-desc">Causa e efeito óbvios para todos. Aplique melhores práticas. Risco: complacência e cegueira para mudanças de contexto. <em>Ex.: processos de rotina, compliance, pedidos padrão.</em></p>
+      </div>
+      <div class="cynefin-cell c-complicado">
+        <p class="domain-label">Domínio 2</p>
+        <p class="domain-name">Complicado</p>
+        <p class="domain-approach">Sentir → Analisar → Responder</p>
+        <p class="domain-desc">Requer expertise e análise. Múltiplas respostas corretas possíveis. Território de engenheiros, cirurgiões, analistas. <em>Ex.: diagnóstico técnico, otimização de supply chain.</em></p>
+      </div>
+      <div class="cynefin-cell c-complexo">
+        <p class="domain-label">Domínio 3 — O Mais Crítico</p>
+        <p class="domain-name">Complexo</p>
+        <p class="domain-approach">Sondar → Sentir → Responder</p>
+        <p class="domain-desc">Causa e efeito só visíveis em retrospecto. Padrões emergem de experimentos seguros. <strong>É aqui que vivem inovação, cultura e transformação digital.</strong> A única saída inteligente é a experimentação deliberada.</p>
+      </div>
+      <div class="cynefin-cell c-caotico">
+        <p class="domain-label">Domínio 4</p>
+        <p class="domain-name">Caótico</p>
+        <p class="domain-approach">Agir → Sentir → Responder</p>
+        <p class="domain-desc">Não há relação causa-efeito perceptível. Velocidade acima de precisão. Estabilize primeiro, analise depois. <em>Ex.: crises de reputação, falhas sistêmicas, pandemias.</em></p>
+      </div>
+      <div class="cynefin-cell c-confusao">
+        <div>
+          <p class="domain-label">Domínio Central — O Estado Mais Perigoso</p>
+          <p class="domain-name">Confusão</p>
+        </div>
+        <p class="domain-desc" style="flex:1;">Quando o líder não sabe em qual domínio está, recorre ao seu estilo preferido de decisão — geralmente errado para o contexto. Meta: fragmentar o problema e classificar cada parte no domínio correto o mais rápido possível.</p>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Tabela de Referência Executiva</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Domínio</th><th>Natureza do Problema</th><th>Abordagem de Liderança</th><th>Armadilha Crítica</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Simples</td><td>Previsível, estável</td><td>Aplicar protocolo estabelecido</td><td>Rigidez e complacência</td></tr>
+          <tr><td>Complicado</td><td>Requer expertise, mas solucionável</td><td>Consultar especialistas, analisar dados</td><td>Paralisia por análise</td></tr>
+          <tr><td>Complexo</td><td>Imprevisível, emergente</td><td>Experimentos seguros, aprendizado iterativo</td><td>Querer controle total antes de agir</td></tr>
+          <tr><td>Caótico</td><td>Sem relação causa-efeito</td><td>Ação imediata para estabilizar</td><td>Inação ou excesso de análise</td></tr>
+          <tr><td>Confusão</td><td>Contexto não diagnosticado</td><td>Fragmentar o problema e reclassificar</td><td>Aplicar estilo preferido sem diagnóstico</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="case-study">
+      <div class="case-label">Exemplo de Mercado</div>
+      <h3>Netflix (2007) — Do Domínio Complicado ao Complexo</h3>
+      <p>Em 2007, a Netflix não tinha "melhor prática" disponível para validar se consumidores pagariam por streaming. Reed Hastings operou no domínio Complexo com a abordagem correta: lançou streaming como benefício gratuito para assinantes de DVD (Sondar), observou padrões de adoção (Sentir) e só então pivotou o modelo de negócio (Responder). A Blockbuster, tratando o mesmo desafio como Simples, aplicou melhores práticas históricas — e faliu em 2010.</p>
+    </div>
+
+    <div class="section-block navy-accent">
+      <div class="section-label">Dilemas Executivos</div>
+      <div class="dilema-grid">
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 03</div>
+          <p>Seu time de produto falha consistentemente em inovação apesar de processos bem definidos. O diagnóstico mais provável: você está tratando um problema Complexo (descoberta de valor) com ferramentas de domínio Complicado (checklists, stage-gate). Como redesenhar a abordagem?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">A correção exige substituir o planejamento linear por uma lógica de experimentos: (1) Identificar explicitamente as hipóteses mais críticas do projeto; (2) Desenhar o experimento mínimo que as valide ou refute; (3) Medir aprendizado, não entregáveis; (4) Decidir pivotar ou perseverar com base em evidência comportamental — não em opiniões. Isso implica autoridade delegada para a equipe de produto e métricas de progresso radicalmente diferentes das financeiras tradicionais.</div>
+        </div>
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 04</div>
+          <p>Uma crise operacional estourou. Você está tentando "analisar" antes de agir — comportamento típico do domínio Complicado — quando o correto seria agir para estabilizar (Caótico). Como você reconhece esse erro em tempo real?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">O sinal de alerta é a demanda por mais dados antes de agir num contexto onde o sistema está em colapso ativo. No domínio Caótico, a análise perfeita é inimiga da ação necessária. O protocolo correto: (1) Agir imediatamente para estabilizar o sistema — mesmo que a ação seja imperfeita; (2) Observar o efeito da ação; (3) Responder ajustando. Após estabilização, o contexto frequentemente migra para Complexo ou Complicado, onde a análise volta a ser útil.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════
+       M3 — LEAN THINKING
+  ════════════════════════════════ -->
+  <section class="module" id="mod-2">
+    <div class="mod-header">
+      <div class="mod-number">03</div>
+      <div>
+        <div class="mod-title">Lean Thinking — A Estratégia de Valor Além da Manufatura</div>
+        <div class="mod-subtitle">Dos fundamentos do TPS aos pilares comportamentais que sustentam vantagem competitiva duradoura</div>
+      </div>
+    </div>
+
+    <div class="quote-block">
+      <blockquote>"Tudo o que o consumidor não reconhece como valor é desperdício. A liderança ainda se recusa a pensar simples assim na maioria dos casos."</blockquote>
+      <cite>— José Roberto Ferro, Fundador — Lean Institute Brasil</cite>
+    </div>
+
+    <div class="section-block gold-accent">
+      <div class="section-label">Conceito Central</div>
+      <h2>Lean não é Corte de Custo — é Estratégia de Valor</h2>
+      <p>O Lean nasceu nas fábricas da Toyota nos anos 1950 com Taiichi Ohno. Mas sua essência transcende manufatura: é uma filosofia de gestão construída sobre dois pilares comportamentais — <strong>kaizen</strong> (melhoria contínua como mentalidade) e <strong>empowerment da linha de frente</strong> (inteligência distribuída). A eliminação de desperdícios é consequência de uma compreensão profunda do que o cliente valoriza — não o ponto de partida. Empresas que implementam Lean com maturidade não apenas reduzem custos: elas aumentam receita.</p>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-label">Pilar 1</div>
+        <h3>Kaizen — Melhoria como Mentalidade</h3>
+        <p>Não é evento ou projeto. É a crença cultural de que nenhum processo está tão bom que não possa melhorar amanhã. O kaizen transforma o problema em oportunidade e elimina a complacência organizacional — o maior inimigo de empresas que atingiram posição de liderança.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Pilar 2</div>
+        <h3>Empowerment — Inteligência na Linha de Frente</h3>
+        <p>A maior reserva de conhecimento operacional está nas pessoas que executam o trabalho. O Lean transfere autoridade para quem tem contato direto com o processo e com o cliente, criando uma organização adaptável que não depende de autorização hierárquica para corrigir problemas.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Novas Fronteiras</div>
+        <h3>Lean Além da Fábrica</h3>
+        <p>Bancos, hospitais, companhias aéreas, corretoras e agências de governo já comprovaram que os princípios Lean se aplicam a qualquer processo com fluxo, variabilidade e desperdício. A pergunta não é "Lean se aplica ao meu setor?" — é "que desperdício estou sustentando sem perceber?"</p>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">As 4 Disciplinas da Gestão Lean para Valor Duradouro (McKinsey)</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Disciplina</th><th>O que significa na prática</th><th>Impacto no P&L</th><th>Pergunta para seu time</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1. Entregar Valor ao Cliente</td><td>Mapear o que o cliente paga; eliminar o resto</td><td>Redução de OPEX, NPS superior, market share</td><td>Que parte do nosso processo o cliente nunca pagaria se soubesse?</td></tr>
+          <tr><td>2. Capacitar as Pessoas</td><td>Criar estruturas para domínio do trabalho</td><td>Redução de turnover, produtividade por colaborador</td><td>Nossas pessoas têm clareza, ferramentas e autoridade para resolver o que veem?</td></tr>
+          <tr><td>3. Descobrir Novas Formas</td><td>Tornar melhoria responsabilidade coletiva contínua</td><td>Eficiência operacional composta no tempo</td><td>Qual foi a última melhoria da linha de frente que implementamos?</td></tr>
+          <tr><td>4. Conectar Estratégias</td><td>Metas individuais conectadas à visão da empresa</td><td>Alinhamento; redução de esforço disperso</td><td>Cada pessoa sabe como seu trabalho impacta o cliente final?</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="case-study">
+      <div class="case-label">Exemplo de Mercado</div>
+      <h3>TD Ameritrade — Lean em Serviços Financeiros</h3>
+      <p>A corretora aplicou Lean nos call centers, abertura de contas e processos de compliance. A comunicação inverteu o fluxo: de top-down para bottom-up. O resultado: metade dos ganhos vieram de <strong>crescimento de receita</strong> (novos clientes, qualidade de serviço) — não apenas de corte de custos. O engajamento de funcionários atingiu o topo do setor financeiro americano. Esta é a prova empírica de que Lean bem executado não é programa de austeridade: é estratégia de crescimento.</p>
+    </div>
+
+    <div class="section-block navy-accent">
+      <div class="section-label">Dilemas Executivos</div>
+      <div class="dilema-grid">
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 05</div>
+          <p>Sua empresa passou por uma rodada de cortes de custo e chama isso de "implementação Lean". Como você articula para o CEO a diferença fundamental entre enxugamento reativo e a filosofia Lean genuína?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">Cortar custos sem entender valor é o oposto do Lean. O ponto de partida do Lean é a WTP do cliente — e o desperdício é definido como tudo que o cliente não valoriza. Cortes que afetam capacidades que o cliente valoriza destroem receita futura, mesmo melhorando o P&L de curto prazo. A distinção prática: no Lean genuíno, cada decisão de redução de custo é precedida pela pergunta "isso reduz a entrega de valor ao cliente?". Se a resposta for sim, a decisão precisa de escrutínio estratégico muito maior.</div>
+        </div>
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 06</div>
+          <p>O Lean Institute Brasil aponta que o verdadeiro desafio no Brasil não é adotar ferramentas, mas mudar o estilo de liderança. Quais comportamentos de liderança típicos em grandes organizações brasileiras são estruturalmente incompatíveis com a filosofia Lean?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">Os principais incompatíveis: (1) Liderança que resolve problemas por decreto, em vez de desenvolver a capacidade de resolução da equipe; (2) KPIs puramente financeiros e de curto prazo, que invisibilizam desperdícios que não aparecem no EBITDA imediato; (3) Cultura de "não errar" que penaliza experimentação e aprendizado; (4) Distância física e informacional da liderança do gemba — o local onde o trabalho acontece. Mudar isso é um projeto de transformação cultural de 3 a 5 anos, não uma iniciativa de treinamento.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════
+       M4 — LEAN STARTUP
+  ════════════════════════════════ -->
+  <section class="module" id="mod-3">
+    <div class="mod-header">
+      <div class="mod-number">04</div>
+      <div>
+        <div class="mod-title">Lean Startup — Gerenciando Hipóteses em Incerteza Extrema</div>
+        <div class="mod-subtitle">Por que a inovação não falha por falta de criatividade — e o sistema de gestão que corrige esse erro categórico</div>
+      </div>
+    </div>
+
+    <div class="quote-block">
+      <blockquote>"O aprendizado é a unidade de progresso do empreendedorismo. É mais importante do que ganhar dinheiro, conquistar clientes, desenvolver recursos ou criar qualidade técnica."</blockquote>
+      <cite>— Eric Ries, The Lean Startup (2011)</cite>
+    </div>
+
+    <div class="section-block gold-accent">
+      <div class="section-label">Conceito Central</div>
+      <h2>Aprendizagem Validada como Métrica de Progresso</h2>
+      <p>O Lean Startup parte do princípio de que, em contextos de inovação, <em>não se sabe nada</em> — apenas se tem hipóteses. A métrica de progresso não é o cumprimento do plano de negócios ou a receita gerada: é o aprendizado validado sobre o que o cliente valoriza. Isso exige uma transformação profunda na relação das pessoas com o fracasso: refutar uma hipótese não é falha gerencial — é inteligência operacional que evita anos de desenvolvimento sem demanda validada.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">O Ciclo Build-Measure-Learn — Aplicação Prática em Qualquer Setor</div>
+    </div>
+
+    <div class="kata-steps">
+      <div class="kata-step">
+        <p class="step-num">Fase 01</p>
+        <h4 class="step-title">Formular a Hipótese</h4>
+        <p class="step-body">Qual é a suposição mais crítica que, se falsa, invalida todo o modelo? Explicite em uma frase testável. Sem isso, não há experimento — há execução cega de plano.</p>
+      </div>
+      <div class="kata-step">
+        <p class="step-num">Fase 02</p>
+        <h4 class="step-title">Construir o MVP</h4>
+        <p class="step-body">A versão mais enxuta que testa a hipótese. Em serviços, pode ser um flyer, uma planilha ou 15 minutos de conversa. O objetivo é aprender, não impressionar.</p>
+      </div>
+      <div class="kata-step">
+        <p class="step-num">Fase 03</p>
+        <h4 class="step-title">Medir o Aprendizado</h4>
+        <p class="step-body">Defina antes do experimento qual sinal confirmará ou refutará a hipótese. Evite métricas de vaidade (pageviews, downloads). Foque em comportamento real do cliente.</p>
+      </div>
+      <div class="kata-step">
+        <p class="step-num">Fase 04</p>
+        <h4 class="step-title">Pivotar ou Perseverar</h4>
+        <p class="step-body">Hipótese confirmada? Escale. Refutada? Pivote — mude uma variável fundamental — e recomece. Velocidade aqui é vantagem competitiva mensurável.</p>
+      </div>
+    </div>
+
+    <div class="section-block gold-accent">
+      <div class="section-label">A Lógica do Portfólio — Visão Estratégica</div>
+      <h2>Uma Nova Teoria Geral da Gestão</h2>
+      <p>Eric Ries propõe que a gestão contemporânea gerencie simultaneamente operações maduras e projetos de inovação de alto risco — como um gestor de portfólio diferencia renda fixa de renda variável. Cada categoria exige métricas, sistemas e tolerâncias a risco distintos. Misturar as duas lógicas é o erro que mata projetos promissores prematuramente e sustenta projetos estagnados indefinidamente. Esta é a aplicação da estrutura Cynefin à arquitetura corporativa.</p>
+    </div>
+
+    <div class="case-study">
+      <div class="case-label">Exemplo de Mercado</div>
+      <h3>Dropbox — O MVP que Era um Vídeo</h3>
+      <p>Drew Houston não tinha produto. Tinha uma hipótese: pessoas pagam por sincronização de arquivos em nuvem. Para validá-la sem escrever uma linha de código, criou um vídeo demonstrando como o produto funcionaria. A lista de espera cresceu de 5.000 para 75.000 pessoas em um fim de semana. A hipótese foi validada. Só então o produto foi construído. O "experimento" custou o preço de um vídeo — e evitou anos de desenvolvimento sem demanda validada. Hoje a empresa vale mais de US$ 10 bilhões.</p>
+    </div>
+
+    <div class="section-block navy-accent">
+      <div class="section-label">Dilemas Executivos</div>
+      <div class="dilema-grid">
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 07</div>
+          <p>Seu CFO exige projeção de ROI para aprovar um projeto de inovação em fase inicial. Como você articula, em linguagem financeira, por que "aprendizado validado" é uma métrica mais honesta de progresso do que receita projetada a 18 meses?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">O argumento financeiro central: ROI de inovação em fase inicial é, por definição, zero ou negativo — exatamente como ocorre com qualquer ativo em construção que ainda não gera fluxo de caixa. O risco real não é o ROI negativo provisório; é o risco de construir um produto sem mercado — o que só é evitado via validação antecipada. Enquadre o investimento em aprendizagem validada como uma "redução de risco de capital": cada hipótese confirmada aumenta a probabilidade de retorno positivo do investimento total. Isso é linguagem que o CFO entende.</div>
+        </div>
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 08</div>
+          <p>Uma equipe interna de inovação está no 9º mês sem resultado comercial. Você está diante de uma decisão pivot-ou-perseverar. Que informações você precisaria para tomá-la com rigor — e não com intuição ou pressão política?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">A decisão requer: (1) Evidência comportamental do cliente — não declarativa. O cliente pagou, usou repetidamente, recomendou? (2) Clareza sobre qual hipótese foi testada e qual o resultado objetivo — não a percepção da equipe; (3) Diagnóstico de por que a hipótese falhou: o problema não existe, a solução não resolve, o segmento é errado, ou o canal está errado? Cada causa aponta para um tipo de pivô diferente. Sem esse nível de rigor, a decisão é política — e tende a perpetuar projetos mediocres por inércia ou encerrar projetos promissores por impaciência.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════
+       M5 — TOYOTA KATA
+  ════════════════════════════════ -->
+  <section class="module" id="mod-4">
+    <div class="mod-header">
+      <div class="mod-number">05</div>
+      <div>
+        <div class="mod-title">Toyota Kata — Quando a Melhoria se Torna Comportamento</div>
+        <div class="mod-subtitle">A rotina diária que transforma filosofia em cultura — e cultura em vantagem competitiva composta</div>
+      </div>
+    </div>
+
+    <div class="quote-block">
+      <blockquote>"Kata significa um meio de manter os seus pensamentos e ações em sincronismo com as condições dinâmicas e imprevisíveis."</blockquote>
+      <cite>— Mike Rother, Toyota Kata (2009)</cite>
+    </div>
+
+    <div class="section-block gold-accent">
+      <div class="section-label">Conceito Central</div>
+      <h2>Rotina Estruturada, Não Ferramenta</h2>
+      <p>Originário das artes marciais japonesas, kata é um padrão de movimentos praticados repetidamente até se tornarem reflexo. Na Toyota, é uma rotina de pensamento científico aplicada diariamente a qualquer problema. Kata não prescreve <em>o que fazer</em> — prescreve <em>como pensar</em>. Essa distinção é crucial: organizações têm excelentes princípios e péssimas rotinas. São as rotinas que determinam a cultura real — não os valores afixados na parede. A Toyota utiliza duas rotinas principais: o Kata de Melhoria e o Kata de Coaching.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Kata de Melhoria — As 4 Etapas da Rotina</div>
+    </div>
+
+    <div class="kata-steps">
+      <div class="kata-step">
+        <p class="step-num">Passo 01</p>
+        <h4 class="step-title">Obter a Direção ou Desafio</h4>
+        <p class="step-body">Definir um desafio de longo prazo conectado às necessidades do cliente — aspiracional o suficiente para orientar, concreto o suficiente para guiar decisões diárias. Este é o "norte verdadeiro" que substitui micro-gerenciamento por propósito compartilhado.</p>
+      </div>
+      <div class="kata-step">
+        <p class="step-num">Passo 02</p>
+        <h4 class="step-title">Compreender a Condição Atual</h4>
+        <p class="step-body">Ir ao gemba — o local onde o trabalho acontece — e observar o processo como ele realmente é, não como está documentado. Identificar padrões, lacunas e fatos. O conhecimento adquirido é compartilhado para evitar que o próximo ciclo recomece do zero.</p>
+      </div>
+      <div class="kata-step">
+        <p class="step-num">Passo 03</p>
+        <h4 class="step-title">Estabelecer a Condição-Alvo</h4>
+        <p class="step-body">Definir o estado futuro desejado com métricas mensuráveis em horizonte de tempo realista (sugerido: até 3 meses). Nem trivial nem impossível — deve estar na zona de aprendizado produtivo que exige esforço sem paralisar.</p>
+      </div>
+      <div class="kata-step">
+        <p class="step-num">Passo 04</p>
+        <h4 class="step-title">Conduzir Experimentos (PDCA)</h4>
+        <p class="step-body">Aplicar o ciclo PDCA diariamente para navegar do atual ao alvo. O caminho é deliberadamente obscuro — se fosse claro, não haveria aprendizado. Cada experimento expande a fronteira do saber organizacional.</p>
+      </div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-label">Kata de Coaching</div>
+        <h3>A Rotina que Ensina a Rotina</h3>
+        <p>O Kata de Coaching é o mecanismo pelo qual a Toyota transmite sua cultura de geração em geração sem depender de treinamentos formais. Todos têm um mentor; todos são aprendizes de alguém. O mentor não dá a resposta — faz perguntas que desenvolvem a capacidade de encontrá-la. O objetivo final não é resolver o problema: é formar pessoas que resolvem problemas.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">As 5 Perguntas do Coaching Kata</div>
+        <h3>A Conversa que Gera Cultura</h3>
+        <p style="font-size:0.83rem; line-height:1.8;">
+          <strong>1.</strong> Qual é a Condição-Alvo?<br>
+          <strong>2.</strong> Qual é a Condição Atual?<br>
+          <strong>3.</strong> Que obstáculos te impedem? Qual você está endereçando agora?<br>
+          <strong>4.</strong> Qual é seu próximo passo? O que você espera?<br>
+          <strong>5.</strong> Quando podemos ver o que aprendemos com esse passo?
+        </p>
+      </div>
+    </div>
+
+    <div class="case-study">
+      <div class="case-label">Exemplo de Mercado</div>
+      <h3>Toyota — O Ativo Intangível Mais Difícil de Replicar</h3>
+      <p>Concorrentes podem copiar produtos, processos e tecnologias. Não podem copiar o que a Toyota levou décadas para construir: uma rotina comportamental de aprendizagem distribuída que melhora o sistema de dentro para fora, de forma contínua e ininterrupta. O conceito de <strong>yokoten</strong> — compartilhar know-how de forma transversal e irrestrita por toda a organização — garante que cada aprendizado individual torna-se patrimônio coletivo. Isso é o ativo intangível mais valioso da empresa e o mais difícil de replicar.</p>
+    </div>
+
+    <div class="section-block navy-accent">
+      <div class="section-label">Dilemas Executivos</div>
+      <div class="dilema-grid">
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 09</div>
+          <p>Você implementou ferramentas Lean (kanban, 5S, VSM) mas a melhoria não se sustentou 6 meses depois. O que o conceito de Kata sugere como causa provável desse colapso — e o que você faria diferente?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">A causa provável é clássica: ferramentas sem rotina comportamental de suporte. O Kata explica que ferramentas Lean são apenas o conteúdo visível — a forma que sustenta seu uso contínuo são as rotinas diárias de melhoria e coaching. Sem um mentor que faça as 5 perguntas regularmente, sem ciclos de PDCA ativos e sem condições-alvo definidas, as ferramentas são adotadas pontualmente e abandonadas quando a urgência passa. O Kata de Coaching é o "sistema imunológico" que mantém a melhoria viva.</div>
+        </div>
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 10</div>
+          <p>O Kata de Melhoria opera com horizonte de condição-alvo de 1 a 3 meses. Como você reconcilia isso com ciclos de planejamento estratégico de 3 a 5 anos que predominam em grandes corporações?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">A reconciliação é estrutural, não de escolha. O planejamento estratégico de 3 a 5 anos define a Direção ou Desafio — o norte do Kata de Melhoria. O Kata então desdobra essa direção em condições-alvo trimestrais, que por sua vez são alcançadas por ciclos de PDCA semanais. É uma hierarquia temporal: a estratégia define o destino, o Kata define a rota e o ritmo. Empresas que usam o Hoshin Kanri (desdobramento de política) integram formalmente os dois horizontes — das metas anuais aos experimentos diários.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════
+       M6 — APRENDIZAGEM ORGANIZACIONAL
+  ════════════════════════════════ -->
+  <section class="module" id="mod-5">
+    <div class="mod-header">
+      <div class="mod-number">06</div>
+      <div>
+        <div class="mod-title">Kata e Aprendizagem Organizacional</div>
+        <div class="mod-subtitle">A conexão com Argyris — como as rotinas da Toyota institucionalizam os três níveis de aprendizagem</div>
+      </div>
+    </div>
+
+    <div class="section-block gold-accent">
+      <div class="section-label">Conceito Central</div>
+      <h2>Existe Relação Conceitual?</h2>
+      <p>O artigo de Michels e Forcellini (2023) demonstra que as rotinas de Toyota Kata possuem relação conceitual direta com os três níveis de Aprendizagem Organizacional definidos por Argyris e Schön (1978). Mais do que promover aprendizagem, o Kata o faz de forma <strong>contínua, incremental e sistematicamente disseminada</strong> por toda a organização. Esta é a distinção que separa organizações que "implementam Lean" de organizações que "aprendem continuamente".</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Os Três Níveis de Aprendizagem Organizacional (Argyris) — e o Kata</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Nível</th><th>Definição</th><th>Como o Kata o Manifesta</th><th>Impacto Estratégico</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ciclo Simples<br><span style="font-family:'DM Mono',monospace;font-size:0.7rem;font-weight:400;color:var(--text-light)">Adaptativo</span></td>
+            <td>Ajuste da ação para atingir o resultado desejado, mantendo as normas vigentes</td>
+            <td>Aplicação diária do PDCA no Kata de Melhoria — cada experimento ajusta a ação sem questionar os valores</td>
+            <td>Eficiência operacional composta ao longo do tempo</td>
+          </tr>
+          <tr>
+            <td>Ciclo Duplo<br><span style="font-family:'DM Mono',monospace;font-size:0.7rem;font-weight:400;color:var(--text-light)">Generativo</span></td>
+            <td>Revisão profunda das normas e valores que sustentam o sistema, antes de institucionalizar melhorias</td>
+            <td>Kata de Coaching cria segurança psicológica para questionar o "status quo" — o aprendiz é incentivado a investigar os fatos da condição atual sem pressão</td>
+            <td>Inovação incremental e revisão de modelos mentais da liderança</td>
+          </tr>
+          <tr>
+            <td>Dêutero-aprendizagem<br><span style="font-family:'DM Mono',monospace;font-size:0.7rem;font-weight:400;color:var(--text-light)">Metalearning</span></td>
+            <td>Aprender a aprender — melhorar a capacidade de aprendizagem em si, não apenas o conteúdo aprendido</td>
+            <td>Kata de Coaching em sua essência: ensina a metodologia para resolver qualquer problema, não a resposta para um problema específico</td>
+            <td>Capacidade organizacional de autorrenovação — o ativo mais sustentável</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-label">Ciclo Simples × Kata</div>
+        <h3>Eficiência Operacional Diária</h3>
+        <p>Cada ciclo de PDCA da rotina de Kata de Melhoria é aprendizagem de ciclo simples em ação: ajuste da ação para reduzir a lacuna entre condição atual e condição-alvo, mantendo os valores e a direção estratégica estabelecidos.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Ciclo Duplo × Kata</div>
+        <h3>Revisão de Normas com Segurança</h3>
+        <p>O ambiente do Kata de Coaching cria a segurança psicológica que a aprendizagem de ciclo duplo exige. O aprendiz é encorajado a questionar fatos e procedimentos sem temer represálias — condição necessária para que normas possam ser revisadas.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Dêutero × Kata</div>
+        <h3>Aprender a Aprender como Rotina</h3>
+        <p>O Kata de Coaching não ensina soluções — ensina a metodologia de pensamento científico aplicável a qualquer problema. Quando toda a organização domina essa metodologia, a capacidade coletiva de aprendizagem cresce de forma composta e independente de qualquer liderança individual.</p>
+      </div>
+    </div>
+
+    <div class="case-study">
+      <div class="case-label">Evidência de Pesquisa</div>
+      <h3>Michels & Forcellini (2023) — Relação Teórica Confirmada</h3>
+      <p>A revisão bibliométrica publicada no Brazilian Journal of Business identificou que as rotinas de Kata de Melhoria e Coaching promovem os três níveis de aprendizagem organizacional de Argyris de forma contínua, incremental e sistêmica. A lacuna identificada: ainda são escassos os estudos empíricos que comprovam essa relação em contextos variados — o que representa oportunidade de pesquisa e de validação prática em diferentes setores e culturas organizacionais.</p>
+    </div>
+
+    <div class="section-block navy-accent">
+      <div class="section-label">Dilemas Executivos</div>
+      <div class="dilema-grid">
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 11</div>
+          <p>Sua empresa tem uma cultura que penaliza quem comete erros. Como o conceito de aprendizagem de ciclo duplo explica por que essa cultura é uma barreira estrutural à inovação — e quais mudanças seriam necessárias para criar o ambiente que o Kata exige?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">A cultura de punição do erro cria o que Argyris chama de "mecanismos de defesa organizacionais" — comportamentos que protegem indivíduos de julgamento, mas que impedem o aprendizado genuíno. Na prática: as pessoas ocultam erros, relatam o que a liderança quer ouvir e evitam experimentos arriscados. O Kata requer o oposto: que erros sejam vistos como dados valiosos. As mudanças necessárias são estruturais (não apenas discursivas): (1) Celebrar aprendizados de experimentos fracassados publicamente; (2) Avaliar líderes por sua capacidade de desenvolver pessoas, não apenas por resultados; (3) Separar claramente experimentos de inovação (onde erro é esperado) de operações maduras (onde conformidade é exigida).</div>
+        </div>
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 12</div>
+          <p>Você quer implementar o Kata de Coaching na sua equipe. Qual é o maior risco de fracasso — e como você o mitiga nos primeiros 60 dias?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">O maior risco é a regressão para o comportamento de "dar a resposta" — o reflexo natural de líderes acostumados a resolver problemas. O Kata exige que o coach resista a essa tentação e faça perguntas mesmo quando conhece a resposta. Mitigação nos primeiros 60 dias: (1) Comece com apenas um aprendiz e um processo específico — não tente escalar antes de dominar a rotina; (2) Use um segundo coach para observar e dar feedback sobre o próprio comportamento de coaching; (3) Defina uma condição-alvo concreta para o seu próprio desenvolvimento como coach — aplique o Kata ao Kata.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════
+       M7 — SÍNTESE
+  ════════════════════════════════ -->
+  <section class="module" id="mod-6">
+    <div class="mod-header">
+      <div class="mod-number">07</div>
+      <div>
+        <div class="mod-title">A Grande Síntese — Sistema Unificado para a Complexidade</div>
+        <div class="mod-subtitle">Como Cynefin, Lean, Lean Startup e Toyota Kata operam como camadas de um único sistema integrado</div>
+      </div>
+    </div>
+
+    <div class="section-block gold-accent">
+      <div class="section-label">O Princípio Unificador</div>
+      <h2>Sondar → Sentir → Responder</h2>
+      <p>A abordagem do domínio Complexo do Cynefin não é apenas uma instrução de alto nível — é a lógica operacional comum a todos os quatro frameworks. <strong>Sondar</strong> é a hipótese do Lean Startup e o experimento do Kata de Melhoria. <strong>Sentir</strong> é o aprendizado validado de Eric Ries e a compreensão da condição atual do Kata. <strong>Responder</strong> é a iteração do MVP e o estabelecimento da próxima condição-alvo. Os quatro frameworks falam a mesma linguagem em diferentes altitudes de abstração.</p>
+    </div>
+
+    <div class="synthesis-grid">
+      <div class="syn-cell dark">
+        <p class="syn-framework">Framework 1 · Diagnóstico</p>
+        <h3 class="syn-title">Cynefin</h3>
+        <p class="syn-body">Define o terreno antes da ação. Mapeia o tipo de problema e a abordagem de liderança adequada. É o guia de altitude — o que vemos do topo antes de descer ao campo.</p>
+        <div class="syn-metric">
+          <span class="syn-metric-label">Métrica</span>
+          <span class="syn-metric-value">Consciência contextual + acerto da abordagem</span>
+        </div>
+      </div>
+      <div class="syn-cell">
+        <p class="syn-framework">Framework 2 · Direção</p>
+        <h3 class="syn-title">Lean Thinking</h3>
+        <p class="syn-body">Define a direção de valor. Eliminar o que o cliente não valoriza e potencializar o que ele valoriza. A bússola estratégica que orienta onde e como alocar recursos.</p>
+        <div class="syn-metric">
+          <span class="syn-metric-label">Métrica</span>
+          <span class="syn-metric-value">Valor entregue ao cliente / desperdício eliminado</span>
+        </div>
+      </div>
+      <div class="syn-cell">
+        <p class="syn-framework">Framework 3 · Inovação</p>
+        <h3 class="syn-title">Lean Startup</h3>
+        <p class="syn-body">Metodologia para o domínio Complexo. Quando não há resposta conhecida, o caminho é gerenciar hipóteses por experimentos rápidos e baratos com clientes reais.</p>
+        <div class="syn-metric">
+          <span class="syn-metric-label">Métrica</span>
+          <span class="syn-metric-value">Velocidade e qualidade do aprendizado validado</span>
+        </div>
+      </div>
+      <div class="syn-cell dark">
+        <p class="syn-framework">Framework 4 · Execução Diária</p>
+        <h3 class="syn-title">Toyota Kata</h3>
+        <p class="syn-body">Operacionaliza tudo. Transforma Lean e aprendizagem em rotina diária comportamental. A camada de execução que faz a estratégia descer até a linha de frente e voltar como inteligência organizacional.</p>
+        <div class="syn-metric">
+          <span class="syn-metric-label">Métrica</span>
+          <span class="syn-metric-value">Frequência e qualidade dos ciclos de Kata</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Matriz de Síntese Executiva</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Framework</th><th>Problema que Resolve</th><th>Abordagem de Liderança</th><th>Métrica Central</th><th>Mecanismo de Ação</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Cynefin</td><td>Navegar incerteza e complexidade</td><td>Adaptar abordagem ao contexto</td><td>Acerto do domínio diagnosticado</td><td>Sondar → Sentir → Responder</td></tr>
+          <tr><td>Lean</td><td>Eliminar desperdícios e criar valor</td><td>Focar no cliente; servir a equipe</td><td>Valor entregue / desperdício eliminado</td><td>Melhoria Contínua (Kaizen)</td></tr>
+          <tr><td>Lean Startup</td><td>Inovar em incerteza extrema</td><td>Gerenciar portfólio de hipóteses</td><td>Aprendizagem validada</td><td>Experimentos com MVP</td></tr>
+          <tr><td>Toyota Kata</td><td>Institucionalizar melhoria e aprendizagem</td><td>Ser coach e mentor diário</td><td>Frequência dos ciclos de Kata</td><td>Rotinas de Melhoria e Coaching</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-block navy-accent">
+      <div class="section-label">Dilemas Executivos</div>
+      <div class="dilema-grid">
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 13</div>
+          <p>Um concorrente implementa IA generativa em seus processos de atendimento e reduz custo em 30%. Você usa o sistema unificado (Cynefin + Lean + Kata) para decidir como responder. Qual é o raciocínio?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">Passo 1 (Cynefin): O que está acontecendo é Simples (copiar a tecnologia) ou Complexo (descobrir como a IA pode criar valor único para seu cliente)? Não confunda os dois. Passo 2 (Lean): O atendimento humano é um driver de WTP para o seu segmento? Se sim, automatizá-lo pode reduzir custo e destruir receita simultaneamente. Passo 3 (Lean Startup): Antes de decidir, construa um MVP — teste IA em um subconjunto de clientes e meça o impacto em NPS e churn, não apenas em custo. Passo 4 (Kata): Defina a condição-alvo de IA com horizonte de 90 dias e conduza experimentos controlados. A decisão precipitada de "copiar o concorrente" geralmente replica sua eficácia operacional sem criar nenhuma vantagem diferenciada.</div>
+        </div>
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 14</div>
+          <p>Sua organização domina operações maduras (Lean bem implementado), mas consistentemente falha em inovação. Como o sistema integrado explica essa contradição — e o que você propõe para resolvê-la?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">A contradição é explicada pelo Cynefin: organizações Lean excelentes dominam os domínios Simples e Complicado, onde a eliminação de variabilidade e o controle de processo são virtudes. No domínio Complexo (inovação), essas mesmas virtudes se tornam limitações — variabilidade é informação, e controle prematuro mata experimentos antes de gerar aprendizado. A solução estrutural é a lógica do portfólio de Ries: criar unidades de inovação com sistema de gestão separado (métricas de aprendizado, autoridade delegada, tolerância ao risco definida), conectadas à organização mãe por interfaces claras de transferência quando uma inovação amadurece para o domínio Complicado.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════
+       CONCLUSÃO
+  ════════════════════════════════ -->
+  <section class="module" id="mod-7">
+    <div class="mod-header">
+      <div class="mod-number">✦</div>
+      <div>
+        <div class="mod-title">Conclusão Executiva</div>
+        <div class="mod-subtitle">O sistema integrado como manual de liderança para a era da complexidade</div>
+      </div>
+    </div>
+
+    <div class="section-block gold-accent">
+      <div class="section-label">A Mensagem Central</div>
+      <h2>A Empresa que Aprende Mais Rápido Vence</h2>
+      <p>Em um mundo onde a incerteza é estrutural e a velocidade de mudança é exponencial, a habilidade mais crítica de um líder não é a resposta que ele já tem — é a velocidade com que sua organização aprende a encontrar novas respostas. Os quatro frameworks examinados nesta nota não são alternativas concorrentes: são camadas de um sistema que vai do diagnóstico estratégico de alto nível (Cynefin) até a rotina comportamental diária que institucionaliza o aprendizado (Toyota Kata). A empresa que integra esses quatro sistemas não apenas reage à mudança — ela a abraça como oportunidade constante de diferenciação.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Os 5 Princípios do Líder na Era da Complexidade</div>
+      <ol class="principles">
+        <li>
+          <div class="prin-content"><strong>Diagnostique Antes de Responder</strong><span>Use o Cynefin como check-in mental antes de qualquer decisão significativa. O erro mais custoso não é a decisão errada — é aplicar a abordagem de um domínio a uma situação de outro.</span></div>
+        </li>
+        <li>
+          <div class="prin-content"><strong>Comece pelo Cliente, Não pelo Orçamento</strong><span>A filosofia Lean exige que o design operacional parta do valor percebido pelo cliente. WTP é a bússola — não a conveniência interna ou o histórico orçamentário.</span></div>
+        </li>
+        <li>
+          <div class="prin-content"><strong>Gerencie Hipóteses, Não Planos Rígidos</strong><span>Para inovação, substitua o plano de negócios por um "log de hipóteses". A principal métrica de progresso é o aprendizado validado — não o ROI projetado a 18 meses.</span></div>
+        </li>
+        <li>
+          <div class="prin-content"><strong>Implemente Rotinas, Não Eventos</strong><span>O Toyota Kata revela que a diferença entre uma iniciativa que dura 6 meses e uma cultura que dura décadas são as rotinas diárias. Comece com uma equipe, uma condição-alvo, um ciclo de PDCA.</span></div>
+        </li>
+        <li>
+          <div class="prin-content"><strong>Torne-se Coach, Não Especialista que Responde</strong><span>O papel do líder não é ter todas as soluções — é criar o ambiente onde as pessoas as encontram por conta própria. Fazer as perguntas certas é mais escalável e mais duradouro do que qualquer expertise individual.</span></div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="section-block navy-accent">
+      <div class="section-label">Key Takeaways — Para Levar ao Trabalho Amanhã</div>
+      <ul class="takeaway-list" style="margin-top:0.5rem;">
+        <li><strong>Cynefin:</strong> Antes da próxima reunião de estratégia, pergunte: "Estamos tratando um problema Complexo com ferramentas de domínio Complicado?" Se sim, o plano precisa ser redesenhado.</li>
+        <li><strong>Lean:</strong> Identifique os 3 maiores desperdícios da sua área que o cliente final nunca pagaria se soubesse que existem. Calcule o custo real. Apresente como análise de P&L.</li>
+        <li><strong>Lean Startup:</strong> Para o próximo projeto de inovação, liste as 3 hipóteses mais críticas e o experimento mínimo para testá-las antes de aprovar orçamento completo.</li>
+        <li><strong>Toyota Kata:</strong> Na próxima 1:1, substitua o status report pelas 5 perguntas do Coaching Kata. Observe o que acontece com a qualidade do pensamento da equipe.</li>
+        <li><strong>Sistema Integrado:</strong> A vantagem competitiva sustentável não reside em ter a resposta certa de antemão — reside na capacidade de encontrá-la de forma contínua e sistemática.</li>
+      </ul>
+    </div>
+
+    <div class="section-block" style="text-align:center; padding:3rem 2rem;">
+      <div class="section-label" style="justify-content:center;">O Princípio Unificador</div>
+      <div style="font-family:'DM Mono',monospace;font-size:1.5rem;color:var(--navy);font-weight:500;margin:1rem 0;letter-spacing:0.15em;">Sondar → Sentir → Responder</div>
+      <p style="max-width:520px;margin:0 auto;font-style:italic;color:var(--text-light);font-size:0.88rem;line-height:1.7;">A lógica do domínio Complexo do Cynefin — operacionalizada pelo Lean como filosofia, pelo Lean Startup como metodologia e pelo Toyota Kata como rotina diária. Não quatro ferramentas, mas um sistema.</p>
+    </div>
+  </section>
+
+</main>
+
+
+
+<script>
+  function showModule(idx) {
+    document.querySelectorAll('.module').forEach((m, i) => {
+      m.classList.toggle('active', i === idx);
+    });
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', i === idx);
+    });
+    const nav = document.getElementById('nav-tabs');
+    window.scrollTo({ top: nav.offsetTop - 64, behavior: 'smooth' });
+  }
+
+  function toggleDilema(el) {
+    el.classList.toggle('open');
+    const toggle = el.querySelector('.dilema-toggle');
+    toggle.textContent = el.classList.contains('open')
+      ? '▾ Fechar perspectiva'
+      : '▸ Ver perspectiva analítica';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestão de Serviços — EMBA</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628;
+    --navy-mid: #112240;
+    --navy-light: #1d3461;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-pale: #f5e9c8;
+    --cream: #faf6ef;
+    --white: #ffffff;
+    --text-dark: #0a1628;
+    --text-mid: #2d3f55;
+    --text-light: #4a5f78;
+    --border: rgba(201,168,76,0.25);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    border-bottom: 2px solid var(--gold);
+  }
+  .header-inner {
+    padding: 0 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+  .header-brand { display: flex; align-items: center; gap: 10px; }
+  .header-badge {
+    background: var(--gold);
+    color: var(--navy);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 600;
+    padding: 4px 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    color: var(--white);
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .header-meta {
+    font-family: 'DM Mono', monospace;
+    color: var(--gold);
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--navy);
+    padding: 2.5rem 1.25rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 30% 90%, rgba(201,168,76,0.09) 0%, transparent 60%);
+  }
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    color: var(--gold);
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--white);
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 0.75rem;
+    position: relative;
+  }
+  .hero h1 em { color: var(--gold); font-style: italic; }
+  .hero-sub {
+    color: rgba(255,255,255,0.65);
+    font-size: 0.88rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    position: relative;
+  }
+  .hero-stat {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(201,168,76,0.2);
+    padding: 0.75rem;
+    border-radius: 2px;
+  }
+  .hero-stat strong {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 0.2rem;
+  }
+  .hero-stat span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ── MODULE SELECTOR ── */
+  .mod-selector {
+    background: var(--navy-mid);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    padding: 0.75rem 1.25rem;
+    position: sticky;
+    top: 56px;
+    z-index: 150;
+  }
+  .mod-selector-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .mod-select {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 0.65rem 1rem;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23c9a84c' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    cursor: pointer;
+  }
+  .mod-select option { background: var(--navy); color: var(--white); }
+  .mod-select:focus { outline: none; border-color: var(--gold); }
+
+  /* ── MOD NAV DOTS ── */
+  .mod-nav {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0 0;
+  }
+  .mod-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+  }
+  .mod-dot.active {
+    background: var(--gold);
+    width: 18px;
+    border-radius: 3px;
+  }
+
+  /* ── MAIN ── */
+  .main { padding: 0 1.25rem 5rem; }
+
+  .module { display: none; padding-top: 1.75rem; }
+  .module.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── MODULE HEADER ── */
+  .mod-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .mod-num-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .mod-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--gold);
+    opacity: 0.35;
+    line-height: 1;
+  }
+  .mod-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .mod-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.2;
+    margin-bottom: 0.35rem;
+  }
+  .mod-subtitle {
+    font-size: 0.82rem;
+    color: var(--text-light);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* ── ACCORDION ── */
+  .acc-group { display: flex; flex-direction: column; gap: 2px; margin-bottom: 1rem; }
+
+  .acc-item {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.07);
+    overflow: hidden;
+  }
+
+  .acc-item.navy { background: var(--navy); border-color: rgba(201,168,76,0.2); }
+
+  .acc-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    gap: 0.75rem;
+    min-height: 56px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .acc-trigger-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .acc-bar {
+    width: 3px;
+    height: 28px;
+    background: var(--gold);
+    flex-shrink: 0;
+    border-radius: 2px;
+  }
+
+  .acc-trigger-text { flex: 1; min-width: 0; }
+
+  .acc-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+
+  .acc-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.2;
+    display: block;
+  }
+  .navy .acc-title { color: var(--white); }
+
+  .acc-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(201,168,76,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-size: 1rem;
+    transition: transform 0.3s;
+    line-height: 1;
+  }
+  .acc-item.open .acc-icon { transform: rotate(45deg); }
+
+  .acc-body {
+    display: none;
+    padding: 0 1.1rem 1.25rem;
+    border-top: 1px solid rgba(201,168,76,0.15);
+  }
+  .acc-item.open .acc-body { display: block; }
+  .navy .acc-body { border-top-color: rgba(201,168,76,0.15); }
+
+  /* ── CONTENT BLOCKS ── */
+  .content-block {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  .content-block:last-child { border-bottom: none; }
+
+  .block-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .block-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.6rem;
+    line-height: 1.25;
+  }
+
+  .block-text {
+    font-size: 0.88rem;
+    color: var(--text-mid);
+    line-height: 1.75;
+  }
+  .block-text strong { color: var(--navy); font-weight: 600; }
+  .navy .block-text { color: rgba(255,255,255,0.8); }
+  .navy .block-title { color: var(--gold-light); }
+
+  /* ── QUOTE ── */
+  .quote-block {
+    border-left: 3px solid var(--gold);
+    padding: 1rem 1.1rem;
+    background: rgba(201,168,76,0.06);
+    margin: 0.75rem 0;
+  }
+  .quote-block blockquote {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.92rem;
+    color: var(--navy);
+    line-height: 1.7;
+    margin-bottom: 0.4rem;
+  }
+  .quote-block cite {
+    font-size: 0.72rem;
+    color: var(--text-light);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── CARD STACK ── */
+  .card-stack { display: flex; flex-direction: column; gap: 0.75rem; margin: 0.75rem 0; }
+  .card-item {
+    background: var(--cream);
+    border: 1px solid rgba(0,0,0,0.07);
+    border-left: 3px solid var(--gold);
+    padding: 1rem 1.1rem;
+  }
+  .card-item-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.3rem;
+  }
+  .card-item h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.4rem;
+  }
+  .card-item p {
+    font-size: 0.84rem;
+    color: var(--text-mid);
+    line-height: 1.65;
+  }
+
+  /* ── CASE STUDY ── */
+  .case-block {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 1.1rem;
+    margin: 0.75rem 0;
+  }
+  .case-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .case-block h4 {
+    font-family: 'Playfair Display', serif;
+    color: var(--white);
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+  .case-block p {
+    font-size: 0.84rem;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.7;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 0.75rem 0; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 480px; }
+  thead { background: var(--navy); }
+  th {
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.65rem 0.85rem;
+    text-align: left;
+    font-weight: 500;
+  }
+  td {
+    padding: 0.65rem 0.85rem;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    color: var(--text-mid);
+    line-height: 1.5;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: rgba(201,168,76,0.04); }
+  td:first-child { font-weight: 600; color: var(--navy); }
+
+  .badge-ex { display: inline-block; background: rgba(10,22,40,0.08); color: var(--navy); font-size: 0.62rem; font-weight: 700; padding: 2px 6px; }
+  .badge-inf { display: inline-block; background: rgba(201,168,76,0.15); color: #7a5c10; font-size: 0.62rem; font-weight: 700; padding: 2px 6px; }
+
+  /* ── VAR GRID ── */
+  .var-list { display: flex; flex-direction: column; gap: 2px; margin: 0.75rem 0; }
+  .var-item {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.06);
+    padding: 0.9rem 1.1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .var-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: var(--gold-pale);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 2rem;
+  }
+  .var-content {}
+  .var-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--navy);
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+  .var-desc { font-size: 0.84rem; color: var(--text-mid); line-height: 1.6; }
+
+  /* ── FUNDING ── */
+  .funding-list { display: flex; flex-direction: column; gap: 2px; margin: 0.75rem 0; }
+  .funding-item {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.06);
+    padding: 1rem 1.1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .funding-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    opacity: 0.55;
+    line-height: 1;
+    flex-shrink: 0;
+    width: 1.75rem;
+  }
+  .funding-title { font-size: 0.88rem; font-weight: 700; color: var(--navy); margin-bottom: 0.3rem; }
+  .funding-desc { font-size: 0.83rem; color: var(--text-mid); line-height: 1.65; }
+  .funding-eg { margin-top: 0.4rem; font-size: 0.75rem; color: var(--gold); font-family: 'DM Mono', monospace; line-height: 1.5; }
+
+  /* ── CHAIN ── */
+  .chain-list { display: flex; flex-direction: column; gap: 0; margin: 0.75rem 0; }
+  .chain-item {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.06);
+    padding: 0.85rem 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+  }
+  .chain-item:nth-child(even) { background: rgba(201,168,76,0.04); }
+  .chain-emoji { font-size: 1.2rem; flex-shrink: 0; width: 1.75rem; text-align: center; }
+  .chain-content {}
+  .chain-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--navy); font-weight: 600; }
+  .chain-sub { font-size: 0.78rem; color: var(--text-light); margin-top: 0.1rem; }
+  .chain-arrow-down {
+    text-align: center;
+    color: var(--gold);
+    font-size: 0.9rem;
+    padding: 2px 0;
+    background: var(--cream);
+    border-left: 1px solid rgba(0,0,0,0.06);
+    border-right: 1px solid rgba(0,0,0,0.06);
+    line-height: 1;
+  }
+
+  /* ── MF CARDS ── */
+  .mf-list { display: flex; flex-direction: column; gap: 0.75rem; margin: 0.75rem 0; }
+  .mf-card { border: 1px solid var(--border); overflow: hidden; }
+  .mf-header { padding: 0.75rem 1.1rem; font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; }
+  .mf-header.good { background: var(--navy); color: var(--gold); }
+  .mf-header.warn { background: #7f1d1d; color: #fca5a5; }
+  .mf-header.tip { background: var(--gold); color: var(--navy); }
+  .mf-body { padding: 1rem 1.1rem; background: var(--white); font-size: 0.84rem; color: var(--text-mid); line-height: 1.7; }
+
+  /* ── DILEMA (inside navy accordions) ── */
+  .dilema-item {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(201,168,76,0.2);
+    margin: 0.5rem 0;
+    overflow: hidden;
+  }
+  .dilema-trigger {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    min-height: 52px;
+  }
+  .dilema-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--gold);
+    letter-spacing: 0.14em;
+    margin-bottom: 0.3rem;
+    display: block;
+  }
+  .dilema-q { font-size: 0.85rem; color: rgba(255,255,255,0.82); line-height: 1.6; }
+  .dilema-chevron { flex-shrink: 0; color: var(--gold); font-size: 0.85rem; margin-top: 2px; transition: transform 0.3s; }
+  .dilema-item.open .dilema-chevron { transform: rotate(180deg); }
+  .dilema-body {
+    display: none;
+    padding: 0 1rem 1rem;
+    border-top: 1px solid rgba(201,168,76,0.15);
+  }
+  .dilema-item.open .dilema-body { display: block; }
+  .dilema-answer { font-size: 0.83rem; color: var(--gold-pale); line-height: 1.7; padding-top: 0.75rem; }
+
+  /* ── PRINCIPLES ── */
+  .principles-list { display: flex; flex-direction: column; gap: 0.6rem; margin: 0.75rem 0; }
+  .principle-item {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.06);
+    padding: 1rem 1.1rem 1rem 3rem;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .principle-item:hover { border-color: var(--gold); }
+  .principle-num {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .principle-title { font-size: 0.88rem; font-weight: 700; color: var(--navy); margin-bottom: 0.3rem; }
+  .principle-text { font-size: 0.83rem; color: var(--text-mid); line-height: 1.65; }
+
+  /* ── TAKEAWAY LIST ── */
+  .takeaway-list { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.75rem 0; }
+  .takeaway-item {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.06);
+    padding: 0.85rem 1rem 0.85rem 2.25rem;
+    position: relative;
+    font-size: 0.85rem;
+    color: var(--text-mid);
+    line-height: 1.65;
+  }
+  .takeaway-item::before { content: '✦'; position: absolute; left: 0.85rem; top: 0.85rem; color: var(--gold); font-size: 0.65rem; }
+  .takeaway-item strong { color: var(--navy); font-weight: 600; }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--navy);
+    border-top: 1px solid rgba(201,168,76,0.25);
+    display: flex;
+    z-index: 200;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .bnav-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    padding: 0.75rem 0.5rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-height: 52px;
+    justify-content: center;
+  }
+  .bnav-btn svg { transition: color 0.2s; }
+  .bnav-btn.active { color: var(--gold); }
+  .bnav-btn span { font-size: 0.55rem; letter-spacing: 0.05em; }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--navy);
+    border-top: 1px solid rgba(201,168,76,0.2);
+    padding: 1.5rem 1.25rem;
+    text-align: center;
+    margin-bottom: 52px;
+  }
+  .footer-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.08em;
+    line-height: 2;
+  }
+  .footer-text strong { color: var(--gold); }
+</style>
+<style id="disc-back-css">
+.disc-back{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-right:12px;padding:6px 11px;border-radius:6px;
+background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui,sans-serif;text-decoration:none!important;white-space:nowrap;letter-spacing:0;text-transform:none}
+.disc-back:hover{background:#fff}.disc-back:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.disc-back .bk{font-weight:500;opacity:.85}
+@media(max-width:560px){.disc-back .bk{display:none}header .header-meta{display:none}header .header-title{font-size:.95rem;line-height:1.2}}
+@media print{.disc-back{display:none}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+<a class="disc-back" href="../index.html" title="Voltar à página da disciplina">‹ Disciplina<span class="bk"> · Livro Cap. 2</span></a>
+    <div class="header-brand">
+      <span class="header-badge">EMBA</span>
+      <span class="header-title">Gestão de Serviços</span>
+    </div>
+    <span class="header-meta">Prof. Dr. Thiago Lima</span>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">Processos, Operações e Supply Chain</p>
+  <h1>Arquitetura da <em>Excelência</em> em Serviços</h1>
+  <p class="hero-sub">Quatro pilares estratégicos, a Cadeia de Lucro e a gestão da variabilidade do cliente.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><strong>4</strong><span>Pilares do Modelo</span></div>
+    <div class="hero-stat"><strong>+70%</strong><span>PIB global em serviços</span></div>
+    <div class="hero-stat"><strong>+85%</strong><span>Lucro com 5% mais lealdade</span></div>
+    <div class="hero-stat"><strong>6×</strong><span>Recompra: nota 5 vs. 4</span></div>
+  </div>
+</section>
+
+<!-- MODULE SELECTOR -->
+<div class="mod-selector">
+  <div class="mod-selector-label">Navegando</div>
+  <select class="mod-select" id="modSelect" onchange="showModule(parseInt(this.value))">
+    <option value="0">M1 · Introdução</option>
+    <option value="1">M2 · Pilar 1 — Oferta</option>
+    <option value="2">M3 · Pilar 2 — Financiamento</option>
+    <option value="3">M4 · Pilar 3 — Pessoas</option>
+    <option value="4">M5 · Pilar 4 — Cliente</option>
+    <option value="5">M6 · Cadeia de Lucro</option>
+    <option value="6">M7 · Modelo Multifoco</option>
+    <option value="7">Conclusão</option>
+  </select>
+  <div class="mod-nav" id="modNav"></div>
+</div>
+
+<main class="main">
+
+<!-- ═══════════════════════════════════════ MODULE 1 ══ -->
+<section class="module active" id="mod-0">
+  <div class="mod-header">
+    <div class="mod-num-row">
+      <span class="mod-number">01</span>
+      <span class="mod-eyebrow">Introdução</span>
+    </div>
+    <div class="mod-title">O Paradoxo da Gestão de Serviços</div>
+    <div class="mod-subtitle">Por que as ferramentas de produto são insuficientes para o mundo dos serviços</div>
+  </div>
+
+  <div class="acc-group">
+
+    <div class="acc-item open">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Tese Central</span>
+            <span class="acc-title">O Modelo de Serviços como Sistema</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="quote-block">
+          <blockquote>"O desafio fundamental que diferencia a gestão de serviços da de produtos reside no papel do cliente: ele não é apenas consumidor final, mas parte integrante e imprevisível do processo de produção."</blockquote>
+          <cite>— Frances X. Frei, HBR 2008</cite>
+        </div>
+        <div class="block-text">Nas economias maduras, empresas de serviços respondem por mais de 70% do PIB. Paradoxalmente, a maioria das ferramentas de gestão foi concebida para a indústria de produtos. Para prosperar, uma empresa de serviços precisa alinhar quatro elementos críticos em um sistema coeso onde cada elemento reforça os demais. O verdadeiro diferencial não reside na genialidade de um pilar isolado, mas na sua <strong>eficaz integração</strong>.</div>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Os 4 Pilares</span>
+            <span class="acc-title">Visão Geral do Framework</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="card-stack">
+          <div class="card-item">
+            <div class="card-item-label">Pilar 1</div>
+            <h4>A Oferta</h4>
+            <p>Qual experiência a empresa proporciona e em que atributos decide ser deliberadamente inferior para exceler em outros.</p>
+          </div>
+          <div class="card-item">
+            <div class="card-item-label">Pilar 2</div>
+            <h4>O Financiamento</h4>
+            <p>Como a excelência é custeada — por precificação criativa, savings operacionais ou transferência inteligente de trabalho ao cliente.</p>
+          </div>
+          <div class="card-item">
+            <div class="card-item-label">Pilar 3</div>
+            <h4>As Pessoas</h4>
+            <p>Sistema de gestão de talentos alinhado à promessa de serviço. Modelos que exigem heroísmo do funcionário médio têm falha estrutural de design.</p>
+          </div>
+          <div class="card-item">
+            <div class="card-item-label">Pilar 4</div>
+            <h4>O Cliente</h4>
+            <p>Gestão ativa da variabilidade introduzida pelo cliente como co-produtor. Diagnosticar o tipo correto de variabilidade é o passo mais negligenciado.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item navy">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Dilemas Executivos</span>
+            <span class="acc-title">Questões para a Liderança</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="dilema-item">
+          <button class="dilema-trigger" onclick="toggleDilema(this)">
+            <div>
+              <span class="dilema-num">DILEMA 01</span>
+              <div class="dilema-q">Sua empresa lidera em satisfação do cliente, mas margens caem há três trimestres. Como o modelo de quatro pilares ajuda a diagnosticar onde está a ruptura sistêmica?</div>
+            </div>
+            <span class="dilema-chevron">▾</span>
+          </button>
+          <div class="dilema-body">
+            <div class="dilema-answer">A queda de margem com alta satisfação indica tipicamente um problema de Pilar 2 (financiamento): a empresa entrega excelência mas não cobre adequadamente seu custo. Audite o mecanismo de financiamento — está pagando por benefícios que o cliente não percebe como diferencial? O custo da excelência está embutido na precificação de forma palatável?</div>
+          </div>
+        </div>
+        <div class="dilema-item">
+          <button class="dilema-trigger" onclick="toggleDilema(this)">
+            <div>
+              <span class="dilema-num">DILEMA 02</span>
+              <div class="dilema-q">Um concorrente digital entra no seu mercado com modelo de autoatendimento e custo 40% menor. Você replica o modelo ou aprofunda a diferenciação? Como decide?</div>
+            </div>
+            <span class="dilema-chevron">▾</span>
+          </button>
+          <div class="dilema-body">
+            <div class="dilema-answer">A decisão depende do segmento que o concorrente está capturando. Se ele ataca clientes periféricos com baixa WTP para atendimento humano, a defesa é aprofundar excelência no atributo que seu segmento-alvo valoriza. Se ele avança sobre seu core, a questão é: seu modelo de financiamento permite igualar o custo sem destruir a proposta de valor?</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ MODULE 2 ══ -->
+<section class="module" id="mod-1">
+  <div class="mod-header">
+    <div class="mod-num-row">
+      <span class="mod-number">02</span>
+      <span class="mod-eyebrow">Pilar 1 — The Offering</span>
+    </div>
+    <div class="mod-title">A Concepção Estratégica da Oferta</div>
+    <div class="mod-subtitle">A excelência é definida pelo que você escolhe não fazer bem</div>
+  </div>
+
+  <div class="acc-group">
+
+    <div class="acc-item open">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Conceito Central</span>
+            <span class="acc-title">O Trade-off como Decisão Estratégica</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="block-text">O design de serviços deve priorizar <strong>a experiência que o cliente deseja ter</strong>. O conceito mais contraintuitivo: a excelência em serviços é definida pelo que a empresa escolhe <strong>deliberadamente não fazer bem</strong>. O desempenho inferior em uma dimensão sustenta o desempenho superior em outra. A escolha é entre excelência em alguns pontos com inferioridade em outros, ou mediocridade universal.</div>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Matriz Comparativa</span>
+            <span class="acc-title">Trade-offs Estratégicos</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Atributo</th><th>Walmart</th><th>Commerce Bank</th><th>Shouldice</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Preço</td><td><span class="badge-ex">EXCEL.</span></td><td><span class="badge-inf">INFERIOR</span></td><td><span class="badge-inf">INFERIOR</span></td></tr>
+              <tr><td>Variedade</td><td><span class="badge-ex">EXCEL.</span></td><td><span class="badge-inf">INFERIOR</span></td><td><span class="badge-inf">INFERIOR</span></td></tr>
+              <tr><td>Conveniência</td><td><span class="badge-inf">INFERIOR</span></td><td><span class="badge-ex">EXCEL.</span></td><td><span class="badge-ex">EXCEL.</span></td></tr>
+              <tr><td>Atendimento</td><td><span class="badge-inf">INFERIOR</span></td><td><span class="badge-ex">EXCEL.</span></td><td><span class="badge-ex">EXCEL.</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Visão Estratégica</span>
+            <span class="acc-title">Alocação de Capital como Sinal Estratégico</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="block-text">A "não-excelência" intencional é uma decisão de <strong>alocação de capital altamente estratégica</strong>. Ao renunciar a investimentos em atributos que os clientes-alvo não valorizam, a empresa libera OPEX e CAPEX para fortalecer os diferenciais que definem a marca. Empresas que tentam exceler em todos os atributos sem prêmio de preço de 50%+ tendem à mediocridade sistêmica — competitivas em nada, vulneráveis a todos.</div>
+        <div class="case-block" style="margin-top:0.75rem">
+          <div class="case-tag">Caso Real</div>
+          <h4>Cleveland Clinic — Quando o Sistema é a Estratégia</h4>
+          <p>A Cleveland Clinic organiza centros por doença, incentiva colaboração interdisciplinar e remove incentivos de produtividade individual. Cada decisão parece contraintuitiva isoladamente; juntas, criam um sistema incomparável. Quando avaliou expandir para um spa premium, abandonou por incompatibilidade com seu modelo operacional.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item navy">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Dilemas Executivos</span>
+            <span class="acc-title">Questões para a Liderança</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="dilema-item">
+          <button class="dilema-trigger" onclick="toggleDilema(this)">
+            <div>
+              <span class="dilema-num">DILEMA 03</span>
+              <div class="dilema-q">Em quais atributos sua empresa compete com excelência real — e sua estrutura de custos reflete essa escolha? Onde você está sendo deliberadamente inferior?</div>
+            </div>
+            <span class="dilema-chevron">▾</span>
+          </button>
+          <div class="dilema-body">
+            <div class="dilema-answer">Se você não consegue nomear rapidamente 2 atributos de excelência e 2 de inferioridade deliberada, sua empresa provavelmente não fez essa escolha. Mapeie o que seus melhores clientes dizem que os faz permanecer e alinhe investimentos para aprofundar esses atributos, aceitando explicitamente ser inferior nos demais.</div>
+          </div>
+        </div>
+        <div class="dilema-item">
+          <button class="dilema-trigger" onclick="toggleDilema(this)">
+            <div>
+              <span class="dilema-num">DILEMA 04</span>
+              <div class="dilema-q">Se um concorrente focado surgisse amanhã mirando seu cliente mais lucrativo, ele conseguiria vencer nos seus próprios atributos de excelência?</div>
+            </div>
+            <span class="dilema-chevron">▾</span>
+          </button>
+          <div class="dilema-body">
+            <div class="dilema-answer">A resposta revela a robustez da sua barreira competitiva. Barreiras duráveis vêm da coerência do sistema — quando a excelência em um atributo é sustentada por um conjunto de decisões operacionais interdependentes que não podem ser copiadas isoladamente.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ MODULE 3 ══ -->
+<section class="module" id="mod-2">
+  <div class="mod-header">
+    <div class="mod-num-row">
+      <span class="mod-number">03</span>
+      <span class="mod-eyebrow">Pilar 2 — Funding Mechanism</span>
+    </div>
+    <div class="mod-title">O Financiamento Inteligente da Excelência</div>
+    <div class="mod-subtitle">Excelência tem custo. A questão é como cobri-lo de forma que gere valor percebido</div>
+  </div>
+
+  <div class="acc-group">
+
+    <div class="acc-item open">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Conceito Central</span>
+            <span class="acc-title">Quatro Mecanismos de Financiamento</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="block-text">Em serviços, o mecanismo de financiamento deve ser <strong>desenhado antes do lançamento</strong> — não corrigido à posteriori. Quando um serviço percebido como gratuito passa a ter custo, a reação do cliente é desproporcionalmente negativa. Há quatro formas principais de cobrir o custo da excelência.</div>
+        <div class="funding-list" style="margin-top:0.75rem">
+          <div class="funding-item">
+            <div class="funding-num">01</div>
+            <div>
+              <div class="funding-title">Cobrar de forma "palatável"</div>
+              <div class="funding-desc">Embutir o custo em um formato que o cliente aceite naturalmente.</div>
+              <div class="funding-eg">→ Starbucks cobra premium no café para financiar o ambiente de permanência indefinida.</div>
+            </div>
+          </div>
+          <div class="funding-item">
+            <div class="funding-num">02</div>
+            <div>
+              <div class="funding-title">Relação Ganha-Ganha Operacional</div>
+              <div class="funding-desc">Melhorar a experiência e reduzir custos simultaneamente.</div>
+              <div class="funding-eg">→ Progressive: vans de resposta imediata reduzem fraudes em ~15% dos prêmios. O serviço se paga.</div>
+            </div>
+          </div>
+          <div class="funding-item">
+            <div class="funding-num">03</div>
+            <div>
+              <div class="funding-title">Invista Agora, Colha Depois (DIRST)</div>
+              <div class="funding-desc">Investimentos que parecem custos hoje mas reduzem necessidades futuras.</div>
+              <div class="funding-eg">→ Intuit: suporte gratuito vira insumo de P&D, melhora o software e reduz chamadas futuras.</div>
+            </div>
+          </div>
+          <div class="funding-item">
+            <div class="funding-num">04</div>
+            <div>
+              <div class="funding-title">Repasse o Trabalho ao Cliente</div>
+              <div class="funding-desc">Autoatendimento como excelência, não como punição.</div>
+              <div class="funding-eg">→ Check-in aéreo: hoje passageiros frequentes preferem os quiosques pela agilidade e mapa de assentos.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item navy">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Dilemas Executivos</span>
+            <span class="acc-title">Questões para a Liderança</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="dilema-item">
+          <button class="dilema-trigger" onclick="toggleDilema(this)">
+            <div>
+              <span class="dilema-num">DILEMA 05</span>
+              <div class="dilema-q">Qual serviço hoje percebido como "gratuito" pelos seus clientes pode virar arma contra você se precisar monetizá-lo amanhã?</div>
+            </div>
+            <span class="dilema-chevron">▾</span>
+          </button>
+          <div class="dilema-body">
+            <div class="dilema-answer">Mapeie os serviços que você entrega sem custo explícito e calcule o custo real de cada um. Para os mais caros, avalie se há um mecanismo alternativo — embutir no preço do produto principal, criar um benefício percebido que justifique cobrança futura, ou redesenhar o processo para reduzir o custo antes de precisar monetizar.</div>
+          </div>
+        </div>
+        <div class="dilema-item">
+          <button class="dilema-trigger" onclick="toggleDilema(this)">
+            <div>
+              <span class="dilema-num">DILEMA 06</span>
+              <div class="dilema-q">Onde estão os maiores "baldes de custo" da sua operação? É possível reduzi-los e, ao mesmo tempo, melhorar a experiência do cliente?</div>
+            </div>
+            <span class="dilema-chevron">▾</span>
+          </button>
+          <div class="dilema-body">
+            <div class="dilema-answer">A abordagem correta é inversa à intuitiva: não pergunte "que novo valor podemos criar?" e depois "como financiar?". Pergunte "onde está nosso maior custo?" e então "como reduzir esse custo de forma que também melhore a experiência?". Tempo é frequentemente um bom ponto de partida.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ MODULE 4 ══ -->
+<section class="module" id="mod-3">
+  <div class="mod-header">
+    <div class="mod-num-row">
+      <span class="mod-number">04</span>
+      <span class="mod-eyebrow">Pilar 3 — Employee Management</span>
+    </div>
+    <div class="mod-title">O Sistema de Gestão de Pessoas</div>
+    <div class="mod-subtitle">Sistemas que exigem heroísmo têm falha estrutural — não problema de RH</div>
+  </div>
+
+  <div class="acc-group">
+
+    <div class="acc-item open">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Conceito Central</span>
+            <span class="acc-title">Duas Perguntas Diagnósticas Fundamentais</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="block-text">O sistema de gestão de pessoal deve ser <strong>meticulosamente alinhado</strong> aos atributos de serviço pelos quais a empresa quer ser conhecida. Dois diagnósticos essenciais: <strong>"O que torna nossos funcionários capazes de entregar excelência?"</strong> e <strong>"O que os torna motivados a fazê-lo?"</strong></div>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Visão Estratégica</span>
+            <span class="acc-title">Trade-off: Aptidão vs. Atitude</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="block-text">Funcionários com alta aptidão <em>e</em> alta atitude são os mais disputados — e os mais caros. Uma empresa com estrutura de custos competitiva precisará escolher: <strong>contratar por aptidão</strong> e compensar a atitude via treinamento, ou <strong>contratar por atitude</strong> e simplificar o serviço ao ponto em que o funcionário médio entregue resultados consistentes.</div>
+        <div class="card-stack" style="margin-top:0.75rem">
+          <div class="card-item">
+            <div class="card-item-label">Commerce Bank</div>
+            <h4>Recrutando pelo Sorriso</h4>
+            <p>Competindo em cordialidade — não em complexidade de produto — pode recrutar com critérios simples como "essa pessoa sorri em repouso?". Funciona porque a estratégia foi desenhada para esse perfil.</p>
+          </div>
+          <div class="card-item">
+            <div class="card-item-label">Southwest Airlines</div>
+            <h4>Clientes Selecionam Funcionários</h4>
+            <p>Clientes frequentes participam da seleção de comissários. Quem sofre as consequências de uma má contratação tem o maior interesse em acertar.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Caso Real</span>
+            <span class="acc-title">Quando o Sistema Fada o Funcionário ao Fracasso</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="case-block">
+          <div class="case-tag">Banco Internacional</div>
+          <h4>O Design Errado, Não as Pessoas</h4>
+          <p>Uma executiva sênior decidiu trabalhar como atendente por um mês. Em um dia identificou o problema: iniciativas de cross-selling criaram clientes com expectativas mais complexas, mas os funcionários não foram equipados para atendê-las. O sistema estava fatalmente desalinhado — não as pessoas. Se seu serviço exige heroísmo rotineiro do funcionário médio, o problema é de design operacional.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item navy">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Dilemas Executivos</span>
+            <span class="acc-title">Questões para a Liderança</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="dilema-item">
+          <button class="dilema-trigger" onclick="toggleDilema(this)">
+            <div>
+              <span class="dilema-num">DILEMA 07</span>
+              <div class="dilema-q">Nosso sistema permite que o funcionário médio entregue excelência — ou exige super-heróis para compensar um design ruim?</div>
+            </div>
+            <span class="dilema-chevron">▾</span>
+          </button>
+          <div class="dilema-body">
+            <div class="dilema-answer">Passe um dia completo realizando o trabalho de um funcionário de linha de frente. Não como observador — como executor. Isso revela rapidamente onde o sistema cria obstáculos, onde a informação falta, onde a autonomia é insuficiente e onde o processo exige mais do que o perfil contratado pode entregar.</div>
+          </div>
+        </div>
+        <div class="dilema-item">
+          <button class="dilema-trigger" onclick="toggleDilema(this)">
+            <div>
+              <span class="dilema-num">DILEMA 08</span>
+              <div class="dilema-q">Nossos critérios de seleção foram validados por clientes — ou apenas por gestores internos?</div>
+            </div>
+            <span class="dilema-chevron">▾</span>
+          </button>
+          <div class="dilema-body">
+            <div class="dilema-answer">Critérios definidos apenas por gestores internos tendem a otimizar para conformidade e habilidades técnicas verificáveis — não para os atributos que o cliente percebe como excelência. Inclua voz do cliente no processo: pesquisas de saída, grupos focais com clientes fiéis e métricas de satisfação vinculadas a perfis de funcionários.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ MODULE 5 ══ -->
+<section class="module" id="mod-4">
+  <div class="mod-header">
+    <div class="mod-num-row">
+      <span class="mod-number">05</span>
+      <span class="mod-eyebrow">Pilar 4 — Customer Management</span>
+    </div>
+    <div class="mod-title">Gestão do Cliente como Co-Produtor</div>
+    <div class="mod-subtitle">Os 5 tipos de variabilidade e como superá-los sem sacrificar a experiência</div>
+  </div>
+
+  <div class="acc-group">
+
+    <div class="acc-item open">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Conceito Central</span>
+            <span class="acc-title">Os 5 Tipos de Variabilidade</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="block-text" style="margin-bottom:0.75rem">O primeiro passo — e o mais negligenciado — é <strong>diagnosticar corretamente</strong> qual tipo de variabilidade está gerando custo ou degradando a experiência.</div>
+        <div class="var-list">
+          <div class="var-item"><div class="var-num">01</div><div class="var-content"><div class="var-label">Chegada</div><div class="var-desc">Clientes não chegam em horários convenientes, criando picos e filas.</div></div></div>
+          <div class="var-item"><div class="var-num">02</div><div class="var-content"><div class="var-label">Solicitação</div><div class="var-desc">Clientes pedem coisas distintas, desviando das operações padrão.</div></div></div>
+          <div class="var-item"><div class="var-num">03</div><div class="var-content"><div class="var-label">Capacidade</div><div class="var-desc">Clientes variam em habilidade para realizar tarefas necessárias ao serviço.</div></div></div>
+          <div class="var-item"><div class="var-num">04</div><div class="var-content"><div class="var-label">Esforço</div><div class="var-desc">Alguns querem fazer; outros querem que façam por eles.</div></div></div>
+          <div class="var-item"><div class="var-num">05</div><div class="var-content"><div class="var-label">Preferência Subjetiva</div><div class="var-desc">Clientes têm concepções distintas do que é "bom serviço".</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Estratégias</span>
+            <span class="acc-title">Além do Dilema Custo vs. Experiência</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="card-stack">
+          <div class="card-item">
+            <div class="card-item-label">Estratégia 1</div>
+            <h4>Acomodação de Baixo Custo</h4>
+            <p>O eBay faz os próprios clientes realizarem o trabalho de compra e venda. A Dell usa terceirização com "envoltório de serviço" que mantém a relação com o cliente.</p>
+          </div>
+          <div class="card-item">
+            <div class="card-item-label">Estratégia 2</div>
+            <h4>Redução sem Concessão</h4>
+            <p>A Starbucks treina sutilmente seus clientes a seguir um protocolo de pedido, reduzindo variabilidade sem afetar a percepção de experiência premium.</p>
+          </div>
+          <div class="card-item">
+            <div class="card-item-label">Diagnóstico Incorreto</div>
+            <h4>Armadilhas Comuns</h4>
+            <p>First Union Bank: tratou resistência ao autoatendimento como falta de capacidade — era de esforço. Tiffany: tratou preferência subjetiva de clientes de luxo como variabilidade de chegada. Ambas desperdiçaram investimento.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item navy">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Dilemas Executivos</span>
+            <span class="acc-title">Questões para a Liderança</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="dilema-item">
+          <button class="dilema-trigger" onclick="toggleDilema(this)">
+            <div>
+              <span class="dilema-num">DILEMA 09</span>
+              <div class="dilema-q">Qual tipo de variabilidade está de fato gerando custo ou degradando sua experiência — e você tem certeza do diagnóstico?</div>
+            </div>
+            <span class="dilema-chevron">▾</span>
+          </button>
+          <div class="dilema-body">
+            <div class="dilema-answer">Valide o diagnóstico com dados observacionais — não apenas pesquisas. Shadowing de clientes, análise de logs de atendimento e entrevistas de saída revelam o tipo real de variabilidade. Um cliente que "não sabe usar o app" pode estar dizendo que o app é mal projetado (capacidade), ou simplesmente preferindo não usar (esforço). As soluções são completamente diferentes.</div>
+          </div>
+        </div>
+        <div class="dilema-item">
+          <button class="dilema-trigger" onclick="toggleDilema(this)">
+            <div>
+              <span class="dilema-num">DILEMA 10</span>
+              <div class="dilema-q">As tarefas que transferimos ao cliente são genuinamente mais simples do que as que os funcionários realizam?</div>
+            </div>
+            <span class="dilema-chevron">▾</span>
+          </button>
+          <div class="dilema-body">
+            <div class="dilema-answer">O teste definitivo: se você proibisse descontos como incentivo ao autoatendimento, o cliente ainda escolheria a opção self-service por mérito próprio? Se não, o modelo depende de punição disfarçada, não de criação de valor. O check-in aéreo passou nesse teste. O checkout de supermercado falhou.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ MODULE 6 ══ -->
+<section class="module" id="mod-5">
+  <div class="mod-header">
+    <div class="mod-num-row">
+      <span class="mod-number">06</span>
+      <span class="mod-eyebrow">Service-Profit Chain — Heskett et al.</span>
+    </div>
+    <div class="mod-title">A Cadeia de Lucro do Serviço</div>
+    <div class="mod-subtitle">Cada elo é gerenciável — e cada ruptura tem custo quantificável</div>
+  </div>
+
+  <div class="acc-group">
+
+    <div class="acc-item open">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Conceito Central</span>
+            <span class="acc-title">A Lógica de Causa e Efeito</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="quote-block">
+          <blockquote>"O valor vitalício de um cliente leal de pizzaria pode ser de US$ 8.000; de um proprietário de Cadillac, US$ 332.000; de um comprador de aviões comerciais, bilhões."</blockquote>
+          <cite>— Heskett et al., HBR 1994/2008</cite>
+        </div>
+        <div class="block-text">Uma melhoria de apenas <strong>5% na lealdade do cliente pode elevar lucros entre 25% e 85%</strong>. A cadeia conecta qualidade interna → satisfação do funcionário → lealdade e produtividade → valor externo → satisfação do cliente → lealdade e lucro.</div>
+        <div class="chain-list" style="margin-top:0.75rem">
+          <div class="chain-item"><div class="chain-emoji">🏗️</div><div class="chain-content"><div class="chain-label">Qualidade Interna</div><div class="chain-sub">Ambiente, sistemas, autonomia</div></div></div>
+          <div class="chain-arrow-down">↓</div>
+          <div class="chain-item"><div class="chain-emoji">😊</div><div class="chain-content"><div class="chain-label">Satisfação do Funcionário</div><div class="chain-sub">Capacidade + motivação</div></div></div>
+          <div class="chain-arrow-down">↓</div>
+          <div class="chain-item"><div class="chain-emoji">🔗</div><div class="chain-content"><div class="chain-label">Lealdade & Produtividade</div><div class="chain-sub">Menor turnover → mais valor</div></div></div>
+          <div class="chain-arrow-down">↓</div>
+          <div class="chain-item"><div class="chain-emoji">⭐</div><div class="chain-content"><div class="chain-label">Valor Externo</div><div class="chain-sub">Resultados percebidos pelo cliente</div></div></div>
+          <div class="chain-arrow-down">↓</div>
+          <div class="chain-item"><div class="chain-emoji">🤝</div><div class="chain-content"><div class="chain-label">Satisfação do Cliente</div><div class="chain-sub">Apóstolos vs. terroristas</div></div></div>
+          <div class="chain-arrow-down">↓</div>
+          <div class="chain-item"><div class="chain-emoji">💰</div><div class="chain-content"><div class="chain-label">Lealdade & Lucro</div><div class="chain-sub">+5% lealdade → +25–85% lucro</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Evidências Empíricas</span>
+            <span class="acc-title">Os Elos em Detalhe</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="card-stack">
+          <div class="card-item">
+            <div class="card-item-label">Satisfação → Lealdade do Cliente</div>
+            <h4>Xerox: 6× mais recompra</h4>
+            <p>Clientes com nota 5 ("muito satisfeitos") tinham 6× mais probabilidade de recomprar do que clientes com nota 4 ("satisfeitos"). A diferença não é linear — é exponencial.</p>
+          </div>
+          <div class="card-item">
+            <div class="card-item-label">Lealdade do Funcionário → Produtividade</div>
+            <h4>Southwest: 40% mais utilização</h4>
+            <p>Deplana e recarrega dois terços dos voos em 15 minutos. Pilotos voam 70h/mês vs. 50h nos concorrentes. Tarifas 60-70% menores como resultado.</p>
+          </div>
+          <div class="card-item">
+            <div class="card-item-label">Taco Bell: O "problema de RH"</div>
+            <h4>Lojas com menor turnover: 2× vendas e 55% mais lucro</h4>
+            <p>O que parecia um problema de RH era o principal driver de resultado financeiro da operação. Vinculou 20% da remuneração dos gestores a satisfação de clientes — e viu ambas subirem.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item navy">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Dilemas Executivos</span>
+            <span class="acc-title">Auditoria da Cadeia</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="dilema-item">
+          <button class="dilema-trigger" onclick="toggleDilema(this)">
+            <div>
+              <span class="dilema-num">DILEMA 11</span>
+              <div class="dilema-q">Medimos satisfação de funcionários com a mesma frequência e rigor que medimos satisfação de clientes?</div>
+            </div>
+            <span class="dilema-chevron">▾</span>
+          </button>
+          <div class="dilema-body">
+            <div class="dilema-answer">Empresas que medem satisfação de clientes mensalmente mas satisfação de funcionários anualmente estão monitorando o efeito e ignorando a causa. As duas métricas deveriam ter frequência e rigor comparáveis — e um líder sênior deveria ser capaz de correlacionar os resultados na sua unidade de negócio.</div>
+          </div>
+        </div>
+        <div class="dilema-item">
+          <button class="dilema-trigger" onclick="toggleDilema(this)">
+            <div>
+              <span class="dilema-num">DILEMA 12</span>
+              <div class="dilema-q">Quanto da remuneração variável dos gestores está atrelada a métricas de satisfação — não só a resultados financeiros trimestrais?</div>
+            </div>
+            <span class="dilema-chevron">▾</span>
+          </button>
+          <div class="dilema-body">
+            <div class="dilema-answer">O sistema de incentivos revela as prioridades reais. Se 100% da remuneração variável é financeira, a organização racionalmente otimizará o curto prazo. A causalidade vai dos não-financeiros para os financeiros — não o contrário.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ MODULE 7 ══ -->
+<section class="module" id="mod-6">
+  <div class="mod-header">
+    <div class="mod-num-row">
+      <span class="mod-number">07</span>
+      <span class="mod-eyebrow">Estratégia Competitiva Avançada</span>
+    </div>
+    <div class="mod-title">O Modelo Multifoco e a Ameaça dos Especialistas</div>
+    <div class="mod-subtitle">Incumbentes generalistas são sistematicamente vulneráveis a concorrentes focados</div>
+  </div>
+
+  <div class="acc-group">
+
+    <div class="acc-item open">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Conceito Central</span>
+            <span class="acc-title">Foco Múltiplo como Resposta Competitiva</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="block-text">Empresas que tentam servir a todos são vulneráveis a concorrentes focados. A resposta é dominar <strong>múltiplos nichos com modelos distintos</strong>, unidos por serviços compartilhados que geram escala. O teste crítico: <strong>cada modelo de serviço é melhor por causa dos outros?</strong> Se não, o portfólio está errado.</div>
+        <div class="mf-list" style="margin-top:0.75rem">
+          <div class="mf-card"><div class="mf-header good">Incumbente Multifocado</div><div class="mf-body">Modelos distintos para segmentos distintos. Serviços compartilhados para escala. Exemplos: Yum Brands (5 marcas fast-food), Omnicom, GE.</div></div>
+          <div class="mf-card"><div class="mf-header warn">Incumbente Generalista Vulnerável</div><div class="mf-body">Tenta cobrir tudo com um único modelo. Dilui excelência. Reação típica: Negação → Tristeza → Alívio → Pavor.</div></div>
+          <div class="mf-card"><div class="mf-header tip">O Concorrente Focado</div><div class="mf-body">Otimiza para um segmento. Parece não ser ameaça — mas quando melhora mais rápido, o gap fecha. Ex.: Shouldice Hospital, Commerce Bank.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Caso Real — Lição de Fracasso</span>
+            <span class="acc-title">Progressive: Quando o Fit Estratégico Falha</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="case-block">
+          <div class="case-tag">Progressive Insurance</div>
+          <h4>Atratividade de Mercado ≠ Compatibilidade Operacional</h4>
+          <p>A Progressive tentou expandir para seguro residencial. Mas seguradoras residenciais lucram na gestão de carteiras de investimento — não na superioridade analítica de precificação de risco (a vantagem da Progressive). O fit era ruim e deveria ter sido identificado antes. Resultado: saída humilhante do mercado.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item navy">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Dilemas Executivos</span>
+            <span class="acc-title">Questões para a Liderança</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="dilema-item">
+          <button class="dilema-trigger" onclick="toggleDilema(this)">
+            <div>
+              <span class="dilema-num">DILEMA 13</span>
+              <div class="dilema-q">Existe algum concorrente focado ganhando espaço num nicho que consideramos pequeno demais? Qual a taxa de melhoria dele — não o gap absoluto?</div>
+            </div>
+            <span class="dilema-chevron">▾</span>
+          </button>
+          <div class="dilema-body">
+            <div class="dilema-answer">Benchmarks de diferença absoluta enganam — o que importa é a velocidade relativa de melhoria. Um concorrente que hoje captura 5% do seu nicho mais lucrativo mas cresce 40% ao ano é uma ameaça existencial em 3-4 anos. Meça taxa de crescimento em market share, share of wallet e NPS.</div>
+          </div>
+        </div>
+        <div class="dilema-item">
+          <button class="dilema-trigger" onclick="toggleDilema(this)">
+            <div>
+              <span class="dilema-num">DILEMA 14</span>
+              <div class="dilema-q">Nossas extensões de negócio foram avaliadas pelo critério de fit com nosso modelo operacional — ou apenas pela atratividade de mercado?</div>
+            </div>
+            <span class="dilema-chevron">▾</span>
+          </button>
+          <div class="dilema-body">
+            <div class="dilema-answer">O critério de fit operacional deve preceder a análise financeira. As perguntas corretas: Nossas capacidades distintivas criam vantagem real neste novo mercado? O novo negócio se beneficia dos nossos serviços compartilhados — e vice-versa? Se não, o retorno projetado está superestimado.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════ MODULE 8 ══ -->
+<section class="module" id="mod-7">
+  <div class="mod-header">
+    <div class="mod-num-row">
+      <span class="mod-number">✦</span>
+      <span class="mod-eyebrow">Síntese Final</span>
+    </div>
+    <div class="mod-title">Conclusão Executiva</div>
+    <div class="mod-subtitle">O modelo de serviços como sistema operativo da estratégia</div>
+  </div>
+
+  <div class="acc-group">
+
+    <div class="acc-item open">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Mensagem Central</span>
+            <span class="acc-title">Excelência em Serviços é um Sistema</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="block-text">Vantagem competitiva sustentável em serviços não emerge de uma única inovação ou prática. Ela é produto de um <strong>sistema de quatro pilares coesos</strong> — onde a oferta define escolhas estratégicas, o financiamento as torna sustentáveis, o sistema de pessoas as converte em entrega consistente, e a gestão do cliente as transforma em experiência reproduzível.</div>
+        <div style="background:var(--navy);padding:1.5rem;margin-top:0.75rem;text-align:center;">
+          <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.5rem;">Framework Integrador</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--white);font-weight:900;letter-spacing:0.04em;">Excelência = Sistema Coeso</div>
+          <div style="font-family:'DM Sans',sans-serif;font-size:0.8rem;color:rgba(255,255,255,0.55);margin-top:0.5rem;font-style:italic;">Oferta · Financiamento · Pessoas · Cliente</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Síntese</span>
+            <span class="acc-title">Os 5 Princípios do Gestor Estratégico</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="principles-list">
+          <div class="principle-item"><div class="principle-num">01</div><div class="principle-title">Trade-offs são estratégia</div><div class="principle-text">Excelência em serviços é definida pelo que você escolhe não fazer bem. Recusar essa lógica equivale a aceitar mediocridade universal.</div></div>
+          <div class="principle-item"><div class="principle-num">02</div><div class="principle-title">Financiamento precede lançamento</div><div class="principle-text">Todo serviço excelente tem custo. Esse custo deve ser planejado antes — não corrigido depois.</div></div>
+          <div class="principle-item"><div class="principle-num">03</div><div class="principle-title">Sistemas que exigem heroísmo têm falha de design</div><div class="principle-text">Se o funcionário médio não consegue entregar excelência, o problema não é de capital humano — é de design operacional.</div></div>
+          <div class="principle-item"><div class="principle-num">04</div><div class="principle-title">Diagnostique antes de tratar a variabilidade</div><div class="principle-text">Os cinco tipos de variabilidade têm soluções completamente diferentes. Tratar o tipo errado desperdiça investimento.</div></div>
+          <div class="principle-item"><div class="principle-num">05</div><div class="principle-title">A lealdade tem ROI quantificável</div><div class="principle-text">O impacto financeiro da lealdade é mensurável e frequentemente supera qualquer iniciativa de corte de custo.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-trigger" onclick="toggleAcc(this)">
+        <div class="acc-trigger-left">
+          <div class="acc-bar"></div>
+          <div class="acc-trigger-text">
+            <span class="acc-label">Key Takeaways</span>
+            <span class="acc-title">6 Pontos para Levar ao Próximo Board</span>
+          </div>
+        </div>
+        <div class="acc-icon">+</div>
+      </button>
+      <div class="acc-body">
+        <div class="takeaway-list">
+          <div class="takeaway-item"><strong>Excelência é definida por renúncias.</strong> Empresas que tentam exceler em tudo sem prêmio de preço suficiente tendem à mediocridade sistêmica.</div>
+          <div class="takeaway-item"><strong>O mecanismo de financiamento é tão importante quanto a promessa.</strong> Sem ele, a excelência é insustentável — independentemente de quanto os clientes a apreciem.</div>
+          <div class="takeaway-item"><strong>Sistemas mal desenhados destroem boas pessoas.</strong> Antes de investir em treinamento, verifique se o design operacional permite que o funcionário médio entregue o esperado.</div>
+          <div class="takeaway-item"><strong>A variabilidade do cliente é gerenciável, mas exige diagnóstico correto.</strong> Tratar esforço como capacidade leva a soluções caras e ineficazes.</div>
+          <div class="takeaway-item"><strong>A Cadeia de Lucro conecta "soft" a "hard".</strong> Satisfação de funcionários, lealdade de clientes e lucro são causalmente relacionados — e todos são mensuráveis.</div>
+          <div class="takeaway-item"><strong>Concorrentes focados são ameaças sistêmicas.</strong> A taxa de melhoria deles importa mais do que o gap absoluto atual.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-text">
+    <strong>EMBA — Gestão de Processos, Operações e Supply Chain</strong><br>
+    Prof. Dr. Thiago Lima · Notas de Ensino — Gestão de Serviços<br>
+    Frei (2008) · Heskett et al. (2008)
+  </div>
+</footer>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bnav-btn active" onclick="showModule(0)">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+    <span>Intro</span>
+  </button>
+  <button class="bnav-btn" onclick="showModule(1)">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <span>Oferta</span>
+  </button>
+  <button class="bnav-btn" onclick="showModule(2)">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <span>Financ.</span>
+  </button>
+  <button class="bnav-btn" onclick="showModule(3)">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+    <span>Pessoas</span>
+  </button>
+  <button class="bnav-btn" onclick="showModule(4)">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+    <span>Cliente</span>
+  </button>
+  <button class="bnav-btn" onclick="showModule(5)">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+    <span>Cadeia</span>
+  </button>
+  <button class="bnav-btn" onclick="showModule(6)">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
+    <span>Multifoco</span>
+  </button>
+  <button class="bnav-btn" onclick="showModule(7)">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+    <span>Concl.</span>
+  </button>
+</nav>
+
+<script>
+  const TOTAL = 8;
+
+  // Build dots
+  const nav = document.getElementById('modNav');
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('button');
+    d.className = 'mod-dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => showModule(i);
+    nav.appendChild(d);
+  }
+
+  function showModule(idx) {
+    document.querySelectorAll('.module').forEach((m, i) => m.classList.toggle('active', i === idx));
+    document.querySelectorAll('.bnav-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+    document.querySelectorAll('.mod-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    document.getElementById('modSelect').value = idx;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleAcc(btn) {
+    const item = btn.closest('.acc-item');
+    item.classList.toggle('open');
+  }
+
+  function toggleDilema(btn) {
+    const item = btn.closest('.dilema-item');
+    item.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

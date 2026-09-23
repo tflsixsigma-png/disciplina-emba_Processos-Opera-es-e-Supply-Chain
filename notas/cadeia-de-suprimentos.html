@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBA | Gestão Estratégica da Cadeia de Suprimentos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Josefin+Sans:wght@300;400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0f0e0c;
+  --paper: #f7f3ec;
+  --cream: #ede8dc;
+  --gold: #a07820;
+  --gold-light: #c8982c;
+  --rust: #7a2e1a;
+  --navy: #1a2e4a;
+  --slate: #3a4a5c;
+  --muted: #7a7060;
+  --line: #ccc4b4;
+  --highlight: #f0e8d4;
+  --green: #2a4a30;
+  --teal: #1e3d40;
+  --tag-bg: #e8e0ce;
+  --border: rgba(160,120,32,0.25);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: 300;
+  line-height: 1.8;
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─── */
+header {
+  background: var(--ink);
+  color: var(--paper);
+  position: sticky; top: 0; z-index: 200;
+  border-bottom: 2px solid var(--gold);
+}
+.header-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 58px;
+}
+.header-brand { display: flex; align-items: center; gap: 14px; }
+.brand-badge {
+  width: 32px; height: 32px; border: 1.5px solid var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif; font-size: 14px;
+  color: var(--gold); font-style: italic;
+}
+.brand-text { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #bbb; line-height: 1.4; }
+.brand-text strong { display: block; color: var(--paper); font-weight: 600; font-size: 11px; }
+.header-meta { font-family: 'DM Mono', monospace; color: var(--gold-light); font-size: 0.65rem; letter-spacing: 0.1em; }
+
+/* ─── HERO ─── */
+.hero {
+  background: #0a1628; color: var(--paper);
+  padding: 5rem 2rem 4rem; position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 110%, rgba(29,52,97,0.95) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 60% at 15% 40%, rgba(15,35,75,0.7) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero::after {
+  content: ''; position: absolute; top: -80px; right: -80px;
+  width: 400px; height: 400px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(160,120,32,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+.hero-eyebrow {
+  font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--gold-light); margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 12px;
+  opacity: 0; animation: fadeUp 0.6s 0.1s forwards;
+}
+.hero-eyebrow::before { content: ''; display: block; width: 32px; height: 1px; background: var(--gold); }
+.hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1;
+  max-width: 800px; margin: 0 0 1rem;
+  opacity: 0; animation: fadeUp 0.6s 0.2s forwards;
+}
+.hero h1 em { color: var(--gold-light); font-style: italic; }
+.hero-sub {
+  color: rgba(255,255,255,0.6); font-size: 1rem;
+  max-width: 560px; margin: 0 0 2.5rem; line-height: 1.7;
+  opacity: 0; animation: fadeUp 0.6s 0.3s forwards;
+}
+.hero-meta {
+  display: flex; gap: 32px; flex-wrap: wrap;
+  opacity: 0; animation: fadeUp 0.6s 0.4s forwards;
+}
+.meta-item { display: flex; flex-direction: column; gap: 4px; }
+.meta-label { font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: #666; }
+.meta-value { font-size: 11px; color: var(--gold-light); font-weight: 600; letter-spacing: 0.05em; }
+.hero-decoration {
+  position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+  font-family: 'Cormorant Garamond', serif; font-size: 180px;
+  color: rgba(255,255,255,0.02); font-weight: 700; line-height: 1;
+  user-select: none; pointer-events: none; letter-spacing: -10px;
+}
+
+/* ─── NAV TABS ─── */
+.nav-tabs {
+  background: var(--ink); border-bottom: 1px solid rgba(160,120,32,0.2);
+  overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  position: sticky; top: 58px; z-index: 100;
+}
+.nav-tabs::-webkit-scrollbar { display: none; }
+.nav-tabs-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex;
+}
+.tab-btn {
+  background: none; border: none;
+  color: rgba(255,255,255,0.45);
+  font-family: 'Josefin Sans', sans-serif; font-size: 0.78rem; font-weight: 500;
+  padding: 1rem 1.25rem; cursor: pointer;
+  border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s;
+  letter-spacing: 0.01em;
+}
+.tab-btn:hover { color: rgba(255,255,255,0.8); }
+.tab-btn.active { color: var(--gold-light); border-bottom-color: var(--gold); }
+
+/* ─── MAIN ─── */
+.main { max-width: 1200px; margin: 0 auto; padding: 0 2rem 4rem; }
+.module { display: none; padding-top: 3rem; animation: fadeIn 0.35s ease; }
+.module.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── MODULE HEADER ─── */
+.mod-header {
+  display: grid; grid-template-columns: auto 1fr; gap: 1.5rem;
+  align-items: start; margin-bottom: 3rem; padding-bottom: 2rem;
+  border-bottom: 1px solid var(--line);
+}
+.mod-number {
+  font-family: 'Cormorant Garamond', serif; font-size: 4rem; font-weight: 900;
+  color: var(--gold); line-height: 1; opacity: 0.3; min-width: 80px; text-align: right;
+}
+.mod-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700;
+  color: var(--ink); line-height: 1.2; margin-bottom: 0.5rem;
+}
+.mod-subtitle { font-size: 0.85rem; color: var(--muted); font-style: italic; }
+.mod-tag {
+  display: inline-block; background: var(--ink); color: var(--gold-light);
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 0.2em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 2px; margin-top: 8px;
+}
+
+/* ─── SECTION BLOCKS ─── */
+.section-block { margin-bottom: 32px; }
+.section-label { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.section-label-icon {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0;
+}
+.icon-concept { background: var(--navy); color: #7ba4d4; }
+.icon-strategy { background: var(--rust); color: #e8a090; }
+.icon-guide { background: var(--green); color: #90c890; }
+.icon-case { background: var(--teal); color: #80c0c4; }
+.icon-dilemma { background: #3a2a50; color: #b890e4; }
+.section-label-text { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: #6a6050; font-weight: 600; }
+.section-body { font-size: 15.5px; color: #1e2530; line-height: 1.95; }
+.section-body strong { color: var(--ink); font-weight: 600; }
+.section-body em { color: var(--gold); font-style: normal; font-weight: 600; }
+
+/* ─── CALLOUTS ─── */
+.concept-callout {
+  background: var(--cream); border-left: 3px solid var(--gold);
+  padding: 20px 24px; border-radius: 0 6px 6px 0;
+  font-size: 15px; color: #1e2530; line-height: 1.95; margin-bottom: 16px;
+}
+.concept-callout strong { color: var(--ink); }
+.strategy-callout {
+  background: #1a2e4a08; border: 1px solid rgba(26,46,74,0.12);
+  padding: 20px 24px; border-radius: 6px;
+  font-size: 15px; color: #1e2530; line-height: 1.95;
+}
+
+/* ─── GUIDE QUESTIONS ─── */
+.guide-questions { display: flex; flex-direction: column; gap: 10px; }
+.guide-q {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 18px; background: #f0f8f0;
+  border-radius: 6px; border: 1px solid #c4dcc4;
+  font-size: 14.5px; color: #1e2530; line-height: 1.85;
+}
+.guide-q-num { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--green); font-weight: 500; flex-shrink: 0; margin-top: 2px; }
+
+/* ─── CASE BOX ─── */
+.case-box {
+  background: var(--teal); color: #e0f4f5;
+  padding: 20px 24px; border-radius: 6px;
+  font-size: 14.5px; line-height: 1.85; margin-bottom: 12px;
+}
+.case-company {
+  font-family: 'Cormorant Garamond', serif; font-size: 18px;
+  color: #fff; font-weight: 600; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 10px;
+}
+.case-company::before { content: '◆'; font-size: 8px; color: var(--gold-light); }
+.case-result {
+  display: inline-block; margin-top: 10px; padding: 3px 10px;
+  background: rgba(255,255,255,0.1); border-radius: 20px;
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #a0d8dc;
+}
+
+/* ─── DILEMA CARDS (colapsável) ─── */
+.dilema-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+.dilema-card {
+  background: var(--navy); border: 1px solid rgba(160,120,32,0.2);
+  padding: 1.5rem; cursor: pointer; transition: all 0.25s;
+  border-radius: 6px;
+}
+.dilema-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.dilema-num { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--gold-light); letter-spacing: 0.15em; margin-bottom: 0.75rem; }
+.dilema-card > p { font-size: 0.95rem; color: rgba(255,255,255,0.92); line-height: 1.75; }
+.dilema-reveal {
+  display: none; margin-top: 1rem; padding-top: 1rem;
+  border-top: 1px solid rgba(160,120,32,0.2);
+  font-size: 0.9rem; color: #f5ecd4; line-height: 1.8;
+}
+.dilema-card.open .dilema-reveal { display: block; }
+.dilema-toggle { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--gold-light); margin-top: 0.75rem; letter-spacing: 0.1em; }
+/* legado — mantido para compatibilidade mas não usado nos novos dilemas */
+.dilemma-box { background: #f8f4ff; border: 1px solid #c8a8e8; border-radius: 6px; padding: 20px 24px; }
+.dilemma-title { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #6a3a9a; margin-bottom: 12px; }
+.dilemma-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #ddc8f4; font-size: 14px; color: #2a1e40; line-height: 1.8; }
+.dilemma-item:last-child { border-bottom: none; }
+.dilemma-vs { font-family: 'DM Mono', monospace; font-size: 9px; color: #9a68c8; flex-shrink: 0; margin-top: 4px; font-weight: 500; }
+
+/* ─── DATA TABLE ─── */
+.data-table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--line); margin: 16px 0; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+.data-table thead { background: var(--ink); color: var(--paper); }
+.data-table thead th { padding: 12px 16px; text-align: left; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600; white-space: nowrap; }
+.data-table thead th:first-child { color: var(--gold-light); }
+.data-table tbody tr:nth-child(odd) { background: var(--paper); }
+.data-table tbody tr:nth-child(even) { background: var(--cream); }
+.data-table tbody tr:hover { background: var(--highlight); }
+.data-table td { padding: 13px 16px; color: #1e2530; line-height: 1.65; vertical-align: top; border-bottom: 1px solid var(--line); font-size: 13px; }
+.data-table td:first-child { font-weight: 600; color: var(--ink); font-size: 11px; }
+
+/* ─── FRAMEWORK GRID ─── */
+.framework-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 16px 0; }
+.fw-card {
+  padding: 20px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--paper); transition: box-shadow 0.2s, transform 0.2s;
+}
+.fw-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
+.fw-card-num { font-family: 'DM Mono', monospace; font-size: 20px; color: var(--gold); font-weight: 500; line-height: 1; margin-bottom: 10px; }
+.fw-card-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+.fw-card-body { font-size: 13.5px; color: #3a4050; line-height: 1.75; }
+
+/* ─── PULL QUOTE ─── */
+.pull-quote { border-left: 3px solid var(--gold); margin: 24px 0; padding: 16px 24px; background: var(--highlight); }
+.pull-quote p { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-style: italic; color: var(--ink); line-height: 1.5; }
+.pull-quote cite { display: block; margin-top: 10px; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: #5a5040; }
+
+/* ─── TIMELINE ─── */
+.timeline { position: relative; padding-left: 28px; border-left: 2px solid var(--line); margin: 20px 0; display: flex; flex-direction: column; }
+.tl-item { position: relative; padding: 0 0 28px 24px; }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-item::before { content: ''; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--gold); border: 2px solid var(--paper); }
+.tl-year { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); margin-bottom: 4px; font-weight: 500; }
+.tl-title { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.tl-body { font-size: 14px; color: #3a4050; line-height: 1.8; }
+
+/* ─── EXPAND ─── */
+.expand-toggle {
+  width: 100%; text-align: left; padding: 14px 20px;
+  background: var(--cream); border: 1px solid var(--line); border-radius: 6px;
+  cursor: pointer; font-family: 'Josefin Sans', sans-serif;
+  font-size: 12px; color: var(--slate); font-weight: 600;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background 0.2s; margin-bottom: 2px;
+}
+.expand-toggle:hover { background: var(--highlight); }
+.expand-toggle .arrow { transition: transform 0.25s; font-size: 10px; color: var(--gold); }
+.expand-toggle.open .arrow { transform: rotate(180deg); }
+.expand-content {
+  display: none; padding: 20px;
+  border: 1px solid var(--line); border-top: none; border-radius: 0 0 6px 6px;
+  background: var(--paper); margin-bottom: 8px;
+}
+.expand-content.show { display: block; }
+
+/* ─── SEPARATOR ─── */
+.module-separator { display: flex; align-items: center; gap: 16px; margin: 48px 0; }
+.module-separator::before, .module-separator::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.module-separator span { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--gold); letter-spacing: 0.2em; }
+
+/* ─── FISHER MATRIX ─── */
+.fisher-matrix {
+  display: grid; grid-template-columns: 80px 1fr 1fr;
+  gap: 3px; margin: 20px 0; border-radius: 8px; overflow: hidden;
+}
+.fm-corner { background: transparent; }
+.fm-col-label {
+  background: var(--ink); color: var(--gold-light); padding: 12px; text-align: center;
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600;
+}
+.fm-row-label {
+  background: var(--ink); color: var(--gold-light); padding: 12px;
+  writing-mode: vertical-rl; text-align: center;
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+.fm-cell {
+  padding: 20px; font-size: 14px; color: #1e2530; line-height: 1.75; position: relative;
+}
+.fm-cell strong { display: block; font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+.fm-cell.match { background: #e8f4e8; border: 2px solid #90c090; }
+.fm-cell.mismatch { background: #fce8e0; border: 2px solid #e0a090; }
+.fm-badge {
+  position: absolute; top: 10px; right: 10px;
+  font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 20px; font-weight: 600;
+}
+.fm-cell.match .fm-badge { background: #c4e8c4; color: #2a5a2a; }
+.fm-cell.mismatch .fm-badge { background: #f8d0c4; color: #8a2a1a; }
+
+/* ─── PRODUCT SPECTRUM ─── */
+.product-spectrum {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 3px; border-radius: 8px; overflow: hidden; margin: 20px 0; border: 1px solid var(--line);
+}
+.ps-header {
+  padding: 14px 20px; text-align: center;
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700;
+}
+.ps-header.functional { background: var(--navy); color: #80a8d4; }
+.ps-header.innovative { background: var(--rust); color: #f0b0a0; }
+.ps-body { padding: 20px; font-size: 13.5px; color: #1e2530; line-height: 1.85; }
+.ps-body.functional { background: #f0f4fc; }
+.ps-body.innovative { background: #fdf0ec; }
+.ps-item { display: flex; gap: 10px; margin-bottom: 8px; }
+.ps-item:last-child { margin-bottom: 0; }
+.ps-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 7px; }
+.ps-dot.func { background: var(--navy); }
+.ps-dot.innov { background: var(--rust); }
+
+/* ─── DEMAND COMPARE ─── */
+.demand-compare { border-radius: 8px; overflow: hidden; border: 1px solid var(--line); margin: 20px 0; }
+.dc-header { display: grid; grid-template-columns: 1.2fr 1fr 1fr; background: var(--ink); }
+.dc-col { padding: 12px 16px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 600; }
+.dc-col:first-child { color: var(--gold-light); }
+.dc-col.func { color: #80a8d4; }
+.dc-col.innov { color: #f0b0a0; }
+.dc-row { display: grid; grid-template-columns: 1.2fr 1fr 1fr; border-bottom: 1px solid var(--line); }
+.dc-row:last-child { border-bottom: none; }
+.dc-row:nth-child(even) > * { background: var(--cream); }
+.dc-row:nth-child(odd) > * { background: var(--paper); }
+.dc-cell { padding: 12px 16px; font-size: 13px; color: #1e2530; line-height: 1.6; }
+.dc-cell:first-child { font-weight: 600; color: var(--ink); }
+.dc-cell.func { color: var(--navy); font-weight: 500; }
+.dc-cell.innov { color: var(--rust); font-weight: 500; }
+
+/* ─── FOOTER ─── */
+.site-footer {
+  background: var(--ink); border-top: 1px solid rgba(160,120,32,0.2);
+  padding: 2rem; text-align: center; margin-top: 4rem;
+}
+.footer-text { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: rgba(255,255,255,0.35); letter-spacing: 0.1em; line-height: 2; }
+.footer-text strong { color: var(--gold-light); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 640px) {
+  .mod-header { grid-template-columns: 1fr; }
+  .mod-number { display: none; }
+  .hero { padding: 3rem 1.5rem 2.5rem; }
+  .main { padding: 0 1rem 3rem; }
+  .product-spectrum { grid-template-columns: 1fr; }
+  .fisher-matrix { grid-template-columns: 1fr; }
+}
+</style>
+<style id="disc-back-css">
+.disc-back{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-right:12px;padding:6px 11px;border-radius:6px;
+background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui,sans-serif;text-decoration:none!important;white-space:nowrap;letter-spacing:0;text-transform:none}
+.disc-back:hover{background:#fff}.disc-back:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.disc-back .bk{font-weight:500;opacity:.85}
+@media(max-width:560px){.disc-back .bk{display:none}header .header-meta{display:none}header .header-title{font-size:.95rem;line-height:1.2}}
+@media print{.disc-back{display:none}}
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<header>
+  <div class="header-inner">
+<a class="disc-back" href="../index.html" title="Voltar à página da disciplina">‹ Disciplina<span class="bk"> · Livro Cap. 4</span></a>
+    <div class="header-brand">
+      <div class="brand-badge">M</div>
+      <div class="brand-text">
+        <strong>MBA Executive</strong>
+        Gestão de Operações & Supply Chain
+      </div>
+    </div>
+    <span class="header-meta">Prof. Dr. Thiago Lima</span>
+  </div>
+</header>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Notas de Ensino Executivo · Prof. Dr. Thiago Lima</div>
+    <h1>A Cadeia de Suprimentos como<br><em>Motor de Valor</em> e Vantagem Competitiva</h1>
+    <p class="hero-sub">Da otimização de custos à arquitetura de ecossistemas digitais e resilientes — um guia estratégico para líderes que moldam cadeias de suprimentos em ambientes de incerteza crescente.</p>
+    <div class="hero-meta">
+      <div class="meta-item"><span class="meta-label">Programa</span><span class="meta-value">EMBA · MBA Executivo</span></div>
+      <div class="meta-item"><span class="meta-label">Disciplina</span><span class="meta-value">Supply Chain Management</span></div>
+      <div class="meta-item"><span class="meta-label">Módulos</span><span class="meta-value">7 Tópicos Estratégicos</span></div>
+      <div class="meta-item"><span class="meta-label">Referência</span><span class="meta-value">Fisher (1997) · Indústria 5.0</span></div>
+    </div>
+  </div>
+  <div class="hero-decoration">SCM</div>
+</section>
+
+<!-- ─── NAV TABS ─── -->
+<nav class="nav-tabs">
+  <div class="nav-tabs-inner">
+    <button class="tab-btn active" onclick="showModule(0)">M1 · Fundamentos</button>
+    <button class="tab-btn" onclick="showModule(1)">M2 · Evolução Histórica</button>
+    <button class="tab-btn" onclick="showModule(2)">M3 · Design de Redes</button>
+    <button class="tab-btn" onclick="showModule(3)">M4 · Resiliência</button>
+    <button class="tab-btn" onclick="showModule(4)">M5 · Transformação Digital</button>
+    <button class="tab-btn" onclick="showModule(5)">M6 · Fisher: A SC Certa</button>
+    <button class="tab-btn" onclick="showModule(6)">M7 · Liderança SCM</button>
+  </div>
+</nav>
+
+<!-- ─── MAIN ─── -->
+<main class="main">
+
+  <!-- ═══ MÓDULO 1 ═══ -->
+  <section class="module active" id="mod-0">
+    <div class="mod-header">
+      <div class="mod-number">01</div>
+      <div>
+        <div class="mod-title">A Cadeia de Suprimentos como Plataforma Estratégica de Geração de Valor</div>
+        <div class="mod-subtitle">Da função operacional ao motor central de criação e captura de valor</div>
+        <span class="mod-tag">Fundamentos &amp; Paradigma</span>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-concept">C</div><span class="section-label-text">Conceito Central</span></div>
+      <div class="concept-callout">
+        A Gestão da Cadeia de Suprimentos (SCM) transcende a movimentação física de mercadorias. Ela é a <strong>coordenação e integração de todos os fluxos</strong> — materiais, informações e capitais financeiros — entre parceiros interconectados, desde a extração da matéria-prima até o consumo final. Sua essência reside em tratar a cadeia como uma <em>entidade única e indivisível</em>, não como uma série de departamentos em silos.
+      </div>
+      <div class="section-body">
+        A distinção crítica entre <strong>Logística</strong> e <strong>SCM</strong> consolidou-se nos anos 2000: enquanto a logística otimiza fluxos físicos e de armazenagem, a SCM assume uma postura de <em>governança de rede</em> — incorporando coordenação estratégica, alianças interorganizacionais e informação compartilhada. A competição deixou de ocorrer entre empresas isoladas; ela ocorre entre <strong>cadeias de suprimentos inteiras</strong>.
+      </div>
+      <div class="data-table-wrap" style="margin-top:20px">
+        <table class="data-table">
+          <thead><tr><th>Estágio Evolutivo</th><th>Foco Principal</th><th>Mentalidade Gestora</th></tr></thead>
+          <tbody>
+            <tr><td>Logística Tradicional</td><td>Transporte e Armazenagem</td><td>Eficiência Funcional e Redução de Custos Isolados</td></tr>
+            <tr><td>Logística Integrada</td><td>Fluxo de Materiais Interno</td><td>Coordenação Departamental e Nível de Serviço</td></tr>
+            <tr><td>SCM (Fase Inicial)</td><td>Integração com Fornecedores e Clientes</td><td>Parcerias e Sincronização de Fluxos</td></tr>
+            <tr><td>SCM Contemporânea</td><td>Redes de Valor e Resiliência</td><td>Ecossistemas Digitais, Sustentabilidade e Viabilidade</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-strategy">S</div><span class="section-label-text">Visão Estratégica — Impacto no P&L e no Valor da Marca</span></div>
+      <div class="strategy-callout section-body">
+        A SCM moderna distingue duas dimensões críticas: <strong>Criação de Valor</strong>, obtida pelo design de uma rede com capacidades complementares de ativos e capital humano; e <strong>Captura de Valor</strong>, viabilizada pela coordenação eficaz entre os participantes. Em mercados onde cadeias são fragmentadas, a coordenação torna-se o fator mais crítico — sua ausência gera o <em>Efeito Chicote (Bullwhip Effect)</em>: amplificação progressiva da volatilidade de demanda ao longo da rede, com impacto direto no capital de giro e nas margens operacionais.
+      </div>
+      <div class="pull-quote" style="margin-top:16px">
+        <p>"A SCM não é um centro de custo. É o motor para a criação de valor econômico sustentável."</p>
+        <cite>Paradigma do Value-Based Management aplicado à SCM</cite>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-guide">G</div><span class="section-label-text">Guia de Aplicação Prática</span></div>
+      <div class="guide-questions">
+        <div class="guide-q"><span class="guide-q-num">01</span><span>Minha empresa enxerga a cadeia de suprimentos como custo operacional ou como plataforma estratégica de geração de valor? Essa percepção está refletida na alocação de capital e no perfil dos líderes da área?</span></div>
+        <div class="guide-q"><span class="guide-q-num">02</span><span>Consigo mapear os fluxos de materiais, informação e capital financeiro de ponta a ponta — do fornecedor do meu fornecedor ao cliente do meu cliente? Onde estão os silos que amplificam volatilidade?</span></div>
+        <div class="guide-q"><span class="guide-q-num">03</span><span>A minha organização compete como cadeia de suprimentos integrada ou como empresa isolada? Quais parceiros precisariam ser mais coordenados para aumentar nossa vantagem competitiva?</span></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-case">M</div><span class="section-label-text">Caso de Mercado</span></div>
+      <div class="case-box">
+        <div class="case-company">Amazon — A SCM como Modelo de Negócio</div>
+        A Amazon não compete apenas em preço: compete em <strong>velocidade, flexibilidade e conveniência</strong> como proposição central de valor. Sua cadeia de suprimentos — com centros de distribuição hiperlocais, frota própria e algoritmos preditivos de estoque — é o produto em si. Essa estratégia exige trade-offs deliberados: aceitar custos logísticos mais elevados para capturar market share e fidelização. O resultado é uma rede que cria e captura valor simultaneamente, criando barreiras de entrada estruturais para competidores.
+        <span class="case-result">📌 Lição: SCM como vantagem competitiva sustentável</span>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-dilemma">D</div><span class="section-label-text">Dilemas Executivos</span></div>
+      <div class="dilema-grid">
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 01</div>
+          <p><strong style="color:#fff">Eficiência de curto prazo vs. viabilidade sistêmica.</strong> Quando faz sentido aceitar custos mais altos em nome da coordenação?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">Reduzir custos sem investir em coordenação e visibilidade expõe a empresa a riscos sistêmicos que superam qualquer ganho marginal. O custo real de uma disrupção — receita perdida, operações de emergência, dano de marca — raramente aparece no modelo de corte de custos. A cadeia mais eficiente em custos e a mais resiliente raramente são a mesma.</div>
+        </div>
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 02</div>
+          <p><strong style="color:#fff">Otimização local vs. otimização da rede.</strong> Quando maximizar a performance de um elo destrói valor no sistema total?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">Maximizar um elo — reduzir estoque em compras, aumentar lote em produção, cortar fretes — frequentemente degrada o desempenho total. O efeito chicote é a consequência mais visível: otimizações locais amplificam volatilidade ao longo da cadeia. Pensamento sistêmico é condição de liderança na SCM contemporânea.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ MÓDULO 2 ═══ -->
+  <section class="module" id="mod-1">
+    <div class="mod-header">
+      <div class="mod-number">02</div>
+      <div>
+        <div class="mod-title">Evolução Histórica: Do Taylorismo à Revolução da Informação</div>
+        <div class="mod-subtitle">Como cada era moldou o mindset e as ferramentas do gestor de SCM</div>
+        <span class="mod-tag">Contexto &amp; Mindset</span>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-concept">C</div><span class="section-label-text">Conceito Central</span></div>
+      <div class="concept-callout">
+        A trajetória da SCM não é linear — é um reflexo direto das <strong>pressões competitivas, tecnológicas e geopolíticas de cada era</strong>. Compreender essa evolução permite ao gestor reconhecer padrões, antecipar movimentos e calibrar o modelo operacional de sua organização à lógica do seu tempo.
+      </div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-year">1920–1960</div>
+          <div class="tl-title">Era da Produção em Massa e Taylorismo</div>
+          <div class="tl-body">Logística vista como suporte operacional. Ênfase em escala, padronização e controle de estoques básicos. Funções isoladas: compras, produção e distribuição sem comunicação sistêmica.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1980–1990</div>
+          <div class="tl-title">Surgimento da SCM e Otimização de Custos</div>
+          <div class="tl-body">O termo "Supply Chain Management" ganha tração. Introdução de sistemas MRP. As empresas percebem que fornecedores e clientes impactam diretamente sua eficiência — surgem os primeiros modelos de parceria.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1990–2010</div>
+          <div class="tl-title">Globalização, Tecnologia e Responsabilidade Socioambiental</div>
+          <div class="tl-body">Expansão global das cadeias impulsionada pela abertura de mercados. SCM se distingue formalmente da logística. ERP e internet revolucionam a visibilidade dos fluxos. Competências sociais e multilinguismo tornam-se exigências do gestor.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">2010–Presente</div>
+          <div class="tl-title">Ecossistemas Digitais, Resiliência e Viabilidade Sistêmica</div>
+          <div class="tl-body">Pandemia, guerras e crises climáticas expõem a fragilidade de cadeias ultra-enxutas. IA, IoT e Blockchain redefinem a tomada de decisão. A Indústria 5.0 reposiciona o humano como centro dos ecossistemas digitais.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-strategy">S</div><span class="section-label-text">Visão Estratégica</span></div>
+      <div class="strategy-callout section-body">
+        Cada era exigiu um perfil diferente de liderança em SCM — das habilidades matemáticas do engenheiro taylorista às competências de pensamento sistêmico, gestão de dados e navegação geopolítica do executivo contemporâneo. <em>A lacuna entre economias desenvolvidas e emergentes</em> é um dado estrutural: os modelos clássicos foram construídos sobre realidades que não se aplicam universalmente. O gestor que reconhece isso adapta frameworks globais ao contexto local — uma vantagem competitiva em si.
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-guide">G</div><span class="section-label-text">Guia de Aplicação Prática</span></div>
+      <div class="guide-questions">
+        <div class="guide-q"><span class="guide-q-num">01</span><span>O perfil de competências do meu time de SCM está alinhado com as exigências atuais — análise de dados, pensamento sistêmico, gestão de riscos geopolíticos — ou ainda reflete uma mentalidade operacional da era anterior?</span></div>
+        <div class="guide-q"><span class="guide-q-num">02</span><span>Quais práticas de SCM adotadas em minha empresa foram desenvolvidas para uma realidade que não existe mais? Onde estamos operando com "piloto automático" de uma era anterior?</span></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-case">M</div><span class="section-label-text">Caso de Mercado</span></div>
+      <div class="case-box">
+        <div class="case-company">Toyota — A Evolução do Paradigma Lean</div>
+        A Toyota foi pioneira no Just-in-Time e na filosofia Lean, tornando-se referência global. Décadas depois, a mesma Toyota foi forçada a pausar linhas de produção durante a crise de semicondutores de 2021 — não por ineficiência, mas pela fragilidade sistêmica de uma cadeia excessivamente otimizada para custo. A empresa passou a manter estoques de segurança seletivos para componentes críticos: <strong>o inventor do Lean reconheceu os limites do Lean puro</strong>.
+        <span class="case-result">📌 Lição: Toda era gera seus próprios pontos cegos</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ MÓDULO 3 ═══ -->
+  <section class="module" id="mod-2">
+    <div class="mod-header">
+      <div class="mod-number">03</div>
+      <div>
+        <div class="mod-title">Design de Redes Globais de Suprimentos: Estratégia de Configuração e Geopolítica</div>
+        <div class="mod-subtitle">As decisões estruturais que definem a competitividade de longo prazo</div>
+        <span class="mod-tag">Decisão Estrutural</span>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-concept">C</div><span class="section-label-text">Conceito Central</span></div>
+      <div class="concept-callout">
+        O design de uma rede global de suprimentos é uma <strong>decisão de alto impacto de longo prazo</strong> que define a competitividade estrutural de uma organização. Envolve determinar localização de instalações, capacidades produtivas, canais de distribuição e fontes de suprimento em escala mundial — considerando não apenas custos fixos e variáveis, mas também satisfação do cliente, posição competitiva, políticas governamentais e gestão de fluxos financeiros globais.
+      </div>
+      <button class="expand-toggle" onclick="toggleExpand(this)">Ver Estratégias de Configuração de Plantas (Plant Charter Strategies) <span class="arrow">▼</span></button>
+      <div class="expand-content">
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Estratégia</th><th>Mecanismo</th><th>Implicação Estratégica</th></tr></thead>
+            <tbody>
+              <tr><td>Consolidação Global</td><td>Centralização de linhas de produtos completas em poucas localizações</td><td>Alta eficiência e controle de qualidade; risco de custos logísticos elevados e baixa flexibilidade local</td></tr>
+              <tr><td>Foco no Produto</td><td>Especialização de fábricas em classes específicas de produtos</td><td>Alavanca economias de escala; minimiza complexidade interna</td></tr>
+              <tr><td>Foco no Processo</td><td>Especialização em estágios específicos da fabricação</td><td>Excelência técnica em processos; requer coordenação intensa de fluxos intermediários</td></tr>
+              <tr><td>Postergação (Postponement)</td><td>Atividades de valor agregado próximas ao mercado final</td><td>Reduz lead times e permite personalização tardia</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-strategy">S</div><span class="section-label-text">Visão Estratégica — Geopolítica como Variável de Design</span></div>
+      <div class="strategy-callout section-body">
+        As mudanças recentes na política internacional — guerra comercial EUA-China, Brexit, sanções geopolíticas — transformaram a geopolítica em uma <em>variável de design de rede</em> tão relevante quanto o custo da mão de obra. Em resposta, empresas líderes adotam três movimentos estratégicos:
+        <div class="framework-grid" style="margin-top:16px">
+          <div class="fw-card"><div class="fw-card-num">01</div><div class="fw-card-title">Diversificação de Fontes</div><div class="fw-card-body">Eliminação de dependências de fonte única em componentes críticos, especialmente em regiões de concentração geopolítica.</div></div>
+          <div class="fw-card"><div class="fw-card-num">02</div><div class="fw-card-title">Nearshoring</div><div class="fw-card-body">Aproximação da produção ao mercado consumidor para reduzir exposição a choques logísticos transoceânicos e tensões tarifárias.</div></div>
+          <div class="fw-card"><div class="fw-card-num">03</div><div class="fw-card-title">Friendshoring</div><div class="fw-card-body">Sourcing prioritário em países politicamente aliados, criando redes com menor risco de sanções ou bloqueios comerciais.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-guide">G</div><span class="section-label-text">Guia de Aplicação Prática</span></div>
+      <div class="guide-questions">
+        <div class="guide-q"><span class="guide-q-num">01</span><span>Qual é a nossa estratégia atual de configuração de plantas — e ela foi escolhida deliberadamente ou herdada historicamente? Ela ainda faz sentido no cenário geopolítico atual?</span></div>
+        <div class="guide-q"><span class="guide-q-num">02</span><span>Temos dependências críticas de fonte única em componentes essenciais? Em quais regiões geopolíticas está concentrada essa dependência?</span></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-case">M</div><span class="section-label-text">Caso de Mercado</span></div>
+      <div class="case-box">
+        <div class="case-company">Indústria Automotiva — A Reconfiguração Forçada</div>
+        A transição para veículos elétricos está redesenhando radicalmente a base de fornecedores automotivos. A dependência de motores a combustão está sendo substituída por baterias cuja matéria-prima (lítio, cobalto, terras raras) é controlada majoritariamente pela China. OEMs europeus e norte-americanos respondem formando <strong>alianças estratégicas com mineradoras</strong> e investindo em gigafábricas locais — um redesign de rede de décadas requerido em poucos anos.
+        <span class="case-result">📌 Lição: Geopolítica é variável de planejamento, não de contingência</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ MÓDULO 4 ═══ -->
+  <section class="module" id="mod-3">
+    <div class="mod-header">
+      <div class="mod-number">04</div>
+      <div>
+        <div class="mod-title">Resiliência Sistêmica e a Nova Ciência da Viabilidade em SCM</div>
+        <div class="mod-subtitle">Bounce-Back vs. Bounce-Forward — redesenhando cadeias para sobreviver ao imprevisível</div>
+        <span class="mod-tag">Gestão de Riscos</span>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-concept">C</div><span class="section-label-text">Conceito Central</span></div>
+      <div class="concept-callout">
+        A vulnerabilidade das cadeias de suprimentos foi exposta dramaticamente pela pandemia de COVID-19, impulsionando a pesquisa a evoluir da simples <strong>gestão de riscos</strong> para o conceito de <em>resiliência</em> — e mais recentemente de <em>viabilidade sistêmica</em>: a capacidade de sobrevivência e adaptação contínua de uma cadeia como ecossistema aberto.
+      </div>
+      <div class="framework-grid">
+        <div class="fw-card" style="border-top: 3px solid var(--rust)"><div class="fw-card-num" style="color:var(--rust)">⟲</div><div class="fw-card-title">Bounce-Back</div><div class="fw-card-body">Visão baseada na estabilidade. Objetivo: retornar ao estado pré-crise. Reativo, lida com riscos conhecidos. Modelo tradicional de gestão de riscos.</div></div>
+        <div class="fw-card" style="border-top: 3px solid var(--green)"><div class="fw-card-num" style="color:var(--green)">⟳</div><div class="fw-card-title">Bounce-Forward</div><div class="fw-card-body">Visão adaptativa. Objetivo: avançar para novos estados de equilíbrio. Proativo, lida com riscos desconhecidos. O modelo de resiliência do século XXI.</div></div>
+        <div class="fw-card" style="border-top: 3px solid var(--navy)"><div class="fw-card-num" style="color:var(--navy)">⊕</div><div class="fw-card-title">Efeito Cascata</div><div class="fw-card-body">Propagação de interrupções pela rede. A falha de um fornecedor de nível 2 pode paralisar toda a produção a jusante — diferente do efeito chicote de demanda.</div></div>
+        <div class="fw-card" style="border-top: 3px solid var(--gold)"><div class="fw-card-num" style="color:var(--gold)">⚑</div><div class="fw-card-title">Stress Tests</div><div class="fw-card-body">Simulações para determinar até onde uma cadeia suporta choques severos. Inspirados no setor bancário — já adotados por empresas líderes em SCM.</div></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-strategy">S</div><span class="section-label-text">Visão Estratégica — Hybrid Inventory: O Ponto de Equilíbrio</span></div>
+      <div class="strategy-callout section-body">
+        A tensão central do design de cadeia moderna: eficiência (JIT, estoques mínimos) vs. resiliência (buffers estratégicos). A resposta não é escolher um dos extremos — é adotar <em>Hybrid Inventory</em>: lean onde possível, estratégico onde crítico. A resiliência tornou-se o novo KPI prioritário, superando eficiência de custos em decisões de sourcing para componentes de criticidade sistêmica alta.
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-guide">G</div><span class="section-label-text">Guia de Aplicação Prática</span></div>
+      <div class="guide-questions">
+        <div class="guide-q"><span class="guide-q-num">01</span><span>Nossa organização tem um mapa de risco que vai além do primeiro nível de fornecedores? Conhecemos os pontos de falha críticos no segundo e terceiro nível da cadeia?</span></div>
+        <div class="guide-q"><span class="guide-q-num">02</span><span>A resiliência está incorporada no design da cadeia — ou é tratada como um plano de contingência ativado apenas após a crise se instalar?</span></div>
+        <div class="guide-q"><span class="guide-q-num">03</span><span>Nosso modelo de resiliência é Bounce-Back (retornar ao normal) ou Bounce-Forward (evoluir para um estado melhor)? Qual deveria ser, dado o nosso contexto competitivo?</span></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-case">M</div><span class="section-label-text">Caso de Mercado</span></div>
+      <div class="case-box">
+        <div class="case-company">Setor Automotivo Global — A Queda do JIT Puro</div>
+        A escassez global de semicondutores de 2021–2022 forçou montadoras como Ford, GM e Volkswagen a paralisar linhas de produção inteiras por falta de chips de baixo custo unitário, mas de criticidade sistêmica máxima. A dependência de fornecedores geograficamente concentrados na Ásia e o modelo JIT sem buffers revelaram-se perigosamente frágeis. Em resposta, o setor migrou para modelos de <strong>Hybrid Inventory</strong>: lean onde possível, estratégico onde crítico.
+        <span class="case-result">📌 Lição: A eficiência sem resiliência é uma aposta de alto risco sistêmico</span>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-dilemma">D</div><span class="section-label-text">Dilemas Executivos</span></div>
+      <div class="dilema-grid">
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 01</div>
+          <p><strong style="color:#fff">Custo de estoque vs. custo de paralisação.</strong> Como justificar financeiramente um buffer estratégico a um CFO focado em capital de giro?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">O custo de manter um buffer estratégico de componentes críticos é quase sempre inferior ao custo de uma paralisação de linha — mas raramente aparece no modelo financeiro tradicional. O argumento correto: calcule o custo esperado de paralisação (probabilidade × impacto diário × duração estimada) e compare com o custo anual de carregamento do buffer. O número geralmente surpreende o CFO.</div>
+        </div>
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 02</div>
+          <p><strong style="color:#fff">Fornecedor único vs. diversificação.</strong> O trade-off é realmente só de custo unitário?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">O trade-off não é apenas de custo — é de exposição sistêmica. Um fornecedor único pode ser mais barato por unidade e mais caro por evento de falha. O custo real deve incorporar: prêmio de risco de disrupção, custo de perda de poder de barganha ao longo do tempo e exposição geopolítica concentrada. Diversificação não é custo — é prêmio de seguro estratégico.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ MÓDULO 5 ═══ -->
+  <section class="module" id="mod-4">
+    <div class="mod-header">
+      <div class="mod-number">05</div>
+      <div>
+        <div class="mod-title">Transformação Digital e Tecnologias Inteligentes na SCM</div>
+        <div class="mod-subtitle">De reativa a preditiva — como IA, IoT e Blockchain redefinem a tomada de decisão</div>
+        <span class="mod-tag">Indústria 4.0 &amp; IA</span>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-concept">C</div><span class="section-label-text">Conceito Central</span></div>
+      <div class="concept-callout">
+        A digitalização não é uma iniciativa de TI — é uma <strong>alavanca estratégica de transformação</strong> do modelo de gestão. O objetivo central é migrar a SCM de uma postura <em>reativa</em> (resolução de problemas após a crise) para uma postura <em>preditiva e prescritiva</em> (antecipação de cenários e recomendação automática de ações). A verdadeira transformação reside não na tecnologia em si, mas no alinhamento de estratégia clara, gestão da mudança e qualidade dos dados.
+      </div>
+      <div class="framework-grid">
+        <div class="fw-card" style="border-top:3px solid var(--gold)"><div class="fw-card-num">IA</div><div class="fw-card-title">Inteligência Artificial &amp; ML</div><div class="fw-card-body">Previsão de demanda, S&OP, otimização de rotas e gestão dinâmica de estoques. Modelos de Aprendizado por Reforço tomam decisões em ambientes incertos de forma contínua.</div></div>
+        <div class="fw-card" style="border-top:3px solid var(--navy)"><div class="fw-card-num">IoT</div><div class="fw-card-title">Internet das Coisas</div><div class="fw-card-body">Sensores capturam dados em tempo real de localização, temperatura e condições de ativos ao longo de toda a cadeia — viabilizando manutenção preditiva e rastreamento end-to-end.</div></div>
+        <div class="fw-card" style="border-top:3px solid var(--rust)"><div class="fw-card-num">BC</div><div class="fw-card-title">Blockchain</div><div class="fw-card-body">Registro distribuído e imutável que elimina a falta de confiança entre parceiros. Smart contracts automatizam pagamentos e conformidades regulatórias, reduzindo burocracia e custo transacional.</div></div>
+        <div class="fw-card" style="border-top:3px solid var(--green)"><div class="fw-card-num">DT</div><div class="fw-card-title">Gêmeos Digitais</div><div class="fw-card-body">Clones virtuais da cadeia integram dados de IoT com modelos de simulação, permitindo experimentos "e se" sem risco para a operação física.</div></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-guide">G</div><span class="section-label-text">Guia de Aplicação Prática</span></div>
+      <div class="guide-questions">
+        <div class="guide-q"><span class="guide-q-num">01</span><span>Nossa organização usa dados para resolver problemas passados ou para antecipar problemas futuros? Onde estamos no espectro reativo → preditivo → prescritivo?</span></div>
+        <div class="guide-q"><span class="guide-q-num">02</span><span>A qualidade dos nossos dados de SCM é suficiente para alimentar modelos de IA com confiança — ou estamos automatizando decisões com base em dados imprecisos?</span></div>
+        <div class="guide-q"><span class="guide-q-num">03</span><span>A tecnologia que investimos está otimizando processos existentes ou habilitando um modelo de negócio novo? Qual seria o modelo que só seria possível com nossa SCM digitalizada?</span></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-case">M</div><span class="section-label-text">Caso de Mercado</span></div>
+      <div class="case-box">
+        <div class="case-company">Walmart — IA e Blockchain na Segurança Alimentar</div>
+        O Walmart implementou rastreabilidade via Blockchain para produtos alimentícios perecíveis em parceria com a IBM (plataforma Food Trust). O que antes levava até 7 dias para rastrear a origem de um produto contaminado passou a levar <strong>2,2 segundos</strong>. Além de reduzir dramaticamente o custo de recalls, o sistema criou uma vantagem de confiança com consumidores e reguladores — transformando um investimento em SCM em proposição de valor de marca. A IA complementa com previsão de demanda que reduziu desperdícios em até 30% em categorias específicas.
+        <span class="case-result">📌 Lição: Tecnologia de SCM pode virar argumento de marca e vantagem regulatória</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ MÓDULO 6 — FISHER ═══ -->
+  <section class="module" id="mod-5">
+    <div class="mod-header">
+      <div class="mod-number">06</div>
+      <div>
+        <div class="mod-title">A Cadeia Certa para o Produto Certo: O Framework Fisher (HBR, 1997)</div>
+        <div class="mod-subtitle">Produtos Funcionais vs. Inovadores — a causa raiz do desalinhamento sistêmico em SCM</div>
+        <span class="mod-tag">Fisher · HBR 1997</span>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-concept">C</div><span class="section-label-text">Conceito Central</span></div>
+      <div class="concept-callout">
+        O artigo seminal de Marshall Fisher (Wharton, 1997) oferece um diagnóstico preciso de por que tantas cadeias falham apesar do investimento em tecnologia e metodologias: <strong>o problema não é a cadeia — é o desalinhamento entre o tipo de produto e o tipo de cadeia</strong>. Fisher propõe que os produtos se dividem em dois tipos fundamentais, cada um exigindo uma filosofia operacional radicalmente diferente.
+      </div>
+      <div class="pull-quote">
+        <p>"A causa raiz dos problemas que assolam muitas cadeias de suprimentos é um desalinhamento entre o tipo de produto e o tipo de cadeia de suprimentos."</p>
+        <cite>— Marshall L. Fisher, What is the Right Supply Chain for Your Product?, HBR, 1997</cite>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-strategy">S</div><span class="section-label-text">Visão Estratégica — Produtos Funcionais vs. Inovadores</span></div>
+      <div class="product-spectrum">
+        <div class="ps-header functional">Produtos Funcionais</div>
+        <div class="ps-header innovative">Produtos Inovadores</div>
+        <div class="ps-body functional">
+          <div class="ps-item"><div class="ps-dot func"></div><span>Satisfazem necessidades básicas estáveis</span></div>
+          <div class="ps-item"><div class="ps-dot func"></div><span>Ciclo de vida longo — mais de 2 anos</span></div>
+          <div class="ps-item"><div class="ps-dot func"></div><span>Demanda previsível e estável</span></div>
+          <div class="ps-item"><div class="ps-dot func"></div><span>Margens de contribuição baixas: 5%–20%</span></div>
+          <div class="ps-item"><div class="ps-dot func"></div><span>Baixa variedade: 10–20 variantes por categoria</span></div>
+          <div class="ps-item"><div class="ps-dot func"></div><span>Erro de previsão médio: ~10%</span></div>
+          <div class="ps-item"><div class="ps-dot func"></div><span>Taxa de ruptura de estoque: 1%–2%</span></div>
+          <div class="ps-item"><div class="ps-dot func"></div><span><strong>Exemplos:</strong> Sopas Campbell, pasta de dente básica, itens de mercearia</span></div>
+        </div>
+        <div class="ps-body innovative">
+          <div class="ps-item"><div class="ps-dot innov"></div><span>Criam razões novas de compra via tecnologia ou moda</span></div>
+          <div class="ps-item"><div class="ps-dot innov"></div><span>Ciclo de vida curto: 3 meses a 1 ano</span></div>
+          <div class="ps-item"><div class="ps-dot innov"></div><span>Demanda imprevisível e volátil</span></div>
+          <div class="ps-item"><div class="ps-dot innov"></div><span>Margens de contribuição altas: 20%–60%</span></div>
+          <div class="ps-item"><div class="ps-dot innov"></div><span>Alta variedade: frequentemente milhões de variantes</span></div>
+          <div class="ps-item"><div class="ps-dot innov"></div><span>Erro de previsão médio: 40%–100%</span></div>
+          <div class="ps-item"><div class="ps-dot innov"></div><span>Taxa de ruptura de estoque: 10%–40%</span></div>
+          <div class="ps-item"><div class="ps-dot innov"></div><span><strong>Exemplos:</strong> Moda esportiva, PCs, smartphones, bicicletas custom</span></div>
+        </div>
+      </div>
+      <div class="section-body" style="margin-top:12px; font-size:12.5px; color:var(--muted)">
+        ⚠ Fisher alerta para uma armadilha frequente: empresas que, por pressão competitiva, <em>transformam produtos funcionais em inovadores</em> (acrescentando variedade e lançamentos constantes) sem perceber que sua cadeia continua calibrada para eficiência física — gerando custos de mediação de mercado crescentes e invisíveis.
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-concept">C</div><span class="section-label-text">As Duas Funções da Cadeia de Suprimentos</span></div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Função</th><th>Descrição</th><th>Custos Associados</th><th>Foco por Tipo de Produto</th></tr></thead>
+          <tbody>
+            <tr><td>Função Física</td><td>Conversão de matérias-primas em produtos acabados e transporte entre pontos da cadeia</td><td>Produção, transporte, armazenagem</td><td>Funcional — previsível, otimizável, deve ser minimizado</td></tr>
+            <tr><td>Mediação de Mercado</td><td>Garantir que a variedade de produtos que chega ao mercado coincida com o que os consumidores desejam</td><td>Markdowns por excesso de estoque; vendas perdidas por ruptura</td><td>Inovador — imprevisível, crítico, deve ser o foco principal</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="strategy-callout section-body" style="margin-top:12px">
+        Para <strong>produtos inovadores</strong> com margem de contribuição de 40% e taxa de ruptura de 25%, a perda de margem é: 40% × 25% = <em>10% da receita</em> — valor que geralmente supera o lucro antes de impostos. Cada real investido em responsividade retorna mais de um real em redução de rupturas e markdowns. O cálculo econômico é claro — mas raramente aparece no modelo financeiro tradicional.
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-strategy">S</div><span class="section-label-text">Visão Estratégica — A Matriz de Alinhamento Fisher</span></div>
+      <div class="fisher-matrix">
+        <div class="fm-corner"></div>
+        <div class="fm-col-label">Produtos Funcionais</div>
+        <div class="fm-col-label">Produtos Inovadores</div>
+        <div class="fm-row-label">Cadeia Responsiva</div>
+        <div class="fm-cell mismatch">
+          <span class="fm-badge">Desalinhamento ✗</span>
+          <strong>Custo desnecessário</strong>
+          Cadeia responsiva para produto de demanda previsível gera investimento em velocidade e flexibilidade sem retorno correspondente. O custo de mediação de mercado é baixo — não justifica o prêmio da responsividade.
+        </div>
+        <div class="fm-cell match">
+          <span class="fm-badge">Alinhamento ✓</span>
+          <strong>Alta responsividade para demanda incerta</strong>
+          Buffers de capacidade, lead times curtos, flexibilidade de mix. Fornecedores selecionados por velocidade e flexibilidade. Design modular para Postponement. Posição ideal para produtos inovadores.
+        </div>
+        <div class="fm-row-label">Cadeia Eficiente</div>
+        <div class="fm-cell match">
+          <span class="fm-badge">Alinhamento ✓</span>
+          <strong>Eficiência para demanda estável</strong>
+          MRP, JIT, alta utilização de capacidade, congelamento de schedule. Minimização de custos físicos com nível de serviço de 98%+. Posição ideal para produtos funcionais — Campbell Soup como modelo.
+        </div>
+        <div class="fm-cell mismatch">
+          <span class="fm-badge">A posição mais perigosa ✗</span>
+          <strong>Produto inovador em cadeia eficiente</strong>
+          Alta variedade + demanda imprevisível + foco em eficiência = rupturas crônicas, markdowns excessivos e frustração sistêmica. A maior parte da indústria automobilística e de computadores caiu aqui.
+        </div>
+      </div>
+      <div class="section-body" style="margin-top:12px; font-size:12.5px; color:var(--muted)">
+        Fisher identifica a <strong>célula superior direita</strong> como a mais comum e perigosa. O sinal de alerta: gestores reclamam simultaneamente de "estoque excessivo de produtos indesejados" e "falta dos produtos certos".
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-concept">C</div><span class="section-label-text">Cadeias Eficientes vs. Responsivas — Características Operacionais</span></div>
+      <div class="demand-compare">
+        <div class="dc-header">
+          <div class="dc-col">Dimensão Operacional</div>
+          <div class="dc-col func">Cadeia Eficiente</div>
+          <div class="dc-col innov">Cadeia Responsiva</div>
+        </div>
+        <div class="dc-row"><div class="dc-cell">Objetivo Primário</div><div class="dc-cell func">Suprir demanda previsível ao menor custo possível</div><div class="dc-cell innov">Responder rapidamente à demanda incerta, minimizando rupturas e markdowns</div></div>
+        <div class="dc-row"><div class="dc-cell">Foco de Manufatura</div><div class="dc-cell func">Alta utilização média de capacidade</div><div class="dc-cell innov">Capacidade excedente disponível (buffer)</div></div>
+        <div class="dc-row"><div class="dc-cell">Gestão de Estoque</div><div class="dc-cell func">Alta rotatividade, mínimo de inventário em toda a cadeia</div><div class="dc-cell innov">Estoques estratégicos de componentes ou produtos acabados</div></div>
+        <div class="dc-row"><div class="dc-cell">Foco em Lead Time</div><div class="dc-cell func">Redução enquanto não aumentar custo</div><div class="dc-cell innov">Redução agressiva independentemente do custo</div></div>
+        <div class="dc-row"><div class="dc-cell">Seleção de Fornecedores</div><div class="dc-cell func">Prioritariamente por custo e qualidade</div><div class="dc-cell innov">Prioritariamente por velocidade, flexibilidade e qualidade</div></div>
+        <div class="dc-row"><div class="dc-cell">Design de Produto</div><div class="dc-cell func">Maximizar performance, minimizar custo de fabricação</div><div class="dc-cell innov">Design modular para postergar diferenciação (Postponement)</div></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-strategy">S</div><span class="section-label-text">As 3 Estratégias para Gerenciar Incerteza em Produtos Inovadores</span></div>
+      <div class="framework-grid">
+        <div class="fw-card" style="border-top:3px solid var(--navy)">
+          <div class="fw-card-num" style="color:var(--navy)">01</div>
+          <div class="fw-card-title">Reduzir a Incerteza</div>
+          <div class="fw-card-body">Buscar fontes de dados que sirvam como indicadores antecedentes. Compartilhar componentes entre produtos. Solicitar pedidos antecipados dos maiores clientes. <em>Sport Obermeyer reduziu erro de 200% para 10% com pedidos antecipados de 25 varejistas.</em></div>
+        </div>
+        <div class="fw-card" style="border-top:3px solid var(--gold)">
+          <div class="fw-card-num" style="color:var(--gold)">02</div>
+          <div class="fw-card-title">Evitar a Incerteza</div>
+          <div class="fw-card-body">Cortar lead times e aumentar flexibilidade para produzir próximo ao momento em que a demanda se materializa. Design modular com Postponement. <em>National Bicycle — 2 milhões de variantes, produção sob pedido em 2 semanas, market share de 5% a 29%.</em></div>
+        </div>
+        <div class="fw-card" style="border-top:3px solid var(--rust)">
+          <div class="fw-card-num" style="color:var(--rust)">03</div>
+          <div class="fw-card-title">Proteger da Incerteza Residual</div>
+          <div class="fw-card-body">Após reduzir e evitar ao máximo, proteger com buffers de estoque ou excesso de capacidade posicionados estrategicamente. Usar "accurate response" para determinar quanto produzir de cada item e quando. <em>Sport Obermeyer aumentou lucros em 60%.</em></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-guide">G</div><span class="section-label-text">Guia de Aplicação Prática</span></div>
+      <div class="guide-questions">
+        <div class="guide-q"><span class="guide-q-num">01</span><span>Classifique os produtos ou linhas da sua empresa: quais são funcionais (demanda previsível, baixa margem, ciclo longo) e quais são inovadores (demanda incerta, alta margem, ciclo curto)? A mesma cadeia serve a ambos adequadamente?</span></div>
+        <div class="guide-q"><span class="guide-q-num">02</span><span>Sua empresa expandiu a variedade de produtos sem revisar a estratégia de cadeia? Se sim, é provável que esteja com desalinhamento — cadeia eficiente para produtos que se tornaram inovadores.</span></div>
+        <div class="guide-q"><span class="guide-q-num">03</span><span>Qual é o custo real das rupturas de estoque nos seus produtos inovadores? Calcule: margem de contribuição × taxa de ruptura × volume. Esse número geralmente supera amplamente o custo de investir em responsividade.</span></div>
+        <div class="guide-q"><span class="guide-q-num">04</span><span>Existe algum produto que poderia ser simplificado — retornando de inovador a funcional — sem perda significativa de margem? A proliferação de variedades sem correspondente aumento de WTP é pura destruição de valor operacional.</span></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-case">M</div><span class="section-label-text">Casos de Mercado</span></div>
+      <div class="case-box">
+        <div class="case-company">Campbell Soup — Modelo de Cadeia Eficiente</div>
+        Em 1991, a Campbell lançou programa de reposição contínua via EDI com seus maiores varejistas. A cada manhã, varejistas informavam eletronicamente demanda e estoques; caminhões saíam no mesmo dia. Resultado: inventário dos varejistas caiu de 4 para 2 semanas — redução equivalente a 1% das vendas em custo, suficiente para aumentar o lucro do varejista em 50%. A Campbell também identificou que promoções de preço criavam picos artificiais de demanda que destruíam eficiência operacional sem criar valor real.
+        <span class="case-result">📌 Cadeia eficiente para produto funcional: o modelo de referência</span>
+      </div>
+      <div class="case-box" style="background: var(--navy); margin-top:12px">
+        <div class="case-company">Sport Obermeyer — Modelo de Cadeia Responsiva</div>
+        Fabricante de moda esportiva de esqui com 95% dos produtos novos a cada ano e erro de previsão de até 200%. A empresa desenvolveu a estratégia de "accurate response": identificar quais produtos tinham previsões consensuais entre os compradores (produzidos primeiro); aguardar pedidos antecipados dos 25 maiores varejistas para calibrar produção tardia; modelar quanto produzir minimizando perdas por excesso e ruptura. Resultado: custo de desequilíbrio cortado pela metade, lucros aumentados em 60%, nota máxima de serviço pelos varejistas.
+        <span class="case-result">📌 Cadeia responsiva para produto inovador: o alinhamento que gera vantagem</span>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-dilemma">D</div><span class="section-label-text">Dilemas Executivos — Framework Fisher</span></div>
+      <div class="dilema-grid">
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 01</div>
+          <p><strong style="color:#fff">A armadilha da variedade sem revisão de cadeia.</strong> Por que o novo VP contratado do concorrente pode piorar tudo?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">Empresas que aumentam variedade para defender margens frequentemente se encontram na célula mais perigosa — produto inovador em cadeia eficiente. O novo VP de logística vindo de empresa de produto funcional irá instintivamente cortar estoques, congelar previsões e estabelecer JIT rígido — exatamente o oposto do que o ambiente de alta incerteza exige. O problema não é a pessoa; é o mismatch entre o modelo mental e o contexto operacional.</div>
+        </div>
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 02</div>
+          <p><strong style="color:#fff">O paradoxo do JIT em produtos inovadores.</strong> Quando a melhor prática de manufatura se torna a pior decisão de cadeia?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">O JIT foi desenvolvido para produtos funcionais. Aplicá-lo a produtos inovadores inverte a lógica: estoque mínimo no ponto mais barato (fábricas) e estoque máximo no mais caro (varejistas com 90 dias de carro parado). A solução não é eliminar estoque — é posicioná-lo estrategicamente onde absorve incerteza ao menor custo total, tipicamente em componentes antes da diferenciação final (Postponement).</div>
+        </div>
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">DILEMA 03</div>
+          <p><strong style="color:#fff">A decisão de simplificar o portfólio.</strong> Quando "menos" gera mais valor do que mais inovação?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">Quando uma linha tem frequentes lançamentos, alta variedade e margens em queda — sinal de que a inovação não gera WTP suficiente para cobrir o custo de complexidade — a decisão estratégica correta pode ser reverter para produto funcional. A P&G identificou isso em pasta de dente: 28 variantes geravam custo de cadeia sem WTP adicional. O teste: cada variante adicional eleva a disposição a pagar do cliente — ou apenas aumenta o custo da cadeia?</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ MÓDULO 7 ═══ -->
+  <section class="module" id="mod-6">
+    <div class="mod-header">
+      <div class="mod-number">07</div>
+      <div>
+        <div class="mod-title">Liderança em SCM: Arquitetando Ecossistemas em Ambientes de Disrupção Contínua</div>
+        <div class="mod-subtitle">Do gerente de logística ao estrategista de rede — o perfil do líder SCM do século XXI</div>
+        <span class="mod-tag">Liderança Executiva</span>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-concept">C</div><span class="section-label-text">Conceito Central</span></div>
+      <div class="concept-callout">
+        O líder de SCM do século XXI não é um gerente de logística — é um <strong>estrategista e arquiteto de rede</strong>. Seu papel é gerenciar parcerias, alinhar stakeholders e inovar o modelo de negócios para criar e capturar valor. A liderança eficaz combina pensamento sistêmico com a capacidade de fazer trade-offs em tempo real, construir equipes adaptáveis e liderar através da próxima disrupção — que, cada vez mais, não é exceção, mas norma.
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Característica</th><th>Abordagem Tradicional</th><th>Nova Abordagem Sistêmica</th></tr></thead>
+          <tbody>
+            <tr><td>Objetivo Primário</td><td>Otimização de processos e redução de custos</td><td>Criação e captura de valor sustentável</td></tr>
+            <tr><td>Visão da Cadeia</td><td>Processo linear: Aquisição → Produção → Distribuição</td><td>Plataforma dinâmica e interconectada — uma "rede viva"</td></tr>
+            <tr><td>Papel da Liderança</td><td>Gerente de operações</td><td>Estrategista e arquiteto de ecossistema</td></tr>
+            <tr><td>Foco da Análise</td><td>Otimização de silos funcionais</td><td>Alinhamento e coordenação entre parceiros interdependentes</td></tr>
+            <tr><td>Papel da Tecnologia</td><td>Ferramenta para automação e eficiência</td><td>Habilitadora de novos modelos de negócios e decisão preditiva</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-guide">G</div><span class="section-label-text">Guia de Aplicação Prática</span></div>
+      <div class="guide-questions">
+        <div class="guide-q"><span class="guide-q-num">01</span><span>Meu time de SCM é reconhecido internamente como parceiro estratégico da alta liderança — ou como uma área de suporte operacional? Essa percepção está alinhada com o papel que a SCM deveria ter?</span></div>
+        <div class="guide-q"><span class="guide-q-num">02</span><span>Tenho clareza sobre o trade-off entre eficiência e resiliência que minha organização escolheu conscientemente fazer — ou ele foi determinado por inércia histórica?</span></div>
+        <div class="guide-q"><span class="guide-q-num">03</span><span>Como líderes de outras áreas (Marketing, Finanças, RH, TI) enxergam a cadeia de suprimentos? Estão cientes de como decisões deles impactam — e são impactadas pela — cadeia?</span></div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-case">M</div><span class="section-label-text">Caso de Mercado</span></div>
+      <div class="case-box">
+        <div class="case-company">Apple — SCM como Vantagem Competitiva Estrutural</div>
+        A Apple construiu uma das cadeias de suprimentos mais sofisticadas do mundo como <strong>diferenciação central de negócio</strong>. Tim Cook, antes de se tornar CEO, foi o arquiteto desta cadeia. A estratégia combina contratos exclusivos de longo prazo com fornecedores críticos, design de componentes proprietários que criam dependência, JIT em produtos maduros e buffers estratégicos em lançamentos — tudo integrado por um sistema de dados em tempo real que conecta 200+ fornecedores. O resultado: margens operacionais entre 25–30%, impossíveis de replicar por competidores sem o mesmo ecossistema.
+        <span class="case-result">📌 Lição: O CEO que entende SCM constrói vantagens que os competidores levam décadas para imitar</span>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label"><div class="section-label-icon icon-dilemma">D</div><span class="section-label-text">Síntese do Programa — Key Takeaways Finais</span></div>
+      <div class="dilema-grid">
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">PRINCÍPIO 01</div>
+          <p><strong style="color:#fff">Da eficiência à viabilidade.</strong> Por que eficiência sem resiliência é uma aposta, não uma estratégia?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">O objetivo da SCM contemporânea não é apenas ser eficiente — é ser viável. Sistemas eficientes que não sobrevivem a choques sistêmicos não geram valor no longo prazo. A pandemia demonstrou que cadeias ultra-enxutas podem destruir em semanas o que construíram em décadas. Viabilidade sistêmica é o novo critério de design.</div>
+        </div>
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">PRINCÍPIO 02</div>
+          <p><strong style="color:#fff">Produto determina cadeia (Fisher).</strong> Antes de otimizar, a pergunta certa é: que tipo de produto estou suprindo?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">Produto funcional exige cadeia eficiente; produto inovador exige cadeia responsiva. Confundir os dois é a fonte mais comum de desperdício sistêmico em SCM. A mesma ferramenta — JIT, MRP, estoque zero — pode ser a solução certa ou o erro fatal dependendo do tipo de produto. O diagnóstico precede a solução.</div>
+        </div>
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">PRINCÍPIO 03</div>
+          <p><strong style="color:#fff">Da tecnologia à estratégia.</strong> IA, IoT e Blockchain são respostas. Mas qual é a pergunta?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">IA, IoT e Blockchain são ferramentas — não estratégias. O diferencial está em como a tecnologia é usada para criar e capturar valor que os competidores não conseguem replicar. A pergunta estratégica não é "qual tecnologia adotar?" mas "qual modelo de negócio a tecnologia viabiliza que não existia antes?" Tecnologia que todos adotam cria paridade, não vantagem.</div>
+        </div>
+        <div class="dilema-card" onclick="toggleDilema(this)">
+          <div class="dilema-num">PRINCÍPIO 04</div>
+          <p><strong style="color:#fff">Da automação à liderança humana.</strong> O que as máquinas não conseguem fazer em ambientes de alta incerteza?</p>
+          <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+          <div class="dilema-reveal">Em ambientes de alta incerteza, a combinação de análise avançada com julgamento humano especializado é a única arquitetura de decisão capaz de navegar o desconhecido. Algoritmos otimizam dentro dos parâmetros conhecidos; líderes navegam fora deles. A Indústria 5.0 reconhece isso: o humano não é substituído pela máquina — é potencializado por ela para decisões de maior complexidade e impacto.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ─── FOOTER ─── -->
+<footer class="site-footer">
+  <div class="footer-text">
+    <strong>MBA Executive — Gestão de Operações & Supply Chain</strong>
+  </div>
+</footer>
+
+<script>
+function showModule(idx) {
+  document.querySelectorAll('.module').forEach((m, i) => m.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  const nav = document.querySelector('.nav-tabs');
+  window.scrollTo({ top: nav.offsetTop - 58, behavior: 'smooth' });
+}
+
+function toggleExpand(btn) {
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('show');
+}
+
+function toggleDilema(el) {
+  el.classList.toggle('open');
+  const toggle = el.querySelector('.dilema-toggle');
+  if (toggle) {
+    toggle.textContent = el.classList.contains('open')
+      ? '▾ Fechar perspectiva'
+      : '▸ Ver perspectiva analítica';
+  }
+}
+</script>
+</body>
+</html>

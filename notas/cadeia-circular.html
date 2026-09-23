@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadeia Circular · Mapa Conceitual Interativo</title>
+<style>
+  :root{
+    --bg:#0b1418; --bg2:#0f1d23; --panel:#10222a; --panel2:#16303a;
+    --ink:#eaf4f2; --muted:#8fb0ad; --line:#23454f;
+    --core:#2dd4bf; --teoria:#a78bfa; --autor:#fbbf24; --pratica:#4ade80;
+    --tec:#60a5fa; --barreira:#fb923c; --lacuna:#f472b6;
+    --accent:#2dd4bf;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(1200px 800px at 70% -10%,#13323b 0%,var(--bg) 55%);
+    color:var(--ink);overflow:hidden;
+  }
+  /* ---------- Top bar ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;height:62px;z-index:30;
+    display:flex;align-items:center;gap:18px;padding:0 22px;
+    background:linear-gradient(180deg,rgba(11,20,24,.95),rgba(11,20,24,.78));
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.3px;flex:none}
+  .brand>div{white-space:nowrap;line-height:1.18}
+  .brand .dot{width:13px;height:13px;border-radius:50%;background:var(--core);flex:none;
+    box-shadow:0 0 0 4px rgba(45,212,191,.18),0 0 18px rgba(45,212,191,.6)}
+  .brand small{display:block;font-weight:500;font-size:11px;color:var(--muted);letter-spacing:1.4px;text-transform:uppercase}
+  nav{display:flex;gap:6px;margin-left:6px;overflow-x:auto;min-width:0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  nav::-webkit-scrollbar{display:none}
+  nav button{
+    background:transparent;border:1px solid transparent;color:var(--muted);flex:none;white-space:nowrap;
+    padding:8px 15px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;
+    transition:.15s;font-family:inherit;letter-spacing:.2px;
+  }
+  nav button:hover{color:var(--ink);background:rgba(255,255,255,.04)}
+  nav button.active{color:#04231f;background:var(--core);border-color:var(--core)}
+  .vbadge{background:var(--core);color:#04231f;font-weight:700;font-size:11px;letter-spacing:.4px;
+    padding:4px 9px;border-radius:20px;white-space:nowrap}
+  .spacer{flex:1}
+  .searchbox{position:relative}
+  .searchbox input{
+    background:var(--panel);border:1px solid var(--line);color:var(--ink);
+    padding:8px 12px 8px 32px;border-radius:9px;font-size:13px;width:200px;font-family:inherit;outline:none;
+  }
+  .searchbox input:focus{border-color:var(--core)}
+  .searchbox svg{position:absolute;left:10px;top:9px;opacity:.5}
+  /* ---------- Views ---------- */
+  .view{position:fixed;inset:62px 0 0 0;display:none}
+  .view.active{display:block}
+  /* ---------- Map ---------- */
+  #stage{width:100%;height:100%;cursor:grab;display:block;touch-action:none}
+  #stage.grabbing{cursor:grabbing}
+  .legend{
+    position:absolute;left:18px;top:16px;z-index:10;background:rgba(16,34,42,.82);
+    border:1px solid var(--line);border-radius:13px;padding:13px 15px;backdrop-filter:blur(6px);max-width:230px;
+  }
+  .legend h4{margin:0 0 9px;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .legend .item{display:flex;align-items:center;gap:9px;font-size:13px;padding:4px 6px;border-radius:7px;cursor:pointer;transition:.12s;user-select:none}
+  .legend .item:hover{background:rgba(255,255,255,.05)}
+  .legend .item.off{opacity:.32}
+  .legend .swatch{width:12px;height:12px;border-radius:50%;flex:none}
+  .hint{position:absolute;left:18px;bottom:16px;z-index:10;font-size:12px;color:var(--muted);
+    background:rgba(16,34,42,.7);border:1px solid var(--line);border-radius:9px;padding:8px 12px;max-width:260px;line-height:1.5}
+  .ctrls{position:absolute;right:calc(18px + var(--panelw,0px));bottom:16px;z-index:10;display:flex;gap:8px;transition:right .25s}
+  .ctrls button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgba(16,34,42,.85);
+    color:var(--ink);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
+  .ctrls button:hover{border-color:var(--core);color:var(--core)}
+  /* nodes */
+  .link{stroke:var(--line);stroke-width:1.4;transition:stroke .2s,stroke-width .2s,opacity .2s}
+  .link.hot{stroke:var(--core);stroke-width:2.4;opacity:1}
+  .node{cursor:pointer}
+  .node circle{stroke:var(--bg);stroke-width:2.5;transition:r .15s}
+  .node text{fill:var(--ink);font-size:11.5px;font-weight:600;pointer-events:none;paint-order:stroke;
+    stroke:var(--bg);stroke-width:3px;stroke-linejoin:round}
+  .node.dim{opacity:.16}
+  .link.dim{opacity:.06}
+  .node.sel circle{stroke:#fff;stroke-width:3.5}
+  /* ---------- Detail panel ---------- */
+  #panel{
+    position:fixed;top:62px;right:0;bottom:0;width:380px;z-index:25;
+    background:linear-gradient(180deg,var(--panel),var(--bg2));border-left:1px solid var(--line);
+    transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+    display:flex;flex-direction:column;
+  }
+  #panel.open{transform:translateX(0)}
+  .pclose{position:absolute;top:13px;right:14px;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
+    background:transparent;color:var(--muted);cursor:pointer;font-size:17px}
+  .pclose:hover{color:var(--ink);border-color:var(--core)}
+  .pbody{padding:26px 26px 30px;overflow-y:auto}
+  .ptag{display:inline-block;font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
+    padding:5px 11px;border-radius:30px;margin-bottom:14px}
+  #panel h2{margin:0 0 4px;font-size:23px;line-height:1.2}
+  .pauthor{color:var(--core);font-size:13.5px;font-weight:600;margin-bottom:18px}
+  .pdesc{font-size:14.5px;line-height:1.62;color:#d6e7e4;margin-bottom:20px}
+  .pblock{margin-bottom:18px}
+  .pblock h5{margin:0 0 8px;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .pblock ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.6;color:#cfe4e1}
+  .pblock li{margin-bottom:5px}
+  .chip{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:20px;
+    padding:5px 12px;font-size:12px;margin:0 6px 7px 0;color:#cfe4e1}
+  .relnode{display:inline-flex;align-items:center;gap:7px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:9px;padding:7px 11px;font-size:12.5px;margin:0 7px 7px 0;cursor:pointer;transition:.12s}
+  .relnode:hover{border-color:var(--core);transform:translateY(-1px)}
+  .relnode .sw{width:9px;height:9px;border-radius:50%;flex:none}
+  /* ---------- Content views (timeline/table/synth) ---------- */
+  .scroller{height:100%;overflow-y:auto;padding:46px 8vw 80px}
+  .scroller h1{font-size:30px;margin:0 0 6px;font-weight:800;letter-spacing:-.5px}
+  .scroller .sub{color:var(--muted);font-size:15px;margin-bottom:40px;max-width:680px;line-height:1.6}
+  /* timeline */
+  .tl{position:relative;max-width:880px}
+  .tl::before{content:"";position:absolute;left:88px;top:8px;bottom:8px;width:2px;background:var(--line)}
+  .tlitem{position:relative;padding:0 0 30px 130px;cursor:pointer}
+  .tlitem .yr{position:absolute;left:0;top:-2px;width:72px;text-align:right;font-weight:800;font-size:19px;color:var(--autor)}
+  .tlitem .nub{position:absolute;left:81px;top:4px;width:16px;height:16px;border-radius:50%;background:var(--autor);
+    border:3px solid var(--bg);box-shadow:0 0 0 3px rgba(251,191,36,.18)}
+  .tlcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 19px;transition:.15s}
+  .tlitem:hover .tlcard{border-color:var(--autor);transform:translateX(3px)}
+  .tlcard h3{margin:0 0 3px;font-size:17px}
+  .tlcard .who{color:var(--core);font-size:13px;font-weight:600;margin-bottom:8px}
+  .tlcard p{margin:0;font-size:13.5px;line-height:1.55;color:#cfe4e1}
+  /* table */
+  .ctable{width:100%;max-width:980px;border-collapse:separate;border-spacing:0;font-size:14px}
+  .ctable th,.ctable td{text-align:left;padding:15px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+  .ctable thead th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .ctable tbody tr{transition:.12s}
+  .ctable tbody tr:hover{background:rgba(45,212,191,.05)}
+  .ctable .nm{font-weight:700;font-size:15px}
+  .ctable .nm small{display:block;font-weight:500;color:var(--muted);font-size:11.5px;margin-top:3px;letter-spacing:.3px}
+  .scopebar{height:7px;border-radius:5px;background:linear-gradient(90deg,var(--core),var(--pratica));margin-top:9px}
+  /* synth */
+  .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;max-width:920px;margin-bottom:46px}
+  .scard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;position:relative;overflow:hidden}
+  .scard .n{font-size:34px;font-weight:800;color:var(--core);opacity:.32;position:absolute;top:12px;right:18px}
+  .scard h3{margin:0 0 9px;font-size:16px;color:var(--core)}
+  .scard p{margin:0;font-size:14px;line-height:1.6;color:#d6e7e4}
+  .qbox{max-width:920px}
+  .qbox h2{font-size:21px;margin:0 0 18px}
+  .q{display:flex;gap:16px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:18px 20px;margin-bottom:13px}
+  .q .qn{font-size:24px;font-weight:800;color:var(--lacuna);line-height:1;flex:none}
+  .q p{margin:0;font-size:15px;line-height:1.55}
+  .pullquote{max-width:820px;margin:8px 0 40px;font-size:21px;line-height:1.5;font-weight:600;
+    color:#eaf4f2;border-left:3px solid var(--lacuna);padding-left:22px;font-style:italic}
+  .pullquote cite{display:block;font-style:normal;font-size:13px;color:var(--muted);margin-top:12px;font-weight:500}
+  /* cases */
+  .cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(390px,1fr));gap:20px;max-width:1120px}
+  .case{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;display:flex;flex-direction:column}
+  .case .ch{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:3px}
+  .case h3{margin:0;font-size:18px}
+  .case .loc{font-size:11px;color:var(--muted);letter-spacing:.5px;white-space:nowrap;text-transform:uppercase;flex:none}
+  .case .tag{font-size:14.5px;font-style:italic;color:var(--pratica);font-weight:600;margin:7px 0 13px}
+  .case p.cd{margin:0 0 16px;font-size:13.5px;line-height:1.58;color:#cfe4e1}
+  .case .row{display:flex;gap:12px;font-size:12.5px;padding:9px 0;border-top:1px solid var(--line)}
+  .case .row .k{flex:none;width:62px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:10px;padding-top:2px}
+  .case .row .v{color:#d9eae7;line-height:1.5}
+  .case .row .v b{color:var(--autor);font-weight:700}
+  .loop-chip{display:inline-block;font:700 11px/1 ui-monospace,monospace;color:#7FD3A6;background:rgba(127,211,166,.12);border:1px solid rgba(127,211,166,.34);border-radius:20px;padding:5px 11px;letter-spacing:.04em;text-transform:uppercase;margin:2px 0 4px}
+  .case .gomap{margin-top:16px;align-self:flex-start;background:transparent;border:1px solid var(--line);color:var(--core);
+    border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.13s}
+  .case .gomap:hover{border-color:var(--core);background:rgba(45,212,191,.08);transform:translateY(-1px)}
+  /* refs */
+  .refgroup{font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--core);font-weight:700;margin:36px 0 6px;max-width:1000px}
+  .refrow{max-width:1000px;padding:13px 0 13px 30px;text-indent:-30px;border-bottom:1px solid var(--line);
+    font-size:14px;line-height:1.6;color:#d6e7e4}
+  .refrow i{color:#eaf4f2}
+  .refrow a{color:var(--core);text-decoration:none;font-size:13px;word-break:break-all}
+  .refrow a:hover{text-decoration:underline}
+  .refrow.hide{display:none}
+  .reffilter{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:7px 12px;border-radius:9px;
+    font-size:13px;font-family:inherit;outline:none;margin-left:10px;width:240px}
+  .reffilter:focus{border-color:var(--core)}
+  /* shared "ver no mapa" button */
+  .gomap{margin-top:16px;align-self:flex-start;background:transparent;border:1px solid var(--line);color:var(--core);
+    border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.13s}
+  .gomap:hover{border-color:var(--core);background:rgba(45,212,191,.08);transform:translateY(-1px)}
+  /* quadro teórico */
+  .qtable{display:flex;flex-direction:column;gap:16px;max-width:1080px}
+  .qrow{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 24px;transition:.13s}
+  .qrow:hover{border-color:var(--line)}
+  .qhead{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:6px}
+  .qdotwrap{position:relative;display:inline-flex;flex:none}
+  .qdot{width:15px;height:15px;border-radius:50%;cursor:help;flex:none;box-shadow:0 0 0 3px rgba(255,255,255,.05)}
+  .qtip{position:absolute;left:24px;top:50%;transform:translateY(-50%);z-index:25;width:330px;max-width:72vw;
+    background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:13px 15px;
+    box-shadow:0 14px 34px rgba(0,0,0,.55);display:none;font-size:12.5px;line-height:1.5;color:#d6e7e4}
+  .qdotwrap:hover .qtip{display:block}
+  .qtip .c{display:block;font-weight:700;margin-bottom:7px;font-size:13.5px}
+  .qtip h6{margin:0 0 5px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .qconcept{font-weight:700;font-size:14.5px;padding:5px 13px;border-radius:30px;flex:none}
+  .qauthor{font-weight:700;font-size:15.5px}
+  .qpaper{font-style:italic;color:var(--muted);font-size:12.5px;margin-bottom:4px}
+  .qbody{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:14px}
+  .qcol h6{margin:0 0 6px;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .qcol p{margin:0;font-size:13.5px;line-height:1.56;color:#d6e7e4}
+  /* intro / how-to-use modal */
+  .helpbtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--core);
+    font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;flex:none}
+  .helpbtn:hover{border-color:var(--core)}
+  .introwrap{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:20px;
+    background:rgba(5,12,15,.74);backdrop-filter:blur(7px)}
+  .introwrap.show{display:flex}
+  .introcard{position:relative;background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);
+    border-radius:20px;max-width:580px;width:100%;padding:34px 36px;box-shadow:0 30px 80px rgba(0,0,0,.55);
+    max-height:88vh;overflow-y:auto}
+  .introcard .ptag{display:inline-block;font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
+    padding:5px 11px;border-radius:30px;margin-bottom:14px;background:rgba(45,212,191,.16);color:var(--core)}
+  .introcredit{font-size:12.5px;color:var(--core);font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:12px}
+  .introcard h2{margin:0 0 12px;font-size:25px;line-height:1.2}
+  .introcard .lead{font-size:15px;line-height:1.62;color:#d6e7e4;margin:0 0 22px}
+  .introsteps{display:flex;flex-direction:column;gap:12px;margin-bottom:26px}
+  .introsteps .s{display:flex;gap:12px;font-size:13.5px;line-height:1.5;color:#cfe4e1}
+  .introsteps .s .sw{width:10px;height:10px;border-radius:50%;flex:none;margin-top:5px}
+  .introsteps .s b{color:var(--ink)}
+  .introgo{background:var(--core);color:#04231f;border:none;border-radius:11px;padding:12px 24px;font-size:14.5px;
+    font-weight:700;cursor:pointer;font-family:inherit}
+  .introgo:hover{filter:brightness(1.08)}
+  .introx{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
+    background:transparent;color:var(--muted);cursor:pointer;font-size:16px}
+  .introx:hover{color:var(--ink);border-color:var(--core)}
+  /* apresentação / viewer */
+  .apswrap{height:100%;display:flex;flex-direction:column;padding:22px 4vw 16px}
+  .apstop{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:13px;gap:14px;flex-wrap:wrap}
+  .apstop h1{font-size:22px;margin:0}
+  .apssub{color:var(--muted);font-size:12.5px;margin-top:3px}
+  .apsactions{display:flex;gap:8px}
+  .apsbtn{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:8px 14px;
+    font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .apsbtn:hover{border-color:var(--core);color:var(--core)}
+  .apsstage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
+    background:#0a0f12;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .apsstage img{max-width:100%;max-height:100%;object-fit:contain;display:block;cursor:pointer}
+  .apsmaplink{position:absolute;top:12px;right:12px;background:var(--core);color:#04231f;border:none;
+    border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;
+    box-shadow:0 4px 14px rgba(0,0,0,.35)}
+  .apsmaplink:hover{filter:brightness(1.08)}
+  .apsnav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(16,34,42,.82);color:#fff;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .apsnav:hover{border-color:var(--core);color:var(--core)}
+  .apsprev{left:14px}.apsnext{right:14px}
+  .apscounter{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(11,20,24,.82);
+    border:1px solid var(--line);border-radius:20px;padding:5px 14px;font-size:12.5px;color:var(--muted)}
+  .apsmeta{margin:13px 0 9px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+  .apsmeta .t{font-weight:700;font-size:15px}
+  .apschips{display:flex;flex-wrap:wrap;gap:7px}
+  .apschip{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;transition:.12s}
+  .apschip:hover{border-color:var(--core);transform:translateY(-1px)}
+  .apschip .sw{width:8px;height:8px;border-radius:50%;flex:none}
+  .apsthumbs{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 2px}
+  .apsthumb{flex:none;width:104px;height:58px;border-radius:7px;border:2px solid transparent;overflow:hidden;cursor:pointer;opacity:.5;background:#000;transition:.12s}
+  .apsthumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .apsthumb.active{opacity:1;border-color:var(--core)}
+  .apsthumb:hover{opacity:1}
+  /* tela cheia */
+  .fswrap{position:fixed;inset:0;z-index:80;display:none;background:#000;align-items:center;justify-content:center}
+  .fswrap.show{display:flex}
+  .fswrap img{max-width:100vw;max-height:100vh;object-fit:contain}
+  .fsx{position:absolute;top:16px;right:18px;width:40px;height:40px;border-radius:9px;border:1px solid #333;
+    background:rgba(0,0,0,.5);color:#fff;font-size:17px;cursor:pointer}
+  .fsx:hover{border-color:var(--core);color:var(--core)}
+  .fsnav{position:absolute;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;border:1px solid #444;
+    background:rgba(0,0,0,.4);color:#fff;font-size:26px;line-height:1;cursor:pointer}
+  .fsnav:hover{border-color:var(--core);color:var(--core)}
+  .fsprev{left:20px}.fsnext{right:20px}
+  .fscounter{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:#bbb;font-size:13px}
+  .fsmaplink{position:absolute;bottom:14px;right:20px;background:var(--core);color:#04231f;border:none;
+    border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+    box-shadow:0 4px 14px rgba(0,0,0,.4)}
+  .fsmaplink:hover{filter:brightness(1.08)}
+  .bfybox{max-width:1040px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .bfybox svg{width:100%;height:auto;display:block}
+  .bfyacts{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .bfyacts .gomap{margin-top:0;text-decoration:none}
+  .agh{font-size:13px;letter-spacing:1.2px;text-transform:uppercase;color:var(--core);font-weight:700;margin:36px 0 14px}
+  #view-agenda .scard .gomap{margin-top:14px}
+  @media(max-width:760px){.qbody{grid-template-columns:1fr;gap:14px}.introcard{padding:26px 22px}
+    .apswrap{padding:16px 14px}.apsnav{width:36px;height:36px;font-size:18px}}
+  @media(max-width:760px){
+    .grid4{grid-template-columns:1fr}.scroller{padding:34px 22px 80px}
+    header{gap:10px;padding:0 12px}
+    nav{flex:1;margin-left:0}
+    nav button{padding:8px 11px;font-size:12.5px}
+    .searchbox{display:none}.vbadge{display:none}.spacer{display:none}
+    #panel{width:100%}.brand small{display:none}
+  }
+</style>
+<style id="disc-back-css">
+.disc-back{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-right:12px;padding:6px 11px;border-radius:6px;
+background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui,sans-serif;text-decoration:none!important;white-space:nowrap;letter-spacing:0;text-transform:none}
+.disc-back:hover{background:#fff}.disc-back:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.disc-back .bk{font-weight:500;opacity:.85}
+@media(max-width:560px){.disc-back .bk{display:none}header .header-meta{display:none}header .header-title{font-size:.95rem;line-height:1.2}}
+@media print{.disc-back{display:none}}
+</style>
+</head>
+<body>
+<header>
+<a class="disc-back" href="../index.html" title="Voltar à página da disciplina">‹ Disciplina<span class="bk"> · Livro Cap. 4</span></a>
+  <div class="brand"><span class="dot"></span><div>Cadeia Circular<small>Circular Supply Chain Management</small></div></div>
+  <span class="vbadge">v37 · jun 2026</span>
+  <nav id="nav">
+    <button class="active" data-view="map">Mapa Conceitual</button>
+    <button data-view="diagrama">Diagrama</button>
+    <button data-view="timeline">Linha do Tempo</button>
+    <button data-view="cases">Casos Práticos</button>
+    <button data-view="quadro">Quadro Teórico</button>
+    <button data-view="agenda">Agenda</button>
+    <button data-view="refs">Referências</button>
+  </nav>
+  <div class="spacer"></div>
+  <button id="helpBtn" class="helpbtn" title="Como usar / comece aqui">?</button>
+  <div class="searchbox">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search" placeholder="Buscar conceito ou autor…" autocomplete="off">
+  </div>
+</header>
+
+<!-- ============ MAP ============ -->
+<section class="view active" id="view-map">
+  <svg id="stage"></svg>
+  <div class="legend">
+    <h4>Categorias <span style="font-weight:500;text-transform:none;letter-spacing:0">(clique p/ filtrar)</span></h4>
+    <div id="legendItems"></div>
+  </div>
+  <div class="hint">Clique num nó para detalhes · arraste para reorganizar · roda do mouse para zoom</div>
+  <div class="ctrls" id="ctrls">
+    <button id="zin" title="Aproximar">+</button>
+    <button id="zout" title="Afastar">−</button>
+    <button id="zfit" title="Centralizar" style="font-size:14px">⤢</button>
+  </div>
+</section>
+
+<!-- ============ APRESENTAÇÃO ============ -->
+
+
+<!-- ============ DIAGRAMA DE BORBOLETA ============ -->
+<section class="view" id="view-diagrama">
+  <div class="scroller">
+    <h1>Diagrama de Borboleta</h1>
+    <p class="sub">A imagem-síntese da economia circular. À <b>direita</b>, o <b>ciclo técnico</b> (compartilhar, reusar, remanufaturar, reciclar) mantém materiais e componentes em uso; à <b>esquerda</b>, o <b>ciclo biológico</b> regenera recursos por compostagem, digestão e cascatas. Quanto mais interno o loop, mais valor é preservado. <em>Adaptado do Diagrama de Borboleta da Ellen MacArthur Foundation.</em></p>
+    <div class="bfybox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 760" font-family="Arial,Helvetica,sans-serif"><rect width="1180" height="760" fill="#0b1418"/><text x="290" y="104" text-anchor="middle" fill="#4ade80" font-size="15" font-weight="700">CICLO BIOLÓGICO</text><text x="890" y="104" text-anchor="middle" fill="#60a5fa" font-size="15" font-weight="700">CICLO TÉCNICO</text><path d="M 590 640 C 440 640, 440 405, 590 405" fill="none" stroke="#4ade80" stroke-width="2.4" opacity="0.85"/><path d="M 590 405 l -7 -7 l 0 14 z" fill="#4ade80"/><text x="473.0" y="522.5" text-anchor="end" fill="#4ade80" font-size="13.5" font-weight="600">Cascatas</text><path d="M 590 640 C 340 640, 340 310, 590 310" fill="none" stroke="#4ade80" stroke-width="2.4" opacity="0.85"/><path d="M 590 310 l -7 -7 l 0 14 z" fill="#4ade80"/><text x="395.0" y="475.0" text-anchor="end" fill="#4ade80" font-size="13.5" font-weight="600">Compostagem / digestão</text><path d="M 590 640 C 240 640, 240 215, 590 215" fill="none" stroke="#4ade80" stroke-width="2.4" opacity="0.85"/><path d="M 590 215 l -7 -7 l 0 14 z" fill="#4ade80"/><text x="317.0" y="427.5" text-anchor="end" fill="#4ade80" font-size="13.5" font-weight="600">Extração de bioquímicos</text><path d="M 590 640 C 140 640, 140 120, 590 120" fill="none" stroke="#4ade80" stroke-width="2.4" opacity="0.85"/><path d="M 590 120 l -7 -7 l 0 14 z" fill="#4ade80"/><text x="239.0" y="380.0" text-anchor="end" fill="#4ade80" font-size="13.5" font-weight="600">Regeneração → agricultura</text><path d="M 590 640 C 740 640, 740 405, 590 405" fill="none" stroke="#60a5fa" stroke-width="2.4" opacity="0.85"/><path d="M 590 405 l 7 -7 l 0 14 z" fill="#60a5fa"/><text x="707.0" y="522.5" text-anchor="start" fill="#60a5fa" font-size="13.5" font-weight="600">Compartilhar / manter</text><path d="M 590 640 C 840 640, 840 310, 590 310" fill="none" stroke="#60a5fa" stroke-width="2.4" opacity="0.85"/><path d="M 590 310 l 7 -7 l 0 14 z" fill="#60a5fa"/><text x="785.0" y="475.0" text-anchor="start" fill="#60a5fa" font-size="13.5" font-weight="600">Reusar / redistribuir</text><path d="M 590 640 C 940 640, 940 215, 590 215" fill="none" stroke="#60a5fa" stroke-width="2.4" opacity="0.85"/><path d="M 590 215 l 7 -7 l 0 14 z" fill="#60a5fa"/><text x="863.0" y="427.5" text-anchor="start" fill="#60a5fa" font-size="13.5" font-weight="600">Remanufaturar</text><path d="M 590 640 C 1040 640, 1040 120, 590 120" fill="none" stroke="#60a5fa" stroke-width="2.4" opacity="0.85"/><path d="M 590 120 l 7 -7 l 0 14 z" fill="#60a5fa"/><text x="941.0" y="380.0" text-anchor="start" fill="#60a5fa" font-size="13.5" font-weight="600">Reciclar</text><line x1="590" y1="100" x2="590" y2="640" stroke="#23454f" stroke-width="2"/><text x="440" y="128" text-anchor="end" fill="#4ade80" font-size="12.5">renováveis ▸</text><text x="740" y="128" text-anchor="start" fill="#60a5fa" font-size="12.5">◂ finitos</text><rect x="515.0" y="103" width="150" height="34" rx="8" fill="#10222a" stroke="#23454f"/><text x="590" y="125" text-anchor="middle" fill="#eaf4f2" font-size="13.5" font-weight="600">Materiais</text><rect x="512.1" y="198" width="155.79999999999998" height="34" rx="8" fill="#10222a" stroke="#23454f"/><text x="590" y="220" text-anchor="middle" fill="#eaf4f2" font-size="13.5" font-weight="600">Manufatura de peças</text><rect x="503.9" y="293" width="172.2" height="34" rx="8" fill="#10222a" stroke="#23454f"/><text x="590" y="315" text-anchor="middle" fill="#eaf4f2" font-size="13.5" font-weight="600">Manufatura do produto</text><rect x="512.1" y="388" width="155.79999999999998" height="34" rx="8" fill="#10222a" stroke="#23454f"/><text x="590" y="410" text-anchor="middle" fill="#eaf4f2" font-size="13.5" font-weight="600">Provedor de serviço</text><rect x="508.0" y="488" width="164.0" height="34" rx="8" fill="#10222a" stroke="#23454f"/><text x="590" y="510" text-anchor="middle" fill="#eaf4f2" font-size="13.5" font-weight="600">Consumidor / Usuário</text><rect x="520" y="623" width="140" height="34" rx="8" fill="#16303a" stroke="#23454f"/><text x="590" y="645" text-anchor="middle" fill="#eaf4f2" font-size="13.5" font-weight="700">Coleta</text><text x="1068" y="405" text-anchor="end" fill="#8fb0ad" font-size="11">↑ mais valor preservado</text><text x="1068" y="120" text-anchor="end" fill="#8fb0ad" font-size="11">↓ menos valor</text><text x="590" y="738" text-anchor="middle" fill="#8fb0ad" font-size="11.5">Adaptado do Diagrama de Borboleta — Ellen MacArthur Foundation (ellenmacarthurfoundation.org)</text></svg></div>
+    <div class="bfyacts">
+      <button class="gomap" data-go="tecnico">Ver Ciclo Técnico no mapa →</button>
+      <button class="gomap" data-go="biologico">Ver Ciclo Biológico no mapa →</button>
+      <a class="gomap" href="https://www.ellenmacarthurfoundation.org/pt/o-diagrama-de-borboleta" target="_blank" rel="noopener">Diagrama original (EMF) ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AGENDA DE PESQUISA ============ -->
+<section class="view" id="view-agenda">
+  <div class="scroller">
+    <h1>Agenda de Pesquisa</h1>
+    <p class="sub">O campo é robusto na teoria, mas desigual na evidência empírica — e o ponto cego decisivo é social e métrico. Aqui está onde há espaço de tese. <em>Farooque et al. (2019); Zhang et al. (2023); MahmoumGonbadi et al. (2021); Rasi et al. (2023).</em></p>
+    <h3 class="agh">Cinco lacunas da literatura</h3>
+    <div class="grid4">
+      <div class="scard"><span class="n">01</span><h3>Definições e fronteiras</h3><p><b>Evidência:</b> conceitos ainda variam em escopo e foco. <b>Oportunidade:</b> consolidar uma definição cumulativa e operacional.</p></div>
+      <div class="scard"><span class="n">02</span><h3>Métodos empíricos</h3><p><b>Evidência:</b> faltam dados longitudinais e métodos mistos. <b>Oportunidade:</b> desenhos causais e estudos de campo de longo prazo.</p></div>
+      <div class="scard"><span class="n">03</span><h3>Tópicos subpesquisados</h3><p><b>Evidência:</b> reuse, sourcing, zero waste e design circular aparecem pouco. <b>Oportunidade:</b> agenda aberta nesses temas.</p></div>
+      <div class="scard"><span class="n">04</span><h3>Dimensão social</h3><p><b>Evidência:</b> as métricas privilegiam economia e ambiente. <b>Oportunidade:</b> completar o triple bottom line nas cadeias.</p></div>
+      <div class="scard"><span class="n">05</span><h3>Escala prática</h3><p><b>Evidência:</b> faltam melhores práticas consensuais e difusão. <b>Oportunidade:</b> estudos de implementação e adoção.</p></div>
+    </div>
+    <h3 class="agh">Três debates de fronteira</h3>
+    <div class="grid4">
+      <div class="scard"><h3 style="color:var(--lacuna)">Métricas circulares (MCI)</h3><p>Como padronizar a mensuração da circularidade, superando indicadores puramente financeiros pelo Material Circularity Indicator.</p><button class="gomap" data-go="metricas">Ver no mapa →</button></div>
+      <div class="scard"><h3 style="color:var(--lacuna)">Trade-offs de carbono</h3><p>Quando a logística reversa emite mais CO₂ no transporte do que o benefício da reciclagem do material recuperado.</p><button class="gomap" data-go="carbono">Ver no mapa →</button></div>
+      <div class="scard"><h3 style="color:var(--lacuna)">Ponto cego social</h3><p>Condições de trabalho e inclusão de catadores e cooperativas nos elos iniciais — por cadeias circulares justas (forte relevância para o Brasil).</p><button class="gomap" data-go="social">Ver no mapa →</button></div>
+    </div>
+    <h3 class="agh">Direções de tese — perguntas em aberto</h3>
+    <div class="qbox">
+      <div class="q"><span class="qn">01</span><p>Como medir a dimensão social sem reduzi-la a proxies econômicos?</p></div>
+      <div class="q"><span class="qn">02</span><p>Quando o open loop supera o retorno ao OEM em valor recuperado?</p></div>
+      <div class="q"><span class="qn">03</span><p>Que desenho empírico romperia a predominância de revisões e modelagens?</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TIMELINE ============ -->
+<section class="view" id="view-timeline">
+  <div class="scroller">
+    <h1>Encadeamento Teórico do Campo</h1>
+    <p class="sub">Das raízes conceituais (Boulding, 1966) à maturação do campo (2025): primeiro as bases econômicas, ecológicas e de design da economia circular; depois a operacionalização na gestão de cadeias (Hart, 1995, em diante) e a consolidação recente (2020–2025).</p>
+    <div class="tl" id="tl"></div>
+  </div>
+</section>
+
+<!-- ============ QUADRO TEÓRICO ============ -->
+<section class="view" id="view-quadro">
+  <div class="scroller">
+    <h1>Quadro Teórico · do autor à prática</h1>
+    <p class="sub">Os principais trabalhos que sustentam a cadeia circular, lidos da teoria à prática. Cada linha conecta o autor ao conceito-chave que ele introduziu, sua principal contribuição e a prática que dela deriva. A cor do conceito segue a legenda do mapa — use “ver no mapa” para localizá-lo na rede.</p>
+    <div class="qtable" id="quadroRows"></div>
+  </div>
+</section>
+
+<!-- ============ CASES ============ -->
+<section class="view" id="view-cases">
+  <div class="scroller">
+    <h1>Casos Práticos · da teoria à prática</h1>
+    <p class="sub">Cada caso real conecta uma prática circular à lente teórica que a explica e ao autor principal correspondente. Use “ver no mapa” para abrir o nó relacionado e navegar suas conexões.</p>
+    <div class="cases" id="caseList"></div>
+  </div>
+</section>
+
+<!-- ============ REFERENCES ============ -->
+<section class="view" id="view-refs">
+  <div class="scroller">
+    <h1>Referências Citadas</h1>
+    <p class="sub"><span id="refCount"></span> obras citadas ao longo da aula. Clique no DOI para abrir a fonte original.
+      <input class="reffilter" id="refFilter" placeholder="filtrar por autor, título…" autocomplete="off"></p>
+    <h3 class="refgroup">Fundamentos teóricos principais</h3>
+    <div id="refsSem"></div>
+    <h3 class="refgroup">Revisões e conceito de CSCM</h3>
+    <div id="refsRev"></div>
+    <h3 class="refgroup">Raízes conceituais da economia circular</h3>
+    <div id="refsRaizes"></div>
+  </div>
+</section>
+
+<!-- ============ INTRO / COMO USAR ============ -->
+<div class="introwrap" id="intro">
+  <div class="introcard">
+    <button class="introx" id="introClose">✕</button>
+    <div class="introcredit">Material produzido por Prof. Dr. Thiago Lima</div>
+    <div class="ptag">Comece por aqui · como usar</div>
+    <h2>O que é a cadeia circular?</h2>
+    <p class="lead">O modelo <b>linear</b> extrai, produz, consome e descarta — e o valor se perde no aterro. A <b>cadeia circular</b> integra fluxos diretos e reversos para recuperar valor de produtos, materiais e resíduos ao longo de múltiplos ciclos: estreitando, desacelerando e fechando loops. Este app organiza esse campo nas seguintes áreas complementares:</p>
+    <div class="introsteps">
+      <div class="s"><span class="sw" style="background:var(--core)"></span><div><b>Mapa Conceitual</b> — clique nas bolinhas para abrir cada conceito com sua explicação, o autor de referência e as conexões.</div></div>
+      <div class="s"><span class="sw" style="background:var(--core)"></span><div><b>Diagrama</b> — o diagrama de borboleta (ciclos técnico e biológico) recriado e interativo.</div></div>
+      <div class="s"><span class="sw" style="background:var(--autor)"></span><div><b>Linha do Tempo</b> — como o campo se formou, de Hart (1995) a Saberi (2019); cada autor resolve um problema deixado pelo anterior.</div></div>
+      <div class="s"><span class="sw" style="background:var(--teoria)"></span><div><b>Quadro Teórico</b> — autor → paper → conceito-chave → contribuição → prática, lado a lado.</div></div>
+      <div class="s"><span class="sw" style="background:var(--pratica)"></span><div><b>Casos Práticos</b> — exemplos reais (Kalundborg, Philips, PNRS…) ligados de volta à teoria.</div></div>
+      <div class="s"><span class="sw" style="background:var(--lacuna)"></span><div><b>Agenda</b> — lacunas, debates de fronteira e direções de tese.</div></div>
+      <div class="s"><span class="sw" style="background:var(--tec)"></span><div><b>Referências</b> — todas as obras citadas em APA 7, com DOI/link clicável.</div></div>
+    </div>
+    <button class="introgo" id="introGo">Começar a explorar →</button>
+  </div>
+</div>
+
+<!-- ============ DETAIL PANEL ============ -->
+<aside id="panel">
+  <button class="pclose" id="pclose">✕</button>
+  <div class="pbody" id="pbody"></div>
+</aside>
+
+<script>
+/* ====================== DATA ====================== */
+const CAT = {
+  core:    {name:"Núcleo conceitual", color:"#2dd4bf"},
+  teoria:  {name:"Lentes teóricas",   color:"#a78bfa"},
+  autor:   {name:"Autores principais", color:"#fbbf24"},
+  pratica: {name:"Práticas",          color:"#4ade80"},
+  tec:     {name:"Tecnologia & gov.", color:"#60a5fa"},
+  barreira:{name:"Barreiras & dir.",  color:"#fb923c"},
+  lacuna:  {name:"Lacunas & agenda",  color:"#f472b6"},
+};
+// rótulos curtos no mapa (o nome completo permanece no painel de detalhe)
+const SHORT = {
+  "SCOR-DS · OE13 — Circular Supply Chain Management":"SCOR · OE13",
+  "VCAP — Valor = Capacidade × (Ativos + Processos)":"VCAP · Capital",
+  "EVA / ROIC — o teste de valor":"EVA / ROIC",
+  "Georgescu-Roegen · 1971":"Georgescu · 1971",
+  "Frosch & Gallopoulos · 1989":"Frosch & Gal. · 1989",
+  "McDonough & Braungart · 2002":"McDonough · 2002",
+  "Kirchherr et al. · 2017":"Kirchherr · 2017",
+  "Cadeia Circular (CSCM)":"Cadeia Circular",
+  "Circuito Fechado / Log. Reversa":"Circuito Fechado",
+  "Coordenação em 3 Camadas":"Coordenação (3 camadas)",
+  "Ecodesign / Design for X":"Ecodesign",
+  "Política Pública / Regulação":"Política Pública",
+  "Twin Transition (Indústria 4.0)":"Twin Transition",
+  "Métricas Circulares (MCI)":"Métricas (MCI)",
+  "Servitização / PaaS":"Servitização",
+  "Barreiras & Direcionadores":"Barreiras & Direc.",
+};
+
+const NODES = [
+  // ---- núcleo
+  {id:"cscm", label:"Cadeia Circular (CSCM)", cat:"core", r:34, author:"Farooque et al., 2019 · Lahane et al., 2020 · Theeraworawit et al., 2022",
+   desc:"A incorporação da economia circular à gestão da cadeia de suprimentos: a integração intencional de fluxos diretos e reversos para recuperar valor de produtos, materiais e resíduos ao longo de múltiplos ciclos.",
+   bullets:["Mais ampla que green SCM e closed-loop","Integra ecossistemas, subprodutos e múltiplos mecanismos de recuperação","A atenção se desloca do gerenciamento de descarte para a recirculação de valor"]},
+  {id:"linear", label:"Modelo Linear", cat:"core", r:20, author:"take–make–dispose",
+   desc:"A cadeia linear extrai, produz, consome e descarta — enviando resíduos para aterros e perdendo o valor incorporado em produtos e materiais a cada ciclo. É o ponto de partida que a circularidade contesta.",
+   bullets:["Extrair → Produzir → Consumir → Descartar → Aterro","Valor perdido a cada ciclo"]},
+  {id:"loops", label:"Loops de Recursos", cat:"core", r:24, author:"Bocken et al., 2016 · Geissdoerfer et al., 2018 · Hazen et al., 2020",
+   desc:"A circularidade vai além da logística reversa: reconfigura a velocidade e o destino dos fluxos de recursos atuando sobre os loops.",
+   bullets:["Bocken et al. (2016) estabelece 3 loops fundamentais — estreitar (narrowing): menos insumos por unidade","Desacelerar (slowing): produtos duráveis, reparo, remanufatura","Fechar (closing): logística reversa e reciclagem","Geissdoerfer et al. (2018) estende a 5: + intensificar (uso compartilhado) e desmaterializar (serviços no lugar de produtos)","Hazen et al. (2020) mapeia os cinco loops nos processos de gestão da cadeia"]},
+  {id:"tecnico", label:"Ciclo Técnico", cat:"core", r:18, author:"Ellen MacArthur Foundation, 2013",
+   desc:"Reuso, reparo, remanufatura e reciclagem mantêm componentes e materiais técnicos em circulação, preservando valor a cada ciclo de vida.",bullets:[]},
+  {id:"biologico", label:"Ciclo Biológico", cat:"core", r:18, author:"Ellen MacArthur Foundation, 2013",
+   desc:"Subprodutos e resíduos úteis retornam ao sistema produtivo via simbiose industrial, regenerando recursos e reduzindo a dependência de insumos virgens.",bullets:[]},
+  {id:"greenscm", label:"Green SCM", cat:"core", r:16, author:"Distinção conceitual",
+   desc:"Escopo: fluxos e processos ambientais. Distinção central: foco ambiental. Valor esperado: menor impacto ambiental.",bullets:[]},
+  {id:"ssccm", label:"Sustainable SCM", cat:"core", r:16, author:"Elkington, 1997 · Theeraworawit et al., 2022",
+   desc:"Escopo: cadeia e stakeholders. Distinção central: o triple bottom line (Elkington, 1997) — equilíbrio simultâneo entre desempenho econômico, social e ambiental (profit, people, planet). Valor esperado: desempenho holístico.",bullets:[]},
+  {id:"clsc", label:"Closed-loop SCM", cat:"core", r:18, author:"Distinção conceitual",
+   desc:"Escopo: retorno ao produtor original / OEM. Recuperação no ciclo do produto. Eficiente, mas tende a obscurecer alternativas úteis de recuperação em componentes e subprodutos.",bullets:[]},
+  // ---- teoria
+  {id:"nrbv", label:"NRBV", cat:"teoria", r:21, author:"Hart, 1995",
+   desc:"Visão Baseada em Recursos Naturais: capacidades circulares — ecodesign, simbiose — geram vantagem competitiva sustentável e difícil de imitar.",
+   bullets:["Prevenção de poluição","Administração de produtos (product stewardship)","Desenvolvimento sustentável"]},
+  {id:"institucional", label:"Teoria Institucional", cat:"teoria", r:21, author:"Zhu & Sarkis, 2004",
+   desc:"Pressões institucionais moldam a adoção da CSCM e explicam por que as firmas aderem.",
+   bullets:["Coercitivas: regulação (PNRS)","Normativas: padrões de mercado","Miméticas: imitar líderes em sustentabilidade"]},
+  {id:"relacional", label:"Teoria Relacional", cat:"teoria", r:20, author:"Lente relacional",
+   desc:"O fechamento de loops depende de compartilhamento de riscos, informação e governança interorganizacional estrita — a vantagem nasce na relação, não na firma isolada.",bullets:[]},
+  // ---- autores (timeline chain)
+  {id:"hart", label:"Hart · 1995", cat:"autor", r:16, author:"NRBV",
+   desc:"Restrições biofísicas entram na estratégia da firma. Funda a Visão Baseada em Recursos Naturais.",bullets:[]},
+  {id:"chertow", label:"Chertow · 2000", cat:"autor", r:16, author:"Simbiose industrial",
+   desc:"O resíduo de uma organização vira insumo de outra. Literatura e taxonomia da simbiose industrial.",bullets:[]},
+  {id:"tukker", label:"Tukker · 2004", cat:"autor", r:16, author:"PSS / Servitização",
+   desc:"Vender uso e resultado, não a posse do produto. Oito tipos de product–service system.",bullets:[]},
+  {id:"zhusarkis", label:"Zhu & Sarkis · 2004", cat:"autor", r:16, author:"Teoria Institucional",
+   desc:"Pressões regulatórias e de mercado induzem a adoção de práticas verdes entre early adopters.",bullets:[]},
+  {id:"guide", label:"Guide & V.W. · 2009", cat:"autor", r:16, author:"Closed-loop SC",
+   desc:"Unifica fluxos diretos e reversos sob uma mesma ótica de gestão. A evolução da pesquisa em closed-loop.",bullets:[]},
+  {id:"bocken", label:"Bocken et al. · 2016", cat:"autor", r:16, author:"Design para CE",
+   desc:"O projeto determina a viabilidade do ciclo (Design for X). Estratégias de design e modelo de negócio para a EC.",bullets:[]},
+  {id:"geissdoerfer", label:"Geissdoerfer · 2018", cat:"autor", r:16, author:"Loops de recursos",
+   desc:"Narrowing, slowing e closing como ações estruturais sobre os fluxos de recursos.",bullets:[]},
+  {id:"saberi", label:"Saberi et al. · 2019", cat:"autor", r:16, author:"Twin Transition",
+   desc:"Blockchain e rastreabilidade fecham a assimetria de informação ao longo da cadeia.",bullets:[]},
+  {id:"elkington", label:"Elkington · 1997", cat:"autor", r:16, author:"Triple Bottom Line",
+   desc:"Propõe avaliar o desempenho em três dimensões simultâneas — econômica, social e ambiental (profit, people, planet). É o fundamento conceitual do Sustainable SCM e da dimensão social da circularidade.",bullets:[]},
+  {id:"raizes", label:"Raízes Conceituais", cat:"core", r:22, author:"Genealogia · 1966–2017",
+   desc:"As raízes conceituais da economia circular — da economia de 'spaceship earth' (Boulding) à consolidação do conceito. Antecedem e alimentam a operacionalização na gestão de cadeias.",
+   bullets:["Raízes econômicas (1966–1976): Boulding, Georgescu-Roegen, Stahel & Reday","Bases ecológicas e de design (1989–2002): Frosch & Gallopoulos, Pearce & Turner, Benyus, McDonough & Braungart","Consolidação (2013–2017): Ellen MacArthur Foundation, Kirchherr et al."]},
+  {id:"boulding", label:"Boulding · 1966", cat:"autor", r:15, author:"Boulding, K. E., 1966",
+   desc:"Economia como sistema fechado ('spaceship earth'): o fim da lógica de recursos ilimitados.",bullets:[]},
+  {id:"georgescu", label:"Georgescu-Roegen · 1971", cat:"autor", r:15, author:"Georgescu-Roegen, N., 1971",
+   desc:"Lei da entropia: limites termodinâmicos à reciclagem. Nenhum loop é 100% fechado.",bullets:[]},
+  {id:"stahel", label:"Stahel & Reday · 1976", cat:"autor", r:15, author:"Stahel & Reday, 1976/1981",
+   desc:"Economia em loops e economia funcional: vender função, não produto — origem do PSS / servitização.",bullets:[]},
+  {id:"frosch", label:"Frosch & Gallopoulos · 1989", cat:"autor", r:15, author:"Frosch & Gallopoulos, 1989",
+   desc:"'Ecossistema industrial': o resíduo de um processo vira insumo de outro. Base da simbiose industrial.",bullets:[]},
+  {id:"pearceturner", label:"Pearce & Turner · 1990", cat:"autor", r:15, author:"Pearce & Turner, 1990",
+   desc:"Primeira formulação explícita do termo 'circular economy' na economia ambiental.",bullets:[]},
+  {id:"benyus", label:"Benyus · 1997", cat:"autor", r:15, author:"Benyus, J. M., 1997",
+   desc:"Biomimética: projetar aprendendo com a natureza. Fundamenta o design regenerativo.",bullets:[]},
+  {id:"mcdonough", label:"McDonough & Braungart · 2002", cat:"autor", r:15, author:"McDonough & Braungart, 2002",
+   desc:"Cradle to Cradle: distinção entre ciclos biológicos e técnicos; 'resíduo = alimento'.",bullets:[]},
+  {id:"kirchherr", label:"Kirchherr et al. · 2017", cat:"autor", r:15, author:"Kirchherr et al., 2017",
+   desc:"Analisa 114 definições de economia circular; expõe a fragmentação conceitual e a fraqueza da dimensão social.",bullets:[]},
+  // ---- práticas
+  {id:"ecodesign", label:"Ecodesign / Design for X", cat:"pratica", r:22, author:"Bocken et al., 2016",
+   desc:"O ciclo começa na prancheta: cerca de 80% do impacto ambiental de um produto é definido já na fase de projeto.",
+   bullets:["Design for Disassembly: separar sem destruição, viabilizando remanufatura","Substituição de materiais: de virgens para biobaseados/recicláveis","Modularidade e reparo: upgrade, conserto e múltiplos ciclos de vida"]},
+  {id:"simbiose", label:"Simbiose Industrial", cat:"pratica", r:21, author:"Chertow, 2000",
+   desc:"Inspirada em ecossistemas naturais: o subproduto de uma organização torna-se o insumo produtivo de outra. Redes locais compartilham calor residual, efluentes, escórias e subprodutos.",
+   bullets:["Reduz simultaneamente custos de aquisição e de descarte","Caso clássico: Kalundborg (Dinamarca) — usina, refinaria e fábricas trocam vapor, água e gesso há décadas"]},
+  {id:"servitizacao", label:"Servitização / PaaS", cat:"pratica", r:21, author:"Tukker, 2004",
+   desc:"No Product-as-a-Service, o fabricante retém a propriedade do ativo e vende acesso ou resultado — tornando-se o maior interessado na durabilidade. A manutenção deixa de ser custo e vira vetor de margem.",
+   bullets:["Philips: Lighting-as-a-Service — vende-se luz, não luminárias","Rolls-Royce: Power-by-the-Hour — vende-se horas de empuxo, não turbinas"]},
+  {id:"circuitofechado", label:"Circuito Fechado / Log. Reversa", cat:"pratica", r:21, author:"Guide & Van Wassenhove, 2009",
+   desc:"Integra fluxos diretos (entrega) e reversos (retorno de obsoletos e pós-consumo) sob uma mesma gestão. Gargalo: incerteza quanto a timing, qualidade e volume do retorno.",
+   bullets:["Hierarquia dos “Rs” (valor decrescente): Reutilizar › Reparar › Remanufaturar › Reciclar"]},
+  // ---- tecnologia & governança
+  {id:"coordenacao", label:"Coordenação em 3 Camadas", cat:"tec", r:20, author:"Braz & De Mello, 2023 · Montag, 2022",
+   desc:"A implementação depende de colaboração interorganizacional gerida em paralelo. A circularidade é coordenação, não só tecnologia.",
+   bullets:["Supply chain: fluxos diretos e reversos como um único sistema","Ecossistema: mais agentes e níveis, terceiros e simbiose intersetorial","Modelo de negócio: reconfigurar relações e incentivos"]},
+  {id:"politica", label:"Política Pública / Regulação", cat:"tec", r:20, author:"De Angelis et al., 2018 · Govindan & Hasanagic, 2018",
+   desc:"Pressões coercitivas e normativas (chave da Teoria Institucional) aceleram a adoção. A regra como motor da transição.",
+   bullets:["Legislação ambiental & PNRS: logística reversa obrigatória","Procurement público: o Estado como indutor de demanda","Responsabilidade estendida do produtor (EPR)","Metas de descarbonização internalizam o custo da disposição final"]},
+  {id:"twin", label:"Twin Transition (Indústria 4.0)", cat:"tec", r:22, author:"Saberi et al., 2019 · Das, 2024 · Khanna et al., 2025",
+   desc:"A digitalização como condição da circularidade: a economia circular falha se não houver rastreabilidade e simetria de informação ao longo da cadeia.",
+   bullets:["Blockchain + DPP: registro imutável, Passaporte Digital do Produto","Big Data & IA: previsão de retornos e otimização de coleta","IoT: manutenção preditiva em modelos PaaS"]},
+  // ---- barreiras
+  {id:"barreiras", label:"Barreiras & Direcionadores", cat:"barreira", r:23, author:"Govindan & Hasanagic, 2018",
+   desc:"O que trava e o que impulsiona a transição — em quatro categorias. A mesma força regulatória pode travar e impulsionar; gerenciar essa ambivalência é o desafio estratégico.",
+   bullets:["Financeira: custos iniciais altos ↔ incentivos fiscais verdes","Operacional: redes descentralizadas ↔ ecossistemas digitais compartilhados","Cultural: percepção de menor qualidade ↔ critérios ESG no B2B","Regulatória: subproduto como “resíduo perigoso” ↔ logística reversa obrigatória"]},
+  // ---- lacunas
+  {id:"lacunas", label:"Cinco Lacunas", cat:"lacuna", r:22, author:"Farooque 2019 · Zhang 2023 · MahmoumGonbadi 2021 · Rasi 2023",
+   desc:"O campo cresceu rápido, mas mantém fragmentação conceitual, predominância de revisões e modelagens e pouca validação empírica robusta e longitudinal.",
+   bullets:["Definições e fronteiras ainda variam em escopo","Métodos: faltam dados longitudinais e métodos mistos","Tópicos subpesquisados: reuse, sourcing, zero waste, design circular","Dimensão social: triple bottom line incompleto","Escala prática: faltam melhores práticas consensuais"]},
+  {id:"metricas", label:"Métricas Circulares (MCI)", cat:"lacuna", r:17, author:"Ellen MacArthur Foundation, 2015 · MahmoumGonbadi et al., 2021",
+   desc:"Debate de fronteira. Como padronizar a mensuração da circularidade? A superação de indicadores puramente financeiros pelo Material Circularity Indicator — MCI (Ellen MacArthur Foundation & Granta Design, 2015), que mede quanto o fluxo linear foi minimizado e o fluxo restaurativo, maximizado. A literatura aponta que as métricas ainda privilegiam economia e ambiente, e faltam melhores práticas consensuais.",bullets:[]},
+  {id:"carbono", label:"Trade-offs de Carbono", cat:"lacuna", r:17, author:"Rasi et al., 2023",
+   desc:"Debate de fronteira. Quando a logística reversa emite mais CO₂ no transporte do que o benefício da reciclagem do material recuperado — um dos desafios interdisciplinares de equilibrar simultaneamente as dimensões econômica, ambiental e social.",bullets:[]},
+  {id:"social", label:"Ponto Cego Social", cat:"lacuna", r:18, author:"MahmoumGonbadi et al., 2021 · Rasi et al., 2023",
+   desc:"Debate de fronteira com forte relevância para o Brasil. Condições de trabalho e inclusão de catadores e cooperativas nos elos iniciais — por cadeias circulares justas. As métricas ainda privilegiam economia e ambiente, deixando o triple bottom line incompleto.",bullets:[]},
+  {id:"vcap", label:"VCAP — Valor = Capacidade × (Ativos + Processos)", cat:"teoria", r:24, author:"Van Mieghem & Allon, 2015 · Lima, 2026b",
+   desc:"A lente de decisão da aula: gerar valor é reconfigurar ativos e processos para construir capacidades. Na cadeia circular, os cinco loops são as capacidades; ativos e processos os sustentam. Decisões de cadeia são decisões de capital.",
+   bullets:["Capacidades = os cinco loops: desmaterializar, estreitar, intensificar, desacelerar, fechar","Ativos = design circular, infraestrutura de recuperação, rastreabilidade (IoT/blockchain)","Processos = logística reversa, simbiose industrial, procurement circular, product-service","A multiplicação importa: sem capacidade de orquestrar, ativos e processos não geram valor"]},
+  {id:"eva", label:"EVA / ROIC — o teste de valor", cat:"teoria", r:24, author:"Stewart, 1991 · Lima, 2026a",
+   desc:"Mede se a transição circular cria ou destrói valor econômico: EVA = (ROIC − WACC) × Capital Investido. A circularidade move as três variáveis ao mesmo tempo, conectando operações (os loops) à finança corporativa.",
+   bullets:["ROIC > WACC → cria valor · ROIC < WACC → destrói valor","ROIC ↑ — alavancas Fechar e Estreitar (recuperar material, menos insumo virgem)","Capital Investido ↓ — alavancas Desacelerar e Intensificar (vida longa, uso compartilhado)","WACC / Risco ↓ — alavancas Estreitar e Fechar (menos exposição a commodity e a regulação)"]},
+  {id:"scor", label:"SCOR-DS · OE13 — Circular Supply Chain Management", cat:"tec", r:20, author:"ASCM · SCOR Digital Standard (OE13)",
+   desc:"Modelo de referência de processos da cadeia (SCOR-DS, da ASCM). O processo Orchestrate OE13 — Circular Supply Chain Management — traduz as capacidades (os cinco loops) em processos operacionais: Plan, Source, Transform, Order, Fulfill e Return. É onde a estratégia circular vira operação.",
+   bullets:["Desmaterializar → Plan · Order","Estreitar → Source · Transform","Intensificar → Plan · Fulfill","Desacelerar → Return · Transform","Fechar → Return · Source","O retorno realimenta o source — operar no menor anel possível"]},
+];
+
+const LINKS = [
+  ["cscm","linear","contrapõe-se a"],["cscm","loops","opera por"],
+  ["loops","tecnico","recupera via"],["loops","biologico","recupera via"],
+  ["cscm","greenscm","escopo crescente"],["greenscm","ssccm","escopo crescente"],
+  ["ssccm","clsc","escopo crescente"],["clsc","cscm","escopo crescente"],
+  ["cscm","nrbv","sustentada por"],["cscm","institucional","sustentada por"],["cscm","relacional","sustentada por"],
+  ["nrbv","hart","fundada por"],["institucional","zhusarkis","fundada por"],
+  ["cscm","ecodesign","operacionalizada por"],["cscm","simbiose","operacionalizada por"],
+  ["cscm","servitizacao","operacionalizada por"],["cscm","circuitofechado","operacionalizada por"],
+  ["ecodesign","bocken","fundada por"],["simbiose","chertow","fundada por"],
+  ["servitizacao","tukker","fundada por"],["circuitofechado","guide","fundada por"],
+  ["loops","geissdoerfer","fundada por"],["clsc","guide","origem"],
+  ["cscm","coordenacao","governada por"],["cscm","politica","governada por"],["cscm","twin","habilitada por"],
+  ["twin","saberi","fundada por"],["politica","institucional","explicada por"],
+  ["simbiose","biologico","gera"],["circuitofechado","tecnico","gera"],
+  ["cscm","barreiras","enfrenta"],["barreiras","politica","ambivalência regulatória"],
+  ["cscm","lacunas","limitada por"],["lacunas","metricas","frente de"],
+  ["lacunas","carbono","frente de"],["lacunas","social","frente de"],
+  ["vcap","loops","lê os loops como capacidades"],["vcap","eva","testa o valor com"],
+  ["eva","cscm","avalia a criação de valor na"],["vcap","cscm","estrutura a decisão na"],
+  ["scor","loops","operacionaliza os loops"],["scor","cscm","modelo de processos da"],
+  ["vcap","scor","capacidades viram processos"],["scor","coordenacao","governa a"],
+  ["ssccm","elkington","fundada por"],
+  ["cscm","raizes","raízes em"],
+  ["raizes","boulding","precursor"],["raizes","georgescu","precursor"],["raizes","stahel","precursor"],
+  ["raizes","frosch","precursor"],["raizes","pearceturner","precursor"],["raizes","benyus","precursor"],
+  ["raizes","mcdonough","precursor"],["raizes","kirchherr","precursor"],
+  ["stahel","servitizacao","origem de"],["frosch","simbiose","origem de"],["benyus","ecodesign","inspira"],
+  ["mcdonough","tecnico","distingue"],["mcdonough","biologico","distingue"],["pearceturner","cscm","cunha o termo"],["kirchherr","lacunas","expõe"],
+];
+
+/* timeline cards */
+const TIMELINE = [
+  {yr:"1966",node:"boulding",t:"Economia como sistema fechado",who:"Boulding, K. E.",d:"'Spaceship earth': o fim da lógica de recursos ilimitados — a raiz econômica da circularidade."},
+  {yr:"1971",node:"georgescu",t:"Lei da entropia",who:"Georgescu-Roegen, N.",d:"Limites termodinâmicos à reciclagem: nenhum loop é 100% fechado."},
+  {yr:"1976",node:"stahel",t:"Economia em loops; economia funcional",who:"Stahel & Reday",d:"Vender função, não produto — origem do PSS/servitização. Relatório à Comissão Europeia (livro em 1981)."},
+  {yr:"1989",node:"frosch",t:"Ecologia industrial",who:"Frosch & Gallopoulos",d:"'Ecossistema industrial': resíduo de um processo vira insumo de outro. Base da simbiose (Kalundborg)."},
+  {yr:"1990",node:"pearceturner",t:"Primeira formulação de 'circular economy'",who:"Pearce & Turner",d:"O termo 'economia circular' é cunhado explicitamente na economia ambiental."},
+  {yr:"1995",node:"hart",t:"NRBV — Visão Baseada em Recursos Naturais",who:"Hart, S. L.",d:"Restrições biofísicas entram na estratégia da firma. A vantagem competitiva passa a depender de capacidades ambientais difíceis de imitar."},
+  {yr:"1997",node:"elkington",t:"Triple Bottom Line",who:"Elkington, J.",d:"Propõe avaliar o desempenho em três dimensões — econômica, social e ambiental. Fundamenta o Sustainable SCM e a dimensão social da circularidade."},
+  {yr:"1997",node:"benyus",t:"Biomimética; design regenerativo",who:"Benyus, J. M.",d:"Projetar aprendendo com a natureza — fundamenta o design regenerativo."},
+  {yr:"2000",node:"chertow",t:"Simbiose Industrial",who:"Chertow, M. R.",d:"O resíduo de uma organização vira insumo produtivo de outra. Da firma para a rede: a recuperação de valor extrapola a empresa isolada."},
+  {yr:"2002",node:"mcdonough",t:"Cradle to Cradle",who:"McDonough & Braungart",d:"Distinção entre ciclos biológicos e técnicos; 'resíduo = alimento'."},
+  {yr:"2004",node:"tukker",t:"PSS / Servitização",who:"Tukker, A.",d:"Vender uso e resultado, não a posse do produto. Da rede para o modelo de negócio: muda a relação de propriedade."},
+  {yr:"2004",node:"zhusarkis",t:"Teoria Institucional aplicada ao GSCM",who:"Zhu, Q. & Sarkis, J.",d:"Em early adopters chineses, pressões regulatórias e de mercado impulsionam a adoção precoce de práticas de cadeia verde — base empírica para a leitura institucional."},
+  {yr:"2009",node:"guide",t:"Closed-loop Supply Chain",who:"Guide, V.D.R. & Van Wassenhove, L.N.",d:"Unifica fluxos diretos e reversos sob uma só ótica. Do modelo de negócio para o circuito fechado."},
+  {yr:"2013",node:"tecnico",t:"Diagrama de borboleta; difusão prática",who:"Ellen MacArthur Foundation",d:"Sistematiza princípios e o diagrama borboleta; populariza a EC no meio empresarial e de políticas."},
+  {yr:"2016",node:"bocken",t:"Os três loops de recursos",who:"Bocken, N.M.P. et al.",d:"Estabelece os 3 loops fundamentais — estreitar, desacelerar e fechar — via estratégias de design e modelo de negócio. A circularidade começa na prancheta."},
+  {yr:"2017",node:"kirchherr",t:"114 definições; debate conceitual",who:"Kirchherr et al.",d:"Analisa 114 definições e expõe a fragmentação conceitual e a fraqueza da dimensão social."},
+  {yr:"2018",node:"geissdoerfer",t:"Extensão para cinco loops",who:"Geissdoerfer, M. et al.",d:"Estende os três loops de Bocken para cinco, somando intensificar (uso compartilhado) e desmaterializar (serviços no lugar de produtos)."},
+  {yr:"2019",node:"saberi",t:"Twin Transition — Blockchain & Rastreabilidade",who:"Saberi, S. et al.",d:"Do circuito fechado para a rastreabilidade digital: blockchain fecha a assimetria de informação."},
+  {yr:"2020",node:"loops",t:"Loops mapeados na cadeia e agenda de pesquisa",who:"Hazen, B. T. et al.",d:"Mapeia os cinco loops nos processos de gestão da cadeia de suprimentos e fixa uma agenda de pesquisa para a EC nas cadeias."},
+  {yr:"2021",node:"clsc",t:"Revisão multidimensional (closed/open/híbrido)",who:"Zhang, A. et al.",d:"Mostra empiricamente a predominância do closed-loop (72%) frente ao open-loop (28%) e modela redes circulares como configurações híbridas."},
+  {yr:"2022",node:"cscm",t:"Framework conceitual da Cadeia Circular",who:"Montag, L.",d:"Consolida definições e conceitualizações da CSCM e fixa a agenda do framework, separando-a de green, sustainable e closed-loop SCM."},
+  {yr:"2023",node:"coordenacao",t:"Ecossistema como sistema adaptativo complexo",who:"Braz, A. C. & de Mello, A. M.",d:"Trata a circularidade como coordenação simultânea de cadeia, ecossistema e modelo de negócio — além da seta de volta à fábrica."},
+  {yr:"2024",node:"cscm",t:"Síntese e conceitualização (estado da arte)",who:"Das, C.",d:"Sintetiza e conceitua as cadeias circulares, organizando o estado da arte e apontando as lacunas de validação empírica."},
+  {yr:"2025",node:"twin",t:"Melhores práticas: inovação e sustentabilidade",who:"Khanna, K. et al.",d:"Liga inovação de negócio e sustentabilidade por meio de melhores práticas, com tecnologia (IoT, blockchain) como habilitador."},
+];
+
+const CASES = [
+  {title:"Adidas \u00d7 Parley", loc:"Vestu\u00e1rio esportivo", loop:"Estreitar (narrow)",
+   tag:"O res\u00edduo que vira t\u00eanis antes de chegar ao mar.",
+   desc:"A Adidas adquire o Parley Ocean Plastic \u2014 pl\u00e1stico recuperado de oceanos e \u00e1reas costeiras \u2014 e o transforma em insumo para t\u00eanis e vestu\u00e1rio. Cerca de 11 garrafas PET reaproveitadas por par, em milh\u00f5es de pares produzidos.",
+   practice:"Efici\u00eancia de recursos \u00b7 mat\u00e9ria-prima secund\u00e1ria (fechar o loop do pl\u00e1stico)",
+   theory:"<b>NRBV</b> \u2014 transformar um res\u00edduo poluente em capacidade de valor dif\u00edcil de imitar \u00b7 <b>fechar loops</b>",
+   author:"Hart, 1995 \u00b7 Geissdoerfer et al., 2018", node:"loops"},
+  {title:"Thermoplan", loc:"Su\u00ed\u00e7a", loop:"Desacelerar (slow)",
+   tag:"Trocar o m\u00f3dulo, n\u00e3o a m\u00e1quina.",
+   desc:"Fabricante su\u00ed\u00e7a de m\u00e1quinas de caf\u00e9 profissionais (clientes como a Starbucks) que projeta os equipamentos de forma modular: cada bloco funcional \u00e9 substitu\u00eddo rapidamente, no balc\u00e3o, pelo pr\u00f3prio usu\u00e1rio \u2014 sem descartar a m\u00e1quina.",
+   practice:"Ecodesign \u00b7 design modular para reparo e atualiza\u00e7\u00e3o (desacelerar loops)",
+   theory:"<b>Design para a economia circular</b> \u2014 durabilidade e reparabilidade definidas no projeto",
+   author:"Bocken et al., 2016", node:"ecodesign"},
+  {title:"Patagonia \u00b7 Worn Wear", loc:"Vestu\u00e1rio", loop:"Intensificar (intensify)",
+   tag:"Devolva usado, ganhe cr\u00e9dito.",
+   desc:"A iniciativa Worn Wear recebe roupas e equipamentos usados em troca de cr\u00e9ditos na loja; a empresa recupera, repara e revende esses produtos, mantendo-os em uso por mais tempo e reduzindo o res\u00edduo t\u00eaxtil.",
+   practice:"Log\u00edstica reversa \u00b7 take-back, reparo e revenda (hierarquia dos Rs)",
+   theory:"<b>Closed-loop SCM</b> \u2014 coordena\u00e7\u00e3o dos fluxos diretos e reversos de p\u00f3s-consumo",
+   author:"Guide & Van Wassenhove, 2009", node:"circuitofechado"},
+  {title:"Apple \u00b7 Rob\u00f4 Daisy", loc:"Eletr\u00f4nicos", loop:"Fechar (close)",
+   tag:"Desmontar para recuperar, n\u00e3o descartar.",
+   desc:"O rob\u00f4 Daisy desmonta iPhones em fim de vida \u2014 at\u00e9 200 por hora, 1,2 milh\u00e3o por ano, em 29 modelos \u2014 recuperando 15 tipos de materiais que voltam \u00e0 cadeia produtiva, em vez de virarem lixo eletr\u00f4nico.",
+   practice:"Recupera\u00e7\u00e3o de materiais \u00b7 ciclo t\u00e9cnico em circuito fechado",
+   theory:"<b>Ciclo t\u00e9cnico</b> (EMF) \u2014 restaurar materiais e componentes \u00b7 <b>closed-loop</b> de recupera\u00e7\u00e3o",
+   author:"Ellen MacArthur Foundation, 2013 \u00b7 Guide & Van Wassenhove, 2009", node:"tecnico"},
+  {title:"Kalundborg", loc:"Distrito industrial · Dinamarca",
+   tag:"O resíduo de uma planta é, há décadas, o insumo de outra.",
+   desc:"Usina, refinaria e fábricas vizinhas trocam vapor, água, gesso e subprodutos numa rede local — reduzindo simultaneamente custos de aquisição e de descarte. É a referência mundial de simbiose industrial.",
+   practice:"Simbiose industrial · ciclo biológico de recuperação",
+   theory:"<b>NRBV</b> (capacidade circular difícil de imitar) + <b>Teoria Relacional</b> (vantagem que nasce na governança entre firmas)",
+   author:"Chertow, 2000", node:"simbiose"},
+  {title:"Philips — Lighting-as-a-Service", loc:"Produto-serviço · iluminação",
+   tag:"Vende-se luz, não luminárias.",
+   desc:"No Product-as-a-Service, a Philips retém a propriedade do ativo e vende o resultado. Ao manter a posse, torna-se a maior interessada na durabilidade e na manutenibilidade — a manutenção deixa de ser custo e vira vetor de margem.",
+   practice:"Servitização · Product-as-a-Service (PaaS)",
+   theory:"<b>NRBV</b> — reter a propriedade cria incentivo direto à durabilidade e à recuperação de valor",
+   author:"Tukker, 2004", node:"servitizacao"},
+  {title:"Rolls-Royce — Power-by-the-Hour", loc:"Produto-serviço · aviação",
+   tag:"Vende-se horas de empuxo, não turbinas.",
+   desc:"A fabricante cobra por hora de uso da turbina e assume a manutenção. Sensores IoT monitoram o desgaste em tempo real, viabilizando manutenção preditiva — intervir antes da falha e prolongar a vida do ativo.",
+   practice:"Servitização + IoT · manutenção preditiva",
+   theory:"<b>NRBV</b> + <b>Twin Transition</b> — a digitalização habilita o modelo de serviço ao dar simetria de informação sobre o ativo",
+   author:"Tukker, 2004 · Saberi et al., 2019", node:"servitizacao"},
+  {title:"PNRS & catadores", loc:"Política pública · Brasil",
+   tag:"A regra como motor — e o ponto cego social da transição.",
+   desc:"A Política Nacional de Resíduos Sólidos torna a logística reversa obrigatória e responsabiliza o produtor pelo destino pós-consumo (EPR). Incluir catadores e cooperativas nos elos iniciais expõe a dimensão social ainda subpesquisada — a questão das cadeias circulares justas.",
+   practice:"Logística reversa obrigatória · responsabilidade estendida do produtor",
+   theory:"<b>Teoria Institucional</b> (pressão coercitiva e normativa induz a adoção) + lacuna social do <b>triple bottom line</b>",
+   author:"Zhu & Sarkis, 2004 · De Angelis et al., 2018", node:"politica"},
+  {title:"Passaporte Digital do Produto", loc:"Rastreabilidade · blockchain + DPP",
+   tag:"Sem rastreabilidade e simetria de informação, a circularidade falha.",
+   desc:"Registro imutável em blockchain fixa origem, composição, manutenção e toxicidade dos materiais ao longo dos elos. O DPP fecha a assimetria de informação que trava a recuperação de valor e a remanufatura confiável.",
+   practice:"Twin Transition · blockchain + Digital Product Passport",
+   theory:"<b>Teoria Institucional</b> (normas regulatórias emergentes) — tecnologia como habilitador da economia circular",
+   author:"Saberi et al., 2019 · Das, 2024", node:"twin"},
+  {title:"Remanufatura & hierarquia dos Rs", loc:"Circuito fechado · bens duráveis",
+   tag:"Reutilizar preserva mais valor que reciclar.",
+   desc:"Em redes de retorno de obsoletos e pós-consumo, o produtor coordena fluxos diretos e reversos sob uma só gestão. O gargalo é a incerteza de timing, qualidade e volume do retorno; a recuperação segue a hierarquia reutilizar › reparar › remanufaturar › reciclar.",
+   practice:"Circuito fechado (CLSC) · logística reversa integrada",
+   theory:"<b>Closed-loop SCM</b> — recuperação de valor no ciclo do produto, na fronteira com a circular (open loops)",
+   author:"Guide & Van Wassenhove, 2009", node:"circuitofechado"},
+];
+
+/* ---- Apresentação: imagens (injetadas) + metadados ---- */
+
+
+const APS_META = [
+  {t:"Abertura — Cadeia Circular", nodes:["cscm"]},
+  {t:"Por que estamos aqui", nodes:["cscm"]},
+  {t:"Objetivos da aula", nodes:["cscm"]},
+  {t:"Decisão e Capital", nodes:["vcap", "eva"]},
+  {t:"VCAP — Valor = Capacidade × (Ativos + Processos)", nodes:["vcap", "loops"]},
+  {t:"EVA — a transição circular cria ou destrói valor?", nodes:["eva", "cscm"]},
+  {t:"Economia Circular", nodes:["cscm", "raizes"]},
+  {t:"Do paradigma linear à transição circular", nodes:["linear", "tecnico", "biologico", "loops"]},
+  {t:"Raízes conceituais da economia circular (1966–2017)", nodes:["raizes"]},
+  {t:"Principais contribuições — genealogia da economia circular", nodes:["raizes"]},
+  {t:"Diagrama de Borboleta — ciclos técnico e biológico", nodes:["tecnico", "biologico", "loops"]},
+  {t:"O Estado da Pesquisa", nodes:["lacunas"]},
+  {t:"Acceleration Wave — evolução bibliométrica", nodes:["lacunas"]},
+  {t:"Radar de oportunidades de pesquisa", nodes:["lacunas", "social", "metricas"]},
+  {t:"Cadeia de Suprimentos Circular", nodes:["cscm"]},
+  {t:"Matriz de desambiguação — Green · Sustainable · Closed-loop · Circular", nodes:["greenscm", "ssccm", "clsc", "cscm"]},
+  {t:"Predominância do closed-loop (72%) × fronteira do open-loop (28%)", nodes:["clsc", "circuitofechado"]},
+  {t:"O motor do ciclo de vida circular — os cinco loops", nodes:["loops"]},
+  {t:"SCOR-DS · OE13 — capacidades viram processos da cadeia", nodes:["scor", "loops", "coordenacao"]},
+  {t:"A circularidade na prática — casos reais", nodes:["cscm"]},
+  {t:"Caso · Adidas × Parley — estreitar (narrow)", nodes:["loops"]},
+  {t:"Caso · Thermoplan — desacelerar (slow)", nodes:["ecodesign"]},
+  {t:"Caso · Patagonia Worn Wear — intensificar (intensify)", nodes:["circuitofechado"]},
+  {t:"Caso · Apple Robô Daisy — fechar (close)", nodes:["tecnico"]},
+  {t:"A circularidade redesenha a experiência do cliente", nodes:["servitizacao", "circuitofechado", "cscm"]},
+  {t:"Decisão e Capital — a leitura financeira", nodes:["vcap", "eva"]},
+  {t:"A arquitetura da decisão circular (VCAP)", nodes:["vcap", "loops", "coordenacao"]},
+  {t:"EVA — o teste de valor: (ROIC − WACC) × Capital", nodes:["eva"]},
+  {t:"A economia circular cria valor na cadeia de suprimentos", nodes:["cscm", "loops", "scor"]},
+  {t:"Atividade Prática", nodes:["greenscm", "loops", "lacunas"]},
+  {t:"Atividade · Da aula à sua cadeia", nodes:["greenscm", "loops", "lacunas"]},
+  {t:"Ferramenta interativa — explore o mapa conceitual", nodes:["cscm"]},
+];
+// mapeia cada conceito ao slide mais representativo (1-based)
+const NODE2SLIDE = {cscm:16, linear:8, tecnico:11, biologico:11, loops:18, greenscm:16, ssccm:16, clsc:17, circuitofechado:17, ecodesign:22, simbiose:20, servitizacao:25, politica:14, twin:27, institucional:14, coordenacao:27, lacunas:14, social:14, metricas:14, raizes:9, boulding:10, georgescu:10, stahel:10, frosch:10, pearceturner:10, benyus:10, mcdonough:10, kirchherr:10, elkington:16, vcap:5, eva:6, scor:19};
+
+const QUADRO = [
+  {concept:"NRBV — Natural-Resource-Based View", cat:"teoria", author:"Hart, S. L. (1995)",
+   paper:"A natural-resource-based view of the firm. (Academy of Management Review)",
+   contribution:"Teoria que insere as restrições e desafios do ambiente biofísico na estratégia de negócios, dividida em três pilares: prevenção de poluição, administração de produtos e desenvolvimento sustentável.",
+   practice:"Alinhamento estratégico global de CSCM; justificativa teórica para investimentos de longo prazo em infraestrutura circular sustentável.", node:"nrbv"},
+  {concept:"Triple Bottom Line (TBL)", cat:"core", author:"Elkington, J. (1997)",
+   paper:"Cannibals with forks: The triple bottom line of 21st century business. (Capstone)",
+   contribution:"Propõe avaliar o desempenho da organização em três dimensões simultâneas — econômica, social e ambiental (profit, people, planet) —, superando a visão puramente financeira.",
+   practice:"Fundamento do Sustainable SCM e critério para avaliar a circularidade além do lucro; sustenta a dimensão social ainda subpesquisada nas cadeias circulares.", node:"ssccm"},
+  {concept:"Simbiose Industrial", cat:"pratica", author:"Chertow, M. R. (2000)",
+   paper:"Industrial symbiosis: Literature and taxonomy. (Annual Review of Energy and the Environment)",
+   contribution:"Definição taxonômica e operacional de redes que engajam organizações separadas em uma troca de subprodutos, compartilhamento de utilidades e coprodutos.",
+   practice:"Redes locais de eco-eficiência (ex.: Kalundborg); direcionamento de resíduos e calor residual de uma fábrica como insumo para plantas industriais adjacentes.", node:"simbiose"},
+  {concept:"Product-Service Systems (PSS) / Servitização", cat:"pratica", author:"Tukker, A. (2004)",
+   paper:"Eight types of product–service system. (Business Strategy and the Environment)",
+   contribution:"Tipologia analítica de sistemas produto-serviço (focados no produto, no uso ou no resultado), demonstrando o impacto de cada modelo na sustentabilidade corporativa.",
+   practice:"Modelos de negócio Product-as-a-Service (PaaS): locação de equipamentos, pagamento por performance em turbinas ou iluminação corporativa.", node:"servitizacao"},
+  {concept:"Teoria Institucional em GSCM", cat:"teoria", author:"Zhu, Q. & Sarkis, J. (2004)",
+   paper:"Relationships between operational practices and performance among early adopters of GSCM. (Journal of Operations Management)",
+   contribution:"Análise empírica de como pressões regulatórias e de mercado impulsionam a adoção precoce de práticas de cadeia de suprimentos verde em mercados emergentes.",
+   practice:"Adequação a marcos regulatórios de conformidade ambiental (como a PNRS) e atendimento de exigências ESG de clientes corporativos globais.", node:"institucional"},
+  {concept:"Closed-Loop Supply Chains (CLSC)", cat:"pratica", author:"Guide, V. D. R. & Van Wassenhove, L. N. (2009)",
+   paper:"OR FORUM — The evolution of closed-loop supply chain research. (Operations Research)",
+   contribution:"Consolidação histórica da pesquisa em cadeias de circuito fechado, enfatizando o gerenciamento lucrativo de fluxos de materiais diretos e reversos.",
+   practice:"Estruturação de redes de logística reversa pós-consumo; mitigação da variabilidade de qualidade, volume e tempo no retorno de produtos obsoletos.", node:"circuitofechado"},
+  {concept:"Economia Circular & ciclos técnico/biológico", cat:"core", author:"Ellen MacArthur Foundation (2013)",
+   paper:"Towards the circular economy Vol. 1: An economic and business rationale for an accelerated transition.",
+   contribution:"Consolida e populariza o arcabouço da economia circular e o diagrama de borboleta, distinguindo o ciclo técnico (restaurar materiais e componentes) do ciclo biológico (regenerar recursos).",
+   practice:"Base conceitual dos ciclos técnico e biológico e do Material Circularity Indicator (MCI); referência para o desenho de cadeias circulares.", node:"tecnico"},
+  {concept:"Design para Economia Circular", cat:"pratica", author:"Bocken, N. M. P. et al. (2016)",
+   paper:"Product design and business model strategies for a circular economy. (Journal of Industrial and Production Engineering)",
+   contribution:"Framework que mapeia e categoriza taxonomias de design de produtos alinhadas às estratégias de fechamento e desaceleração do ciclo de recursos.",
+   practice:"Design for Disassembly (design para desmontagem) e substituição de materiais por polímeros biobaseados ou componentes modulares de fácil reparo.", node:"ecodesign"},
+  {concept:"Loops de Recursos Circulares", cat:"core", author:"Geissdoerfer, M. et al. (2018)",
+   paper:"Business models and supply chains for the circular economy. (Journal of Cleaner Production)",
+   contribution:"Sistematização e diferenciação entre as ações estruturais de desacelerar (slowing), fechar (closing) e estreitar (narrowing) loops nas cadeias de valor.",
+   practice:"Programas industriais de remanufatura (slowing); triagem automatizada e reciclagem de materiais secundários integrados ao supply chain (closing).", node:"loops"},
+  {concept:"Barreiras e Direcionadores de CSCM", cat:"barreira", author:"Govindan, K. & Hasanagic, M. (2018)",
+   paper:"A systematic review on drivers, barriers, and practices towards circular economy. (International Journal of Production Research)",
+   contribution:"Revisão sistemática que codifica os fatores internos e externos que impedem ou aceleram a adoção de práticas circulares por gestores de SCM.",
+   practice:"Gestão de risco na transição corporativa; auditoria e redesenho de processos operacionais para contornar custos iniciais e atritos culturais de mercado.", node:"barreiras"},
+  {concept:"Rastreabilidade por Tecnologia (Twin Transition)", cat:"tec", author:"Saberi, S. et al. (2019)",
+   paper:"Blockchain technology and its relationships to sustainable supply chain management. (International Journal of Production Research)",
+   contribution:"Framework conceitual explorando o papel da imutabilidade do blockchain para assegurar transparência social e ecológica ao longo dos elos da cadeia.",
+   practice:"Implementação do Passaporte Digital do Produto (DPP); auditoria criptográfica do ciclo de vida e da pegada ambiental de componentes químicos e eletrônicos.", node:"twin"},
+  {concept:"VCAP — Valor = Capacidade × (Ativos + Processos)", cat:"teoria", author:"Van Mieghem, J. A. & Allon, G. (2015)",
+   paper:"Operations Strategy: Principles and Practice. (Dynamic Ideas, 2ª ed.)",
+   contribution:"Estrutura toda decisão de operações como a reconfiguração de ativos e processos para construir capacidades. Lida à circularidade, os cinco loops são as capacidades; ativos e processos os habilitam.",
+   practice:"Ler a transição circular como decisão de capital, com ROIC, payback e risco explícitos.", node:"vcap"},
+  {concept:"EVA — Valor Econômico Agregado", cat:"core", author:"Stewart, G. B. (1991)",
+   paper:"The Quest for Value. (Harper Business / Stern Stewart & Co.)",
+   contribution:"Define EVA = (ROIC − WACC) × Capital Investido — o lucro econômico acima do custo de capital — permitindo testar se uma iniciativa cria ou destrói valor.",
+   practice:"Avaliar se a transição circular cria valor: efeito sobre ROIC, capital investido e WACC/risco.", node:"eva"},
+  {concept:"Interface supply chain ↔ finanças corporativas", cat:"core", author:"Lima, T. F. (2026)",
+   paper:"A interface entre supply chain e finanças corporativas. (Atena)",
+   contribution:"Sistematiza a leitura financeira das decisões de cadeia (ROIC, capital de giro, geração de caixa, risco).",
+   practice:"Traduzir práticas circulares em impacto de capital e valor econômico.", node:"eva"},
+];
+
+const REFS_SEM = [
+  {apa:"Bocken, N. M. P., de Pauw, I., Bakker, C., & van der Grinten, B. (2016). Product design and business model strategies for a circular economy. <i>Journal of Industrial and Production Engineering, 33</i>(5), 308–320.", doi:"https://doi.org/10.1080/21681015.2016.1172124"},
+  {apa:"Chertow, M. R. (2000). Industrial symbiosis: Literature and taxonomy. <i>Annual Review of Energy and the Environment, 25</i>, 313–337.", doi:"https://doi.org/10.1146/annurev.energy.25.1.313"},
+  {apa:"Elkington, J. (1997). <i>Cannibals with forks: The triple bottom line of 21st century business</i>. Capstone.", doi:""},
+  {apa:"Ellen MacArthur Foundation. (2013). <i>Towards the circular economy Vol. 1: An economic and business rationale for an accelerated transition</i>.", doi:"https://www.ellenmacarthurfoundation.org/towards-the-circular-economy-vol-1-an-economic-and-business-rationale-for-an"},
+  {apa:"Ellen MacArthur Foundation, & Granta Design. (2015). <i>Circularity indicators: An approach to measuring circularity — Methodology</i> (Material Circularity Indicator, MCI).", doi:"https://www.ellenmacarthurfoundation.org/material-circularity-indicator"},
+  {apa:"Geissdoerfer, M., Morioka, S. N., de Carvalho, M. M., & Evans, S. (2018). Business models and supply chains for the circular economy. <i>Journal of Cleaner Production, 190</i>, 712–721.", doi:"https://doi.org/10.1016/j.jclepro.2018.04.159"},
+  {apa:"Govindan, K., & Hasanagic, M. (2018). A systematic review on drivers, barriers and practices towards circular economy: A supply chain perspective. <i>International Journal of Production Research, 56</i>(1–2), 278–311.", doi:"https://doi.org/10.1080/00207543.2017.1402141"},
+  {apa:"Guide, V. D. R., Jr., & Van Wassenhove, L. N. (2009). OR Forum—The evolution of closed-loop supply chain research. <i>Operations Research, 57</i>(1), 10–18.", doi:"https://doi.org/10.1287/opre.1080.0628"},
+  {apa:"Hart, S. L. (1995). A natural-resource-based view of the firm. <i>Academy of Management Review, 20</i>(4), 986–1014.", doi:"https://doi.org/10.5465/amr.1995.9512280033"},
+  {apa:"Masi, D., Day, S., & Godsell, J. (2017). Supply chain configurations in the circular economy: A systematic literature review. <i>Sustainability, 9</i>(9), 1602.", doi:"https://doi.org/10.3390/su9091602"},
+  {apa:"Saberi, S., Kouhizadeh, M., Sarkis, J., & Shen, L. (2019). Blockchain technology and its relationships to sustainable supply chain management. <i>International Journal of Production Research, 57</i>(7), 2117–2135.", doi:"https://doi.org/10.1080/00207543.2018.1533261"},
+  {apa:"Tukker, A. (2004). Eight types of product–service system: Eight ways to sustainability? Experiences from SusProNet. <i>Business Strategy and the Environment, 13</i>(4), 246–260.", doi:"https://doi.org/10.1002/bse.414"},
+  {apa:"Zhu, Q., & Sarkis, J. (2004). Relationships between operational practices and performance among early adopters of green supply chain management practices in Chinese manufacturing enterprises. <i>Journal of Operations Management, 22</i>(3), 265–289.", doi:"https://doi.org/10.1016/j.jom.2004.01.005"},
+  {apa:"Van Mieghem, J. A., & Allon, G. (2015). <i>Operations strategy: Principles and practice</i> (2nd ed.). Dynamic Ideas.", doi:""},
+  {apa:"Stewart, G. B. (1991). <i>The quest for value: A guide for senior managers</i>. Harper Business.", doi:""},
+  {apa:"Lima, T. F. (2026a). <i>A interface entre supply chain e finanças corporativas</i>. Atena Editora.", doi:"https://doi.org/10.22533/at.ed.007262204"},
+  {apa:"Lima, T. F. (2026b). <i>Excelência operacional: da estratégia à execução</i>. Atena Editora.", doi:"https://doi.org/10.22533/at.ed.052262204"},
+];
+
+const REFS_REV = [
+  {apa:"Batista, L., Bourlakis, M., Smart, P., & Maull, R. (2018). In search of a circular supply chain archetype – A content-analysis-based literature review. <i>Production Planning &amp; Control, 29</i>, 438–451.", doi:"https://doi.org/10.1080/09537287.2017.1343502"},
+  {apa:"Braz, A. C., & de Mello, A. M. (2022). Circular economy supply network management: A complex adaptive system. <i>International Journal of Production Economics</i>.", doi:"https://doi.org/10.1016/j.ijpe.2021.108317"},
+  {apa:"Braz, A. C., & de Mello, A. M. (2023). Supply chain management strategies, types and tactics for circular economy transitions. <i>Management Review Quarterly, 74</i>, 2121–2148.", doi:"https://doi.org/10.1007/s11301-023-00354-4"},
+  {apa:"Chokshi, H., Agrawal, R., Samadhiya, A., & Kumar, A. (2023). Circular economy initiatives in supply chain: A systematic literature review and future research directions. <i>International Journal of Mathematical, Engineering and Management Sciences</i>.", doi:"https://doi.org/10.33889/ijmems.2023.8.6.061"},
+  {apa:"Das, C. (2024). Synthesising and conceptualising circular supply chains: A state-of-the-art literature review. <i>The Journal of Environment &amp; Development, 33</i>, 339–369.", doi:"https://doi.org/10.1177/10704965241231553"},
+  {apa:"de Angelis, R., Howard, M., & Miemczyk, J. (2018). Supply chain management and the circular economy: Towards the circular supply chain. <i>Production Planning &amp; Control, 29</i>, 425–437.", doi:"https://doi.org/10.1080/09537287.2018.1449244"},
+  {apa:"Farooque, M., Zhang, A., Thürer, M., Qu, T., & Huisingh, D. (2019). Circular supply chain management: A definition and structured literature review. <i>Journal of Cleaner Production</i>.", doi:"https://doi.org/10.1016/j.jclepro.2019.04.303"},
+  {apa:"Genovese, A., Acquaye, A., Figueroa, A., & Koh, S. (2015). Sustainable supply chain management and the transition towards a circular economy: Evidence and some applications. <i>Omega, 66</i>, 344–357.", doi:"https://doi.org/10.1016/j.omega.2015.05.015"},
+  {apa:"Hazen, B. T., Russo, I., Confente, I., & Pellathy, D. A. (2020). Supply chain management for circular economy: Conceptual framework and research agenda. <i>The International Journal of Logistics Management</i>.", doi:"https://doi.org/10.1108/ijlm-12-2019-0332"},
+  {apa:"Kalverkamp, M., & Young, S. (2019). In support of open-loop supply chains: Expanding the scope of environmental sustainability in reverse supply chains. <i>Journal of Cleaner Production</i>.", doi:"https://doi.org/10.1016/j.jclepro.2019.01.006"},
+  {apa:"Khanna, K., Kuik, S., & Ban, J. (2025). Circular supply chain management: Bridging business innovation and sustainability through best practices. <i>Circular Economy</i>.", doi:"https://doi.org/10.55845/vlhs2148"},
+  {apa:"Khompatraporn, C. (2020). Circular supply chain management. In <i>An Introduction to Circular Economy</i> (pp. 419–435).", doi:"https://doi.org/10.1007/978-981-15-8510-4_21"},
+  {apa:"Lahane, S., Kant, R., & Shankar, R. (2020). Circular supply chain management: A state-of-art review and future opportunities. <i>Journal of Cleaner Production</i>.", doi:"https://doi.org/10.1016/j.jclepro.2020.120859"},
+  {apa:"MahmoumGonbadi, A., Genovese, A., & Sgalambro, A. (2021). Closed-loop supply chain design for the transition towards a circular economy: A systematic literature review of methods, applications and current gaps. <i>Journal of Cleaner Production</i>.", doi:"https://doi.org/10.1016/j.jclepro.2021.129101"},
+  {apa:"Montag, L. (2022). Circular economy and supply chains: Definitions, conceptualizations, and research agenda of the circular supply chain framework. <i>Circular Economy and Sustainability, 3</i>, 35–75.", doi:"https://doi.org/10.1007/s43615-022-00172-y"},
+  {apa:"Rasi, R. Z., Ismail, H., Shahbaz, M., & Sundram, V. P. K. (2023). Interdisciplinary challenges in the circular supply chains: A systematic literature review. <i>Heliyon, 9</i>(4), e15225.", doi:"https://doi.org/10.1016/j.heliyon.2023.e15225"},
+  {apa:"Theeraworawit, M., Suriyankietkaew, S., & Hallinger, P. (2022). Sustainable supply chain management in a circular economy: A bibliometric review. <i>Sustainability</i>.", doi:"https://doi.org/10.3390/su14159304"},
+  {apa:"Zhang, A., Wang, J. X., Farooque, M., Wang, Y., & Choi, T. (2021). Multi-dimensional circular supply chain management: A comparative review of the state-of-the-art practices and research. <i>Transportation Research Part E: Logistics and Transportation Review</i>.", doi:"https://doi.org/10.1016/j.tre.2021.102509"},
+  {apa:"Zhang, A., Duong, L., Seuring, S., & Hartley, J. (2023). Circular supply chain management: A bibliometric analysis-based literature review. <i>The International Journal of Logistics Management</i>.", doi:"https://doi.org/10.1108/ijlm-04-2022-0199"},
+  {apa:"Association for Supply Chain Management. (s.d.). OE13 — Circular supply chain management. <i>SCOR Digital Standard</i>.", doi:"https://scor.ascm.org/processes/orchestrate%20supply%20chain/OE13"},
+  {apa:"Ellen MacArthur Foundation. (s.d.). <i>Como a economia circular cria valor</i>.", doi:"https://www.ellenmacarthurfoundation.org/pt/como-a-economia-circular-cria-valor"},
+];
+
+/* ====================== MAP RENDER (force layout) ====================== */
+const NS="http://www.w3.org/2000/svg";
+const stage=document.getElementById("stage");
+const nodeById=Object.fromEntries(NODES.map(n=>[n.id,n]));
+const adj={}; NODES.forEach(n=>adj[n.id]=new Set());
+LINKS.forEach(([a,b])=>{adj[a].add(b);adj[b].add(a)});
+
+let W=innerWidth,H=innerHeight-62;
+// initial positions: spread on a circle, core in middle
+NODES.forEach((n,i)=>{
+  if(n.id==="cscm"){n.x=W/2;n.y=H/2;}
+  else{const a=i/NODES.length*Math.PI*2; n.x=W/2+Math.cos(a)*Math.min(W,H)*0.34; n.y=H/2+Math.sin(a)*Math.min(W,H)*0.34;}
+  n.vx=0;n.vy=0;
+});
+
+const vp=document.createElementNS(NS,"g"); stage.appendChild(vp);
+const linkLayer=document.createElementNS(NS,"g"); vp.appendChild(linkLayer);
+const nodeLayer=document.createElementNS(NS,"g"); vp.appendChild(nodeLayer);
+
+const linkEls=LINKS.map(l=>{
+  const el=document.createElementNS(NS,"line"); el.setAttribute("class","link");
+  el._a=l[0];el._b=l[1]; linkLayer.appendChild(el); return el;
+});
+const nodeEls=NODES.map(n=>{
+  const g=document.createElementNS(NS,"g"); g.setAttribute("class","node"); g._n=n;
+  const c=document.createElementNS(NS,"circle");
+  c.setAttribute("r",n.r); c.setAttribute("fill",CAT[n.cat].color);
+  const t=document.createElementNS(NS,"text");
+  t.setAttribute("text-anchor","middle"); t.setAttribute("dy",n.r+15);
+  t.textContent=SHORT[n.label]||n.label;
+  g.appendChild(c); g.appendChild(t); nodeLayer.appendChild(g);
+  n._g=g;n._c=c;n._t=t; return g;
+});
+
+/* physics */
+let alpha=1;
+function tick(){
+  if(alpha<0.005){return;}
+  alpha*=0.985;
+  const k=alpha;
+  // repulsion
+  for(let i=0;i<NODES.length;i++){
+    const a=NODES[i];
+    for(let j=i+1;j<NODES.length;j++){
+      const b=NODES[j];
+      let dx=a.x-b.x,dy=a.y-b.y; let d2=dx*dx+dy*dy||0.01;
+      let d=Math.sqrt(d2);
+      const minD=a.r+b.r+72;
+      let force=(22000)/d2;
+      if(d<minD) force+= (minD-d)*1.2/d; // collision
+      const fx=dx/d*force*k, fy=dy/d*force*k;
+      if(!a._fix){a.vx+=fx;a.vy+=fy;}
+      if(!b._fix){b.vx-=fx;b.vy-=fy;}
+    }
+  }
+  // springs
+  LINKS.forEach(l=>{
+    const a=nodeById[l[0]],b=nodeById[l[1]];
+    let dx=b.x-a.x,dy=b.y-a.y; let d=Math.sqrt(dx*dx+dy*dy)||0.01;
+    const target=a.id==="cscm"||b.id==="cscm"?210:185;
+    const f=(d-target)*0.045*k;
+    const fx=dx/d*f,fy=dy/d*f;
+    if(!a._fix){a.vx+=fx;a.vy+=fy;}
+    if(!b._fix){b.vx-=fx;b.vy-=fy;}
+  });
+  // gravity to center
+  NODES.forEach(n=>{
+    if(n._fix)return;
+    n.vx+=(W/2-n.x)*0.0035*k; n.vy+=(H/2-n.y)*0.0035*k;
+    n.vx*=0.86; n.vy*=0.86;
+    n.x+=n.vx; n.y+=n.vy;
+  });
+  render();
+  requestAnimationFrame(tick);
+}
+function render(){
+  linkEls.forEach(el=>{
+    const a=nodeById[el._a],b=nodeById[el._b];
+    el.setAttribute("x1",a.x);el.setAttribute("y1",a.y);
+    el.setAttribute("x2",b.x);el.setAttribute("y2",b.y);
+  });
+  nodeEls.forEach(g=>{const n=g._n; g.setAttribute("transform",`translate(${n.x},${n.y})`)});
+}
+function reheat(v){alpha=Math.max(alpha,v||0.6);requestAnimationFrame(tick);}
+
+/* zoom & pan */
+let tx=0,ty=0,scale=1;
+function applyVP(){vp.setAttribute("transform",`translate(${tx},${ty}) scale(${scale})`)}
+stage.addEventListener("wheel",e=>{
+  e.preventDefault();
+  const r=stage.getBoundingClientRect();
+  const mx=e.clientX-r.left,my=e.clientY-r.top;
+  const ds=e.deltaY<0?1.12:0.893;
+  const ns=Math.min(2.6,Math.max(0.3,scale*ds));
+  tx=mx-(mx-tx)*(ns/scale); ty=my-(my-ty)*(ns/scale); scale=ns; applyVP();
+},{passive:false});
+
+let panning=false,sx,sy,stx,sty,dragNode=null,downNode=null,downX=0,downY=0;
+stage.addEventListener("pointerdown",e=>{
+  downX=e.clientX;downY=e.clientY;
+  const g=e.target.closest(".node");
+  if(g){downNode=g._n;dragNode=g._n;dragNode._fix=true;stage.setPointerCapture(e.pointerId);}
+  else{downNode=null;panning=true;stage.classList.add("grabbing");sx=e.clientX;sy=e.clientY;stx=tx;sty=ty;stage.setPointerCapture(e.pointerId);}
+});
+stage.addEventListener("pointermove",e=>{
+  if(dragNode){
+    const r=stage.getBoundingClientRect();
+    dragNode.x=(e.clientX-r.left-tx)/scale; dragNode.y=(e.clientY-r.top-ty)/scale;
+    reheat(0.25); render();
+  }else if(panning){tx=stx+(e.clientX-sx);ty=sty+(e.clientY-sy);applyVP();}
+});
+stage.addEventListener("pointerup",e=>{
+  const movedDist=Math.hypot(e.clientX-downX,e.clientY-downY);
+  if(dragNode){dragNode._fix=false;}
+  if(movedDist<6){                       // clique (não arraste): abre nó ou fecha painel
+    if(downNode) openPanel(downNode.id);
+    else closePanel();
+  }
+  if(dragNode){dragNode=null;reheat(0.3);}
+  downNode=null;panning=false;stage.classList.remove("grabbing");
+});
+
+/* interactions: hover + click */
+let selected=null;
+function neighbors(id){const s=new Set(adj[id]);s.add(id);return s;}
+function highlight(id){
+  const set=id?neighbors(id):null;
+  nodeEls.forEach(g=>{
+    const on=!set||set.has(g._n.id);
+    g.classList.toggle("dim",!on && !legendOff.has(g._n.cat)?!on:!on);
+  });
+  linkEls.forEach(el=>{
+    const hot=set&&(set.has(el._a)&&set.has(el._b)&&(el._a===id||el._b===id));
+    const on=!set||(set.has(el._a)&&set.has(el._b));
+    el.classList.toggle("hot",!!hot);
+    el.classList.toggle("dim",set&&!on);
+  });
+}
+nodeEls.forEach(g=>{
+  g.addEventListener("pointerenter",()=>{if(!selected)highlight(g._n.id)});
+  g.addEventListener("pointerleave",()=>{if(!selected)highlight(null)});
+});
+
+/* legend filter */
+const legendOff=new Set();
+const li=document.getElementById("legendItems");
+Object.entries(CAT).forEach(([k,v])=>{
+  const d=document.createElement("div"); d.className="item"; d.dataset.cat=k;
+  d.innerHTML=`<span class="swatch" style="background:${v.color}"></span>${v.name}`;
+  d.addEventListener("click",()=>{
+    if(legendOff.has(k)){legendOff.delete(k);d.classList.remove("off");}
+    else{legendOff.add(k);d.classList.add("off");}
+    applyFilter();
+  });
+  li.appendChild(d);
+});
+function applyFilter(){
+  nodeEls.forEach(g=>{g.style.display=legendOff.has(g._n.cat)?"none":""});
+  linkEls.forEach(el=>{
+    const off=legendOff.has(nodeById[el._a].cat)||legendOff.has(nodeById[el._b].cat);
+    el.style.display=off?"none":"";
+  });
+}
+
+/* zoom buttons */
+function zoomBy(f){
+  const ns=Math.min(2.6,Math.max(0.3,scale*f));
+  tx=W/2-(W/2-tx)*(ns/scale);ty=H/2-(H/2-ty)*(ns/scale);scale=ns;applyVP();
+}
+document.getElementById("zin").onclick=()=>zoomBy(1.2);
+document.getElementById("zout").onclick=()=>zoomBy(0.83);
+document.getElementById("zfit").onclick=()=>{tx=0;ty=0;scale=1;applyVP();reheat(0.5)};
+
+/* ====================== DETAIL PANEL ====================== */
+const panel=document.getElementById("panel");
+const pbody=document.getElementById("pbody");
+function openPanel(id){
+  const n=nodeById[id]; selected=id;
+  nodeEls.forEach(g=>g.classList.toggle("sel",g._n.id===id));
+  highlight(id);
+  const col=CAT[n.cat].color;
+  const rels=[...adj[id]].map(rid=>{const m=nodeById[rid];
+    return `<span class="relnode" data-go="${rid}"><span class="sw" style="background:${CAT[m.cat].color}"></span>${m.label}</span>`}).join("");
+  pbody.innerHTML=`
+    <div class="ptag" style="background:${hex2rgba(col,.16)};color:${col}">${CAT[n.cat].name}</div>
+    <h2>${n.label}</h2>
+    <div class="pauthor" style="color:${col}">${n.author||""}</div>
+    <div class="pdesc">${n.desc}</div>
+    ${n.bullets&&n.bullets.length?`<div class="pblock"><h5>Em detalhe</h5><ul>${n.bullets.map(b=>`<li>${b}</li>`).join("")}</ul></div>`:""}
+    <div class="pblock"><h5>Conexões (${adj[id].size})</h5>${rels}</div>
+    
+  `;
+  pbody.querySelectorAll("[data-go]").forEach(el=>el.onclick=()=>openPanel(el.dataset.go));
+  const sb=pbody.querySelector("[data-slide]"); if(sb)sb.onclick=()=>{closePanel();switchView("apresentacao");setTimeout(()=>apsGo(+sb.dataset.slide-1),60)};
+  panel.classList.add("open");
+  document.documentElement.style.setProperty("--panelw","380px");
+}
+function closePanel(){
+  panel.classList.remove("open");selected=null;
+  nodeEls.forEach(g=>g.classList.remove("sel"));highlight(null);
+  document.documentElement.style.setProperty("--panelw","0px");
+}
+document.getElementById("pclose").onclick=closePanel;
+function hex2rgba(h,a){const n=parseInt(h.slice(1),16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`}
+
+/* ====================== TIMELINE / TABLE / SYNTH ====================== */
+document.getElementById("tl").innerHTML=TIMELINE.map(t=>`
+  <div class="tlitem" data-go="${t.node}">
+    <div class="yr">${t.yr}</div><div class="nub"></div>
+    <div class="tlcard"><h3>${t.t}</h3><div class="who">${t.who}</div><p>${t.d}</p></div>
+  </div>`).join("");
+document.querySelectorAll("#tl .tlitem").forEach(el=>el.onclick=()=>{switchView("map");setTimeout(()=>openPanel(el.dataset.go),60)});
+
+// ---- Casos práticos
+document.getElementById("caseList").innerHTML=CASES.map(c=>`
+  <div class="case">
+    <div class="ch"><h3>${c.title}</h3><span class="loc">${c.loc}</span></div>
+    ${c.loop?'<span class="loop-chip">'+c.loop+'</span>':''}
+    <div class="tag">${c.tag}</div>
+    <p class="cd">${c.desc}</p>
+    <div class="row"><span class="k">Prática</span><span class="v">${c.practice}</span></div>
+    <div class="row"><span class="k">Teoria</span><span class="v">${c.theory}</span></div>
+    <div class="row"><span class="k">Autor</span><span class="v"><b>${c.author}</b></span></div>
+    <button class="gomap" data-go="${c.node}">Ver no mapa →</button>
+  </div>`).join("");
+document.querySelectorAll("#caseList .gomap").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+
+// ---- Quadro teórico
+document.getElementById("quadroRows").innerHTML=QUADRO.map(q=>{
+  const col=CAT[q.cat].color;
+  return `<div class="qrow">
+    <div class="qhead">
+      <span class="qdotwrap"><span class="qdot" style="background:${col}"></span>
+        <span class="qtip"><span class="c" style="color:${col}">${q.concept}</span><h6>Principal contribuição</h6>${q.contribution}</span>
+      </span>
+      <span class="qconcept" style="background:${hex2rgba(col,.16)};color:${col}">${q.concept}</span>
+      <span class="qauthor">${q.author}</span>
+    </div>
+    <div class="qpaper">${q.paper}</div>
+    <div class="qbody">
+      <div class="qcol"><h6>Principal contribuição</h6><p>${q.contribution}</p></div>
+      <div class="qcol"><h6>Prática associada</h6><p>${q.practice}</p></div>
+    </div>
+    <button class="gomap" data-go="${q.node}">Ver no mapa →</button>
+  </div>`;
+}).join("");
+document.querySelectorAll("#quadroRows .gomap").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+
+// ---- Referências
+function refRow(r){
+  const txt=(r.apa+' '+(r.doi||'')).replace(/<[^>]+>/g,'').replace(/"/g,'').toLowerCase();
+  const link=r.doi?` <a href="${r.doi}" target="_blank" rel="noopener">${r.doi}</a>`:"";
+  return `<div class="refrow" data-txt="${txt}">${r.apa}${link}</div>`;
+}
+const REFS_RAIZES = [
+  {apa:"Benyus, J. M. (1997). <i>Biomimicry: Innovation inspired by nature</i>. William Morrow.", doi:""},
+  {apa:"Boulding, K. E. (1966). The economics of the coming spaceship earth. In H. Jarrett (Ed.), <i>Environmental quality in a growing economy</i> (pp. 3–14). Resources for the Future / Johns Hopkins University Press.", doi:""},
+  {apa:"Fleischmann, M., Bloemhof-Ruwaard, J. M., Dekker, R., van der Laan, E., van Nunen, J. A. E. E., & van Wassenhove, L. N. (1997). Quantitative models for reverse logistics: A review. <i>European Journal of Operational Research, 103</i>(1), 1–17.", doi:""},
+  {apa:"Frosch, R. A., & Gallopoulos, N. E. (1989). Strategies for manufacturing. <i>Scientific American, 261</i>(3), 144–152.", doi:""},
+  {apa:"Georgescu-Roegen, N. (1971). <i>The entropy law and the economic process</i>. Harvard University Press.", doi:""},
+  {apa:"Kirchherr, J., Reike, D., & Hekkert, M. (2017). Conceptualizing the circular economy: An analysis of 114 definitions. <i>Resources, Conservation and Recycling, 127</i>, 221–232.", doi:"https://doi.org/10.1016/j.resconrec.2017.09.005"},
+  {apa:"McDonough, W., & Braungart, M. (2002). <i>Cradle to cradle: Remaking the way we make things</i>. North Point Press.", doi:""},
+  {apa:"Pearce, D. W., & Turner, R. K. (1990). <i>Economics of natural resources and the environment</i>. Johns Hopkins University Press.", doi:""},
+  {apa:"Stahel, W. R., & Reday-Mulvey, G. (1981). <i>Jobs for tomorrow: The potential for substituting manpower for energy</i>. Vantage Press.", doi:""},
+];
+document.getElementById("refsSem").innerHTML=REFS_SEM.map(refRow).join("");
+document.getElementById("refsRev").innerHTML=REFS_REV.map(refRow).join("");
+document.getElementById("refsRaizes").innerHTML=REFS_RAIZES.map(refRow).join("");
+document.getElementById("refCount").textContent=REFS_SEM.length+REFS_REV.length+REFS_RAIZES.length;
+document.getElementById("refFilter").addEventListener("input",e=>{
+  const q=e.target.value.trim().toLowerCase();
+  document.querySelectorAll(".refrow").forEach(r=>r.classList.toggle("hide",q&&!r.dataset.txt.includes(q)));
+});
+
+/* ====================== NAV / SEARCH ====================== */
+function switchView(v){
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("active",s.id==="view-"+v));
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
+  document.getElementById("ctrls").style.display=v==="map"?"flex":"none";
+  if(v==="map"){W=innerWidth;H=innerHeight-62;reheat(0.4);}
+}
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
+
+const search=document.getElementById("search");
+search.addEventListener("input",()=>{
+  const q=search.value.trim().toLowerCase();
+  if(!q){nodeEls.forEach(g=>g.classList.remove("dim"));return;}
+  let hit=null;
+  nodeEls.forEach(g=>{
+    const m=(g._n.label+" "+g._n.author+" "+g._n.desc).toLowerCase().includes(q);
+    g.classList.toggle("dim",!m); if(m&&!hit)hit=g._n;
+  });
+});
+search.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    const q=search.value.trim().toLowerCase();
+    const hit=NODES.find(n=>(n.label+" "+n.author).toLowerCase().includes(q));
+    if(hit){switchView("map");openPanel(hit.id);
+      tx=W/2-hit.x*scale;ty=H/2-hit.y*scale;applyVP();}
+  }
+});
+
+/* ---- Intro / Como usar ---- */
+const intro=document.getElementById("intro");
+function showIntro(){intro.classList.add("show")}
+function hideIntro(){intro.classList.remove("show")}
+document.getElementById("introClose").onclick=hideIntro;
+document.getElementById("introGo").onclick=hideIntro;
+document.getElementById("helpBtn").onclick=showIntro;
+intro.addEventListener("click",e=>{if(e.target===intro)hideIntro()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")hideIntro()});
+showIntro(); // abre o guia ao carregar
+
+document.querySelectorAll("#view-diagrama [data-go]").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+document.querySelectorAll("#view-agenda [data-go]").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+
+window.addEventListener("resize",()=>{W=innerWidth;H=innerHeight-62;});
+applyVP(); render(); reheat(1);
+</script>
+</body>
+</html>

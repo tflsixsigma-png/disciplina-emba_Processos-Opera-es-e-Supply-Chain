@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Gestão de Compras — MBA</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #091525;
+  --navy2: #0d2040;
+  --paper: #f0f3f8;
+  --white: #ffffff;
+  --rust: #b84a2e;
+  --rust-light: #d4674e;
+  --gold: #c9922a;
+  --gold-light: #e8b84d;
+  --blue: #1a4a6e;
+  --text: #0d1f3c;
+  --text2: #3a4e66;
+  --muted: #607899;
+  --border: #c5cfd9;
+  --shadow: 0 2px 12px rgba(9,21,37,0.10);
+  --tab-h: 64px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--paper);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.65;
+  min-height: 100vh;
+  padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom));
+  padding-top: 56px;
+}
+
+/* ─── TOPBAR ─── */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  background: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 2px solid var(--gold);
+  z-index: 200;
+  padding: 0 1rem;
+}
+.topbar-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  text-align: center;
+}
+
+/* ─── BOTTOM TAB BAR ─── */
+.tab-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--tab-h);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--navy);
+  border-top: 2px solid rgba(201,146,42,0.4);
+  display: flex;
+  z-index: 200;
+  box-shadow: 0 -4px 20px rgba(9,21,37,0.35);
+}
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem 0.2rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  position: relative;
+  transition: background 0.18s;
+  min-width: 0;
+}
+.tab-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 0 0 3px 3px;
+  transform: scaleX(0);
+  transition: transform 0.2s;
+}
+.tab-btn.active::before { transform: scaleX(1); }
+.tab-btn:active { background: rgba(255,255,255,0.06); }
+.tab-icon { font-size: 1.15rem; line-height: 1; }
+.tab-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8090a8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transition: color 0.18s;
+}
+.tab-btn.active .tab-label { color: var(--gold-light); }
+
+/* ─── SECTIONS ─── */
+.section {
+  display: none;
+  animation: fadeUp 0.28s ease both;
+}
+.section.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── HERO BANNER (inside each section) ─── */
+.hero-banner {
+  background: linear-gradient(155deg, var(--navy) 0%, var(--navy2) 60%, #0f2d5a 100%);
+  padding: 1.75rem 1.25rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 90% 20%, rgba(201,146,42,0.15) 0%, transparent 65%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rust-light);
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.hero-eyebrow::before { content:''; display:inline-block; width:1.5rem; height:1px; background:var(--rust-light); }
+.hero-banner h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.55rem;
+  font-weight: 900;
+  line-height: 1.15;
+  color: #fff;
+  margin-bottom: 0.6rem;
+}
+.hero-banner h2 em { font-style: italic; color: var(--gold-light); }
+.hero-banner p {
+  font-size: 0.88rem;
+  color: #9bafc4;
+  line-height: 1.65;
+}
+
+/* ─── CONTENT WRAPPER ─── */
+.content { padding: 1rem 1rem 1.5rem; }
+
+/* ─── STAT ROW ─── */
+.stat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.9rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.stat-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--rust);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.stat-label { font-size: 0.75rem; color: var(--muted); line-height: 1.35; }
+
+/* ─── CALLOUT ─── */
+.callout {
+  background: rgba(201,146,42,0.09);
+  border: 1px solid rgba(201,146,42,0.28);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.1rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+.callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.1rem; }
+.callout p { font-size: 0.875rem; color: var(--text); line-height: 1.65; }
+.callout strong { color: var(--navy); }
+
+/* ─── SECTION CARD ─── */
+.s-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+}
+.s-card-top {
+  height: 4px;
+  background: var(--rust);
+}
+.s-card-top.gold { background: var(--gold); }
+.s-card-top.blue { background: var(--blue); }
+.s-card-top.slate { background: #1b3a5c; }
+.s-card-body { padding: 1.1rem 1.15rem; }
+.s-card-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+.s-card-body h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 0.5rem;
+  line-height: 1.25;
+}
+.s-card-body p { font-size: 0.875rem; color: var(--text2); line-height: 1.65; margin-bottom: 0.5rem; }
+.s-card-body p:last-child { margin-bottom: 0; }
+
+/* ─── ACCORDION ─── */
+.acc-group { margin-bottom: 1rem; }
+.acc-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--rust);
+  padding: 0 0 0.5rem;
+  margin-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+.acc-item {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(9,21,37,0.05);
+}
+.acc-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.95rem 1rem 0.95rem 1.1rem;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.4;
+  min-height: 52px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: background 0.15s;
+}
+.acc-btn:active { background: var(--paper); }
+.acc-btn.open { background: var(--navy); color: #fff; }
+.acc-chevron {
+  font-size: 0.65rem;
+  flex-shrink: 0;
+  transition: transform 0.22s;
+  color: var(--gold);
+  width: 20px;
+  text-align: center;
+}
+.acc-btn.open .acc-chevron { transform: rotate(180deg); color: var(--gold-light); }
+.acc-body {
+  display: none;
+  padding: 0.9rem 1.1rem;
+  font-size: 0.875rem;
+  color: var(--text2);
+  line-height: 1.68;
+  border-top: 1px solid var(--border);
+  background: #f8fafc;
+}
+.acc-body.open { display: block; }
+.acc-body p { margin-bottom: 0.5rem; }
+.acc-body p:last-child { margin-bottom: 0; }
+
+/* ─── DILEMA ACCORDION (dark style) ─── */
+.dilema-box {
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  border: 1.5px solid rgba(184,74,46,0.3);
+  box-shadow: 0 4px 16px rgba(9,21,37,0.15);
+}
+.dilema-trigger {
+  width: 100%;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+  border: none;
+  padding: 1rem 1.1rem;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 52px;
+}
+.dilema-trigger-left { display: flex; align-items: center; gap: 0.6rem; }
+.dilema-icon { font-size: 1rem; }
+.dilema-trigger h4 {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  margin: 0;
+  line-height: 1.3;
+}
+.dilema-chevron { font-size: 0.65rem; color: var(--gold-light); transition: transform 0.22s; flex-shrink: 0; }
+.dilema-trigger.open .dilema-chevron { transform: rotate(180deg); }
+.dilema-body { display: none; background: #0a1e35; }
+.dilema-body.open { display: block; }
+.dilema-list { list-style: none; }
+.dilema-list li {
+  color: #c0d0e0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  padding: 0.85rem 1.1rem 0.85rem 2.8rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  position: relative;
+}
+.dilema-list li:last-child { border-bottom: none; }
+.dilema-list li::before {
+  content: attr(data-num);
+  position: absolute;
+  left: 1rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--gold-light);
+  opacity: 0.8;
+  top: 0.9rem;
+}
+
+/* ─── CASE BOX ─── */
+.case-box {
+  background: var(--white);
+  border-left: 4px solid var(--rust);
+  border-radius: 0 10px 10px 0;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.case-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rust);
+  margin-bottom: 0.4rem;
+}
+.case-box h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+}
+.case-box p { font-size: 0.845rem; color: var(--text2); line-height: 1.65; }
+
+/* ─── APPLY BOX ─── */
+.apply-box {
+  background: var(--blue);
+  border-radius: 10px;
+  padding: 1.1rem;
+  margin-bottom: 1rem;
+}
+.apply-box h4 {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(232,184,77,0.75);
+  margin-bottom: 0.75rem;
+}
+.apply-list { list-style: none; }
+.apply-list li {
+  font-size: 0.875rem;
+  color: rgba(240,244,250,0.88);
+  line-height: 1.6;
+  padding: 0.5rem 0 0.5rem 1.4rem;
+  position: relative;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.apply-list li:last-child { border-bottom: none; }
+.apply-list li::before {
+  content: '?';
+  position: absolute;
+  left: 0;
+  font-family: 'DM Mono', monospace;
+  font-weight: 700;
+  color: var(--gold-light);
+  font-size: 0.8rem;
+}
+
+/* ─── TABLE ─── */
+.tbl-wrap {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: var(--shadow);
+}
+table { width: 100%; border-collapse: collapse; font-size: 0.83rem; background: var(--white); min-width: 380px; }
+thead th {
+  background: var(--navy);
+  color: #f0f3f8;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.7rem 0.8rem;
+  text-align: left;
+  font-weight: 500;
+}
+tbody tr { border-bottom: 1px solid var(--border); }
+tbody tr:last-child { border-bottom: none; }
+tbody td { padding: 0.7rem 0.8rem; vertical-align: top; line-height: 1.5; color: var(--text2); }
+.tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 500;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  white-space: nowrap;
+  display: inline-block;
+}
+.tag-r { background: rgba(184,74,46,0.12); color: var(--rust); }
+.tag-g { background: rgba(201,146,42,0.12); color: var(--gold); }
+.tag-b { background: rgba(26,74,110,0.12); color: var(--blue); }
+.tag-s { background: rgba(27,58,92,0.12); color: #1b3a5c; }
+
+/* ─── STEPS ─── */
+.steps { display: flex; flex-direction: column; gap: 0; position: relative; }
+.steps::before {
+  content: '';
+  position: absolute;
+  left: 1.25rem;
+  top: 1.5rem;
+  bottom: 1.5rem;
+  width: 2px;
+  background: var(--border);
+}
+.step { display: flex; gap: 1rem; padding: 0.9rem 0; position: relative; }
+.step-num {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--navy);
+  color: var(--gold-light);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.step-content { flex: 1; padding-top: 0.25rem; }
+.step-content h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 0.3rem;
+  line-height: 1.3;
+}
+.step-content p { font-size: 0.845rem; color: var(--text2); line-height: 1.6; }
+
+/* ─── QUADRANT GRID (2×2) ─── */
+.quadrant {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+}
+.q-cell {
+  padding: 0.9rem;
+  border: 1px solid rgba(0,0,0,0.07);
+  background: var(--white);
+}
+.q-cell-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+.q-cell h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 0.4rem;
+  line-height: 1.2;
+}
+.q-cell p { font-size: 0.78rem; color: var(--text2); line-height: 1.55; }
+.q-cell .q-ex { font-size: 0.72rem; font-style: italic; color: var(--muted); margin-top: 0.35rem; }
+.q-axis {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.4rem;
+  background: var(--paper);
+  border-top: 1px solid var(--border);
+}
+
+/* ─── CHESSBOARD ZONES ─── */
+.chess-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+}
+.chess-cell { padding: 0.9rem; border: 1px solid rgba(0,0,0,0.07); }
+.chess-cell.dark { background: var(--navy); }
+.chess-cell.light1 { background: #f0f4fa; }
+.chess-cell.light2 { background: #e6edf7; }
+.chess-cell.light3 { background: #dce5f2; }
+.chess-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+.chess-cell h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  line-height: 1.2;
+}
+.chess-cell.dark h4 { color: var(--gold-light); }
+.chess-cell p { font-size: 0.78rem; line-height: 1.55; }
+.chess-cell.dark p { color: #a0b4c8; }
+.chess-tactics { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.tactic {
+  font-size: 0.62rem;
+  padding: 0.15rem 0.4rem;
+  background: rgba(0,0,0,0.07);
+  border-radius: 3px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text2);
+}
+.chess-cell.dark .tactic { background: rgba(255,255,255,0.1); color: #c0d0e0; }
+
+/* ─── TIMELINE ─── */
+.timeline { position: relative; padding-left: 1.75rem; margin-bottom: 1rem; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0.4rem;
+  top: 0.4rem;
+  bottom: 0.4rem;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--rust), var(--gold));
+}
+.tl-item { position: relative; padding: 0 0 1rem 1rem; }
+.tl-item::before {
+  content: '';
+  position: absolute;
+  left: -1.42rem;
+  top: 0.3rem;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--rust);
+  border: 2px solid var(--paper);
+}
+.tl-item:last-child { padding-bottom: 0; }
+.tl-item h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 0.25rem;
+}
+.tl-item p { font-size: 0.845rem; color: var(--text2); line-height: 1.6; }
+
+/* ─── KPI CARDS ─── */
+.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 1rem; }
+.kpi-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem; text-align: center; box-shadow: var(--shadow); }
+.kpi-val { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--rust); line-height: 1; margin-bottom: 0.3rem; }
+.kpi-lbl { font-size: 0.72rem; color: var(--muted); line-height: 1.35; }
+
+/* ─── KEYPOINTS ─── */
+.kp-list { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1rem; }
+.kp-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+.kp-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--gold);
+  opacity: 0.55;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 2.2rem;
+  padding-top: 0.1rem;
+}
+.kp-body h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 0.25rem;
+}
+.kp-body p { font-size: 0.82rem; color: var(--text2); line-height: 1.6; }
+
+/* ─── EXEC QUESTIONS ─── */
+.eq-group { margin-bottom: 1.1rem; }
+.eq-group-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--rust);
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+.eq-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.eq-q {
+  padding: 0.9rem 2.8rem 0.9rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.5;
+  background: var(--white);
+  position: relative;
+  transition: background 0.15s;
+  min-height: 52px;
+}
+.eq-q::after {
+  content: '+';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+  color: var(--rust);
+  font-weight: 300;
+}
+.eq-item.open .eq-q { background: var(--navy); color: #fff; }
+.eq-item.open .eq-q::after { content: '×'; color: var(--gold-light); }
+.eq-insight {
+  display: none;
+  padding: 0.9rem 1rem;
+  background: #0a1e35;
+  color: #b8cce0;
+  font-size: 0.845rem;
+  line-height: 1.65;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.eq-item.open .eq-insight { display: block; }
+
+/* ─── TRENDS GRID ─── */
+.trends { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
+.trend-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.trend-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+.tc-1::before { background: var(--rust); }
+.tc-2::before { background: var(--gold); }
+.tc-3::before { background: var(--blue); }
+.tc-4::before { background: #1b3a5c; }
+.trend-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 0.1rem; }
+.trend-card h4 { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; color: var(--navy); margin-bottom: 0.3rem; }
+.trend-card p { font-size: 0.845rem; color: var(--text2); line-height: 1.6; }
+
+/* ─── COMPARE ─── */
+.compare { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
+.cmp-col { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--white); box-shadow: var(--shadow); }
+.cmp-head { padding: 0.7rem 1rem; font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+.cmp-old .cmp-head { background: var(--paper); color: var(--muted); border-bottom: 2px solid var(--border); }
+.cmp-new .cmp-head { background: var(--navy); color: var(--gold-light); border-bottom: 2px solid var(--rust); }
+.cmp-body { padding: 0.8rem 1rem; }
+.cmp-body ul { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+.cmp-body li { font-size: 0.845rem; color: var(--text2); padding-left: 1.2rem; position: relative; line-height: 1.45; }
+.cmp-old li::before { content: '✗'; position: absolute; left: 0; color: #b8c4cc; font-size: 0.7rem; }
+.cmp-new li::before { content: '✓'; position: absolute; left: 0; color: #2a8a5a; font-weight: 700; font-size: 0.7rem; }
+
+/* ─── REFLECTION BOX ─── */
+.reflection {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--gold);
+  border-radius: 0 10px 10px 0;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1rem;
+}
+.reflection .ref-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.4rem;
+}
+.reflection h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 0.4rem;
+}
+.reflection p { font-size: 0.845rem; color: var(--text2); line-height: 1.65; }
+
+/* ─── SECTION TITLE ─── */
+.section-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--rust);
+  margin: 1.25rem 0 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ─── FOOTER ─── */
+.footer {
+  background: var(--navy);
+  color: var(--muted);
+  padding: 1.25rem;
+  text-align: center;
+  font-size: 0.75rem;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  margin-bottom: 0.5rem;
+}
+.footer strong { color: #c8c0b4; }
+
+/* ─── UTILITY ─── */
+.mb-1 { margin-bottom: 1rem; }
+</style>
+<style id="disc-back-css">
+.disc-back{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-right:12px;padding:6px 11px;border-radius:6px;
+background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui,sans-serif;text-decoration:none!important;white-space:nowrap;letter-spacing:0;text-transform:none}
+.disc-back:hover{background:#fff}.disc-back:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.disc-back .bk{font-weight:500;opacity:.85}
+@media(max-width:560px){.disc-back .bk{display:none}header .header-meta{display:none}header .header-title{font-size:.95rem;line-height:1.2}}
+@media print{.disc-back{display:none}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+<a class="disc-back" href="../index.html" title="Voltar à página da disciplina">‹ Disciplina<span class="bk"> · Livro Cap. 4</span></a>
+  <div class="topbar-title">MBA · Gestão de Compras</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 1 — VISÃO GERAL
+══════════════════════════════════════════ -->
+<div class="section active" id="s-overview">
+  <div class="hero-banner">
+    <div class="hero-eyebrow">Contexto Estratégico</div>
+    <h2>O Novo Paradigma da Função de <em>Compras</em></h2>
+    <p>Compras não é sobre o menor preço — é sobre resiliência, inovação e continuidade do negócio.</p>
+  </div>
+  <div class="content">
+
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-value">60–80%</div><div class="stat-label">da receita em compras na manufatura</div></div>
+      <div class="stat-card"><div class="stat-value">5–7×</div><div class="stat-label">impacto no lucro vs. ganho em vendas</div></div>
+      <div class="stat-card"><div class="stat-value">42%</div><div class="stat-label">das disrupções vêm de fornecedores de 2º nível</div></div>
+      <div class="stat-card"><div class="stat-value">1983</div><div class="stat-label">Kraljic revoluciona a visão de compras na HBR</div></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">💡</div>
+      <p><strong>Alavancamento assimétrico:</strong> Redução de 3% no custo de suprimentos tem o mesmo impacto no EBITDA que aumento de 15–20% em receita — com risco operacional significativamente menor.</p>
+    </div>
+
+    <div class="section-title">Transformação da Função</div>
+    <div class="compare">
+      <div class="cmp-col cmp-old">
+        <div class="cmp-head">Compras Operacionais (Legado)</div>
+        <div class="cmp-body"><ul>
+          <li>Foco no menor preço unitário</li>
+          <li>Reativa: compra quando o estoque acaba</li>
+          <li>Sem visibilidade além do fornecedor direto</li>
+          <li>Métricas: economia de curto prazo</li>
+          <li>Relacionamento transacional e pontual</li>
+          <li>Ausência de gestão de risco sistêmica</li>
+        </ul></div>
+      </div>
+      <div class="cmp-col cmp-new">
+        <div class="cmp-head">Gestão Estratégica de Suprimentos</div>
+        <div class="cmp-body"><ul>
+          <li>Análise de Custo Total de Aquisição (TCO)</li>
+          <li>Proativa: antecipa riscos e oportunidades</li>
+          <li>Mapeamento de cadeia completo (Tier 1–3)</li>
+          <li>Métricas: valor, resiliência e inovação</li>
+          <li>Parcerias de longo prazo orientadas a resultados</li>
+          <li>Planos de contingência e diversificação ativa</li>
+        </ul></div>
+      </div>
+    </div>
+
+    <div class="section-title">Vetores de Risco</div>
+    <div class="acc-group">
+      <div class="acc-item">
+        <button class="acc-btn" onclick="toggleAcc(this)">🔴 &nbsp;Risco de Continuidade Operacional<span class="acc-chevron">▼</span></button>
+        <div class="acc-body"><p>A interrupção de um único fornecedor crítico pode paralisar operações inteiras. Em 2011, o tsunami no Japão interrompeu a cadeia da Toyota por semanas — expondo a fragilidade de modelos just-in-time sem planejamento de resiliência.</p><p><em>"Qual é nosso fornecedor mais crítico e o que acontece se ele parar amanhã?"</em></p></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" onclick="toggleAcc(this)">🟡 &nbsp;Risco Reputacional &amp; ESG<span class="acc-chevron">▼</span></button>
+        <div class="acc-body"><p>Associar-se a fornecedores com práticas inadequadas gera danos de marca superiores ao custo de uma auditoria preventiva. Em 2013, o colapso do Rana Plaza custou à H&amp;M bilhões em multas e reestruturação de cadeia.</p></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" onclick="toggleAcc(this)">🔵 &nbsp;Risco de Inovação<span class="acc-chevron">▼</span></button>
+        <div class="acc-body"><p>Empresas que dependem de fornecedores tecnologicamente estagnados perdem janelas de inovação. O sucesso da Apple com o chip M1 foi possível porque a empresa investiu décadas na relação com fornecedores de semicondutores antes de desenvolver capacidade própria.</p></div>
+      </div>
+    </div>
+
+    <div class="dilema-box">
+      <button class="dilema-trigger" onclick="toggleDilema(this)">
+        <div class="dilema-trigger-left"><span class="dilema-icon">🎯</span><h4>Dilemas Executivos</h4></div>
+        <span class="dilema-chevron">▼</span>
+      </button>
+      <div class="dilema-body">
+        <ul class="dilema-list">
+          <li data-num="01">Quanto da nossa vantagem competitiva depende de fornecedores que não gerenciamos ativamente?</li>
+          <li data-num="02">Se um concorrente capturar nosso principal fornecedor estratégico, qual seria o impacto em nossa margem?</li>
+          <li data-num="03">Estamos avaliando fornecedores pelo preço unitário ou pelo valor total ao longo de 3 a 5 anos?</li>
+          <li data-num="04">Nossa função de compras tem assento no comitê estratégico ou apenas recebe ordens de compra?</li>
+          <li data-num="05">Qual % do gasto passou por análise formal de TCO nos últimos 12 meses?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="case-box">
+      <div class="case-label">📌 Caso — Apple Inc.</div>
+      <h4>Controle da Cadeia como Moat Competitivo</h4>
+      <p>A Apple mantém contratos plurianuais exclusivos com fornecedores-chave — pagando antecipadamente por capacidade de fábrica. Resultado: margens brutas de 40%+ em hardware. Compras estratégicas é, aqui, a vantagem competitiva mais importante da empresa.</p>
+    </div>
+
+    <div class="apply-box">
+      <h4>🔧 Guia de Aplicação</h4>
+      <ul class="apply-list">
+        <li>Quais são nossos 10 maiores gastos e quem é responsável estrategicamente por cada um?</li>
+        <li>Temos mapeamento dos fornecedores de 2º e 3º nível para itens críticos?</li>
+        <li>Nossa política diferencia itens de alto impacto de itens rotineiros?</li>
+        <li>Quando revisamos a segmentação do portfólio de fornecedores?</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 2 — STRATEGIC SOURCING
+══════════════════════════════════════════ -->
+<div class="section" id="s-sourcing">
+  <div class="hero-banner">
+    <div class="hero-eyebrow">Capítulo 02 — Metodologia</div>
+    <h2>Strategic Sourcing: Da Análise à <em>Vantagem Competitiva</em></h2>
+    <p>Uma disciplina de gestão estratégica que transforma cada decisão de aquisição em ativo do negócio.</p>
+  </div>
+  <div class="content">
+
+    <div class="callout">
+      <div class="callout-icon">🔍</div>
+      <p><strong>TCO como bússola decisória:</strong> Um fornecedor 15% mais barato pode ser 30% mais caro quando se considera: lead time variável, não-conformidade, retrabalho, risco de ruptura, custo logístico e obsolescência.</p>
+    </div>
+
+    <div class="section-title">Componentes do TCO</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Componente</th><th>O que inclui</th><th>Frequência</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag tag-r">Aquisição</span></td><td>Preço, frete, tarifas, seguros</td><td>A cada cotação</td></tr>
+          <tr><td><span class="tag tag-g">Qualidade</span></td><td>Rejeições, retrabalho, recalls, auditorias</td><td>Trimestral</td></tr>
+          <tr><td><span class="tag tag-b">Operacional</span></td><td>Treinamento, manutenção, integração de sistemas</td><td>Anual</td></tr>
+          <tr><td><span class="tag tag-s">Risco</span></td><td>Ruptura, hedge cambial, estoque de segurança</td><td>Semestral</td></tr>
+          <tr><td><span class="tag tag-r">Fim de Ciclo</span></td><td>Descontinuação, migração, switching cost</td><td>Na renovação</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-title">O Processo em 7 Etapas</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">01</div><div class="step-content"><h4>Diagnóstico de Gastos</h4><p>O que compramos, de quem, a que custo. Conduzida no nível CEO/CFO/CPO. Equivale ao diagnóstico do portfólio antes de rebalancear.</p></div></div>
+      <div class="step"><div class="step-num">02</div><div class="step-content"><h4>Análise do Mercado Fornecedor</h4><p>Mapeamento da oferta global: capacidade, concentração, barreiras de entrada, tendências de preço e inovação por categoria.</p></div></div>
+      <div class="step"><div class="step-num">03</div><div class="step-content"><h4>Desenvolvimento da Estratégia</h4><p>Make-or-buy, single vs. multi-sourcing, local vs. global. Envolve equipe multifuncional: Jurídico, Finanças, TI e Operações.</p></div></div>
+      <div class="step"><div class="step-num">04</div><div class="step-content"><h4>Seleção de Fornecedores — RFI/RFP/RFQ</h4><p>Critérios ponderados: capacidade técnica 20–25%, TCO 20–25%, qualidade 15–20%, saúde financeira 10–15%, ESG 10%, inovação 5–10%.</p></div></div>
+      <div class="step"><div class="step-num">05</div><div class="step-content"><h4>Negociação e Contratação</h4><p>Além do preço: SLAs, reajuste, gain-sharing, propriedade intelectual, exit management. Contratos mal redigidos são passivo estratégico não registrado no balanço.</p></div></div>
+      <div class="step"><div class="step-num">06</div><div class="step-content"><h4>Implementação e Integração</h4><p>Integração de sistemas (ERP/EDI), alinhamento de processos. O "abismo de implementação" é onde contratos bem negociados se perdem na execução.</p></div></div>
+      <div class="step"><div class="step-num">07</div><div class="step-content"><h4>Benchmarking e Gestão Contínua</h4><p>KPIs, scorecard trimestral, revisão anual. O resultado desta etapa alimenta a Etapa 1 — o ciclo nunca termina.</p></div></div>
+    </div>
+
+    <div class="dilema-box">
+      <button class="dilema-trigger" onclick="toggleDilema(this)">
+        <div class="dilema-trigger-left"><span class="dilema-icon">🎯</span><h4>Dilemas Executivos — Sourcing</h4></div>
+        <span class="dilema-chevron">▼</span>
+      </button>
+      <div class="dilema-body">
+        <ul class="dilema-list">
+          <li data-num="01">Qual é o TCO real dos nossos 5 maiores fornecedores — não apenas o preço da nota fiscal?</li>
+          <li data-num="02">Estamos usando poder de compra de forma centralizada ou fragmentando volume e perdendo alavancagem?</li>
+          <li data-num="03">Contratos críticos vencem no próximo ano? Iniciamos renegociação com 12 meses de antecedência?</li>
+          <li data-num="04">A equipe de compras tem autoridade e dados para decisões estratégicas, ou apenas processa pedidos?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="case-box">
+      <div class="case-label">📌 Caso — Walmart</div>
+      <h4>Strategic Sourcing como Arma Competitiva Sistêmica</h4>
+      <p>O Walmart exige dados de custo abertos (open book costing), financia capital de giro de fornecedores estratégicos e negocia contratos plurianuais com volume garantido. Resultado: margens brutas 3–5pp superiores à maioria dos concorrentes — diferença que vem inteiramente da gestão de compras.</p>
+    </div>
+
+    <div class="apply-box">
+      <h4>🔧 Guia de Aplicação</h4>
+      <ul class="apply-list">
+        <li>Conseguimos mapear o TCO dos 20 maiores fornecedores, incluindo custos ocultos?</li>
+        <li>Temos processo formal de RFP com critérios ponderados — ou decidimos por relacionamento e preço?</li>
+        <li>Nossas negociações envolvem Jurídico, Finanças e área técnica, além de Compras?</li>
+        <li>Qual % dos contratos ativos foi renegociado nos últimos 24 meses?</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 3 — KRALJIC
+══════════════════════════════════════════ -->
+<div class="section" id="s-kraljic">
+  <div class="hero-banner">
+    <div class="hero-eyebrow">Capítulo 03 — Framework Analítico</div>
+    <h2>Matriz Kraljic: Recursos <em>Onde Geram Valor</em></h2>
+    <p>Tratar todos os fornecedores da mesma forma é um erro de gestão com custo mensurável.</p>
+  </div>
+  <div class="content">
+
+    <div class="callout">
+      <div class="callout-icon">⚡</div>
+      <p><strong>Premissa central (HBR, 1983):</strong> O portfólio de compras é heterogêneo por natureza. Aplicar a mesma estratégia a material de escritório e a um componente crítico equivale a tratar todos os clientes com o mesmo nível de atenção.</p>
+    </div>
+
+    <div class="section-title">Os 4 Quadrantes</div>
+    <div class="quadrant">
+      <div class="q-cell">
+        <div class="q-cell-tag" style="color:#c9922a;">★ Alto Impacto · Baixo Risco</div>
+        <h4>Alavancagem</h4>
+        <p>Explorar poder de compra: licitações competitivas, consolidação de volume, benchmarking contínuo.</p>
+        <div class="q-ex">Ex: Aço, embalagens, TI comoditizada</div>
+      </div>
+      <div class="q-cell">
+        <div class="q-cell-tag" style="color:#b84a2e;">⚠ Alto Impacto · Alto Risco</div>
+        <h4>Estratégico</h4>
+        <p>Parcerias de longo prazo, contratos 3–5 anos, gain-sharing, codesenvolvimento.</p>
+        <div class="q-ex">Ex: ERP crítico, motores, fármacos patenteados</div>
+      </div>
+      <div class="q-cell">
+        <div class="q-cell-tag" style="color:#1b3a5c;">○ Baixo Impacto · Baixo Risco</div>
+        <h4>Não-Crítico</h4>
+        <p>Automatizar pedidos, reduzir SKUs, e-procurement. Minimizar custo administrativo.</p>
+        <div class="q-ex">Ex: Material de escritório, EPIs básicos</div>
+      </div>
+      <div class="q-cell">
+        <div class="q-cell-tag" style="color:#1a4a6e;">! Baixo Impacto · Alto Risco</div>
+        <h4>Gargalo</h4>
+        <p>Desenvolver fontes alternativas, estoque de segurança estratégico, transferência de tecnologia.</p>
+        <div class="q-ex">Ex: Componentes raros, gases especiais</div>
+      </div>
+      <div class="q-axis">← Baixo Risco de Fornecimento · · · Alto Risco →</div>
+    </div>
+
+    <div class="section-title">Limitações Críticas</div>
+    <div class="acc-group">
+      <div class="acc-item">
+        <button class="acc-btn" onclick="toggleAcc(this)">Natureza Estática — Foto, Não Filme<span class="acc-chevron">▼</span></button>
+        <div class="acc-body"><p>Um fornecedor "não-crítico" em 2022 pode ser estratégico em 2025. Empresas que classificaram semicondutores como "alavancagem" pré-2020 sofreram com a crise de chips sem planos de contingência. Revisão anual é obrigatória.</p></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" onclick="toggleAcc(this)">Ausência de Perspectiva ESG<span class="acc-chevron">▼</span></button>
+        <div class="acc-body"><p>A matriz não incorpora sustentabilidade, práticas trabalhistas ou impacto ambiental. Com o CSRD europeu, um fornecedor "de baixo risco" financeiro pode ser de altíssimo risco reputacional. Precisa ser complementada com avaliação ESG sistemática.</p></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" onclick="toggleAcc(this)">Foco no Tier 1 — Cegueira Estrutural<span class="acc-chevron">▼</span></button>
+        <div class="acc-body"><p>42% das disrupções ocorrem em fornecedores de 2º e 3º nível. A Toyota descobriu pós-2011 que dependia de um único fornecedor de pigmento para 40% dos seus modelos — risco invisível na análise de Kraljic.</p></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" onclick="toggleAcc(this)">Poder de Barganha Simplificado<span class="acc-chevron">▼</span></button>
+        <div class="acc-body"><p>A matriz trata poder de barganha como binário (alto/baixo). O Purchase Chessboard da A.T. Kearney complementa com 64 abordagens táticas calibradas para posições intermediárias.</p></div>
+      </div>
+    </div>
+
+    <div class="dilema-box">
+      <button class="dilema-trigger" onclick="toggleDilema(this)">
+        <div class="dilema-trigger-left"><span class="dilema-icon">🎯</span><h4>Dilemas Executivos — Kraljic</h4></div>
+        <span class="dilema-chevron">▼</span>
+      </button>
+      <div class="dilema-body">
+        <ul class="dilema-list">
+          <li data-num="01">Quando revisamos a classificação do portfólio? Algum item "não-crítico" se tornou estratégico?</li>
+          <li data-num="02">Temos fornecedores de gargalo sem plano de contingência documentado?</li>
+          <li data-num="03">Estamos gastando energia em itens não-críticos enquanto fornecedores estratégicos operam sem SLA?</li>
+          <li data-num="04">Nossa análise de risco inclui fornecedores de 2º e 3º nível para itens estratégicos?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="case-box">
+      <div class="case-label">📌 Caso — Boeing 787 Dreamliner</div>
+      <h4>O Custo de Não Gerenciar Fornecedores Estratégicos</h4>
+      <p>A Boeing delegou 70% da produção do 787 a fornecedores em 40 países sem governança adequada para itens estratégicos. Resultado: atrasos de 3 anos e custos 200% acima do planejado. Classificar corretamente é apenas o começo — é preciso construir a governança correspondente.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4 — CHESSBOARD
+══════════════════════════════════════════ -->
+<div class="section" id="s-chess">
+  <div class="hero-banner">
+    <div class="hero-eyebrow">Capítulo 04 — Framework Tático</div>
+    <h2>Purchase Chessboard: <em>64 Formas</em> de Criar Valor</h2>
+    <p>Se Kraljic diz onde focar, o Chessboard da A.T. Kearney diz como agir — calibrado pelo equilíbrio de poder real.</p>
+  </div>
+  <div class="content">
+
+    <div class="callout">
+      <div class="callout-icon">♟️</div>
+      <p><strong>A lógica do tabuleiro:</strong> 64 abordagens táticas calibradas pelo poder de demanda do comprador e pelo poder de oferta do fornecedor. A estratégia ideal depende das peças em jogo — não de uma fórmula universal.</p>
+    </div>
+
+    <div class="section-title">As 4 Zonas Estratégicas</div>
+    <div class="chess-grid">
+      <div class="chess-cell light1">
+        <div class="chess-tag" style="color:#b84a2e;">Zona I — Baixo Poder Mútuo</div>
+        <h4>Gerenciar os Gastos</h4>
+        <p>O mercado dita as condições. Consolidar demanda, padronizar especificações, reduzir custo de transação.</p>
+        <div class="chess-tactics"><span class="tactic">E-procurement</span><span class="tactic">Co-sourcing</span><span class="tactic">Padronização</span></div>
+      </div>
+      <div class="chess-cell light2">
+        <div class="chess-tag" style="color:#b84a2e;">Zona II — Comprador Forte</div>
+        <h4>Alavancar a Competição</h4>
+        <p>Criar rivalidade entre fornecedores. Leilões reversos, target pricing, globalização da base.</p>
+        <div class="chess-tactics"><span class="tactic">Leilão reverso</span><span class="tactic">Target pricing</span><span class="tactic">Multisourcing</span></div>
+      </div>
+      <div class="chess-cell light3">
+        <div class="chess-tag" style="color:#b84a2e;">Zona III — Fornecedor Forte</div>
+        <h4>Mudar a Natureza</h4>
+        <p>Reconfigurar o que se compra. Re-especificação técnica, design to cost, ruptura tecnológica.</p>
+        <div class="chess-tactics"><span class="tactic">Re-especificação</span><span class="tactic">Design to cost</span><span class="tactic">Ruptura técnica</span></div>
+      </div>
+      <div class="chess-cell dark">
+        <div class="chess-tag" style="color:#e8b84d;">Zona IV — Alto Poder Mútuo</div>
+        <h4>Vantagem Conjunta</h4>
+        <p>Parceria profunda: gain-sharing, codesenvolvimento de P&amp;D, integração de cadeia.</p>
+        <div class="chess-tactics"><span class="tactic">Joint venture</span><span class="tactic">Gain-sharing</span><span class="tactic">Co-P&amp;D</span></div>
+      </div>
+    </div>
+
+    <div class="section-title">Kraljic vs. Chessboard</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Dimensão</th><th>Kraljic</th><th>Chessboard</th></tr></thead>
+        <tbody>
+          <tr><td>Pergunta central</td><td>Qual a importância estratégica?</td><td>Qual o equilíbrio de poder?</td></tr>
+          <tr><td>Eixos</td><td>Impacto × Risco</td><td>Poder comprador × Poder fornecedor</td></tr>
+          <tr><td>Output</td><td>4 quadrantes estratégicos</td><td>64 alavancas táticas</td></tr>
+          <tr><td>Uso ideal</td><td>Priorização de recursos</td><td>Negociação e contratação</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">🔑</div>
+      <p><strong>Fluxo recomendado:</strong> Use Kraljic para posicionar o fornecedor → Chessboard para calibrar como negociar. Um fornecedor "estratégico" na Kraljic pode estar na Zona III do Chessboard, exigindo re-especificação antes de qualquer negociação de preço.</p>
+    </div>
+
+    <div class="dilema-box">
+      <button class="dilema-trigger" onclick="toggleDilema(this)">
+        <div class="dilema-trigger-left"><span class="dilema-icon">🎯</span><h4>Dilemas Executivos — Chessboard</h4></div>
+        <span class="dilema-chevron">▼</span>
+      </button>
+      <div class="dilema-body">
+        <ul class="dilema-list">
+          <li data-num="01">Para cada fornecedor crítico: sabemos qual é o nosso poder de compra real — não o percebido?</li>
+          <li data-num="02">Quando o fornecedor tem alto poder (Zona III), nossa equipe usa re-especificação como alavanca?</li>
+          <li data-num="03">Estamos usando estratégias de Zona II em relações que deveriam ser de Zona IV, destruindo valor?</li>
+          <li data-num="04">Temos acordos de gain-sharing com fornecedores que co-criam inovação conosco?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="case-box">
+      <div class="case-label">📌 Caso — Volkswagen e CATL</div>
+      <h4>Da Zona III à Zona IV — Transição Gerenciada</h4>
+      <p>Em 2018 a VW dependia fortemente da CATL para baterias (Zona III). Em vez de aceitar a dependência, investiu €2,5 bilhões em tecnologia própria e negociou participação em fornecedores alternativos. Em 5 anos migrou para Zona IV, com múltiplos fornecedores e tecnologia proprietária em desenvolvimento.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 5 — GESTÃO SRM
+══════════════════════════════════════════ -->
+<div class="section" id="s-srm">
+  <div class="hero-banner">
+    <div class="hero-eyebrow">Capítulo 05 — Execução e Governança</div>
+    <h2>SRM: Fornecedores como <em>Parceiros Estratégicos</em></h2>
+    <p>Contratos são documentos. Relacionamentos são ativos. O SRM converte contratos bem escritos em vantagem competitiva.</p>
+  </div>
+  <div class="content">
+
+    <div class="section-title">KPIs e SLAs Essenciais</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Dimensão</th><th>Indicador</th><th>Benchmark</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag tag-b">Qualidade</span></td><td>DPPM (Defeitos por Milhão)</td><td>&lt; 50 DPPM</td></tr>
+          <tr><td><span class="tag tag-b">Qualidade</span></td><td>Índice de Rejeição</td><td>&lt; 0,5%</td></tr>
+          <tr><td><span class="tag tag-g">Entrega</span></td><td>OTIF (On Time In Full)</td><td>&gt; 95%</td></tr>
+          <tr><td><span class="tag tag-g">Entrega</span></td><td>Lead Time Médio</td><td>Por categoria</td></tr>
+          <tr><td><span class="tag tag-r">Custo</span></td><td>Price Variance</td><td>≤ 0%</td></tr>
+          <tr><td><span class="tag tag-r">Custo</span></td><td>Saving vs. Meta</td><td>&gt; 100%</td></tr>
+          <tr><td><span class="tag tag-s">Risco</span></td><td>Saúde Financeira</td><td>Revisão trimestral</td></tr>
+          <tr><td><span class="tag tag-s">Relac.</span></td><td>NPS Bilateral</td><td>&gt; 50</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-title">Governança e Desenvolvimento</div>
+    <div class="acc-group">
+      <div class="acc-item">
+        <button class="acc-btn" onclick="toggleAcc(this)">O Que Todo Contrato Estratégico Deve Incluir<span class="acc-chevron">▼</span></button>
+        <div class="acc-body"><p>SLA com métricas e penalidades claras, cláusulas de ajuste de preço com indexadores definidos, propriedade intelectual e confidencialidade (especialmente em P&amp;D), plano de continuidade e exit management, direito de auditoria e compliance ESG.</p><p>Contratos sem exit management criam dependência implícita — o custo de troca efetivo supera o contratual.</p></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" onclick="toggleAcc(this)">Executive Sponsorship — O Nível Certo<span class="acc-chevron">▼</span></button>
+        <div class="acc-body"><p>Fornecedores estratégicos devem ter um executivo sênior designado como "padrinho" — alguém que participa de QBRs (Quarterly Business Reviews) e tem autoridade para resolver impasses sem escalonamento burocrático. A Toyota chama isso de "supplier partnership".</p></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" onclick="toggleAcc(this)">Trade-offs Inevitáveis<span class="acc-chevron">▼</span></button>
+        <div class="acc-body">
+          <p><strong>Concentrar vs. Diversificar:</strong> Maior poder de barganha × risco de dependência e ruptura.</p>
+          <p><strong>Contratos curtos vs. longos:</strong> Flexibilidade × previsibilidade e investimento do fornecedor.</p>
+          <p><strong>Menor preço vs. TCO:</strong> Saving imediato × custo total e qualidade comprometida.</p>
+          <p>Não existe resposta universal. O gestor competente torna esses dilemas explícitos e os gerencia com critério.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Desenvolvimento de Fornecedores</div>
+    <div class="timeline">
+      <div class="tl-item"><h4>Capacitação Técnica</h4><p>Treinamentos em Lean, Six Sigma, gestão financeira e transformação digital. A Toyota enviou engenheiros para 200 fornecedores durante a pandemia — reduzindo rupturas enquanto concorrentes sofriam escassez.</p></div>
+      <div class="tl-item"><h4>Compartilhamento de Tecnologia</h4><p>Licenciamento de processos para elevar a capacidade do fornecedor, criando dependência mútua gerenciada e maior interesse em manter a relação.</p></div>
+      <div class="tl-item"><h4>Coinvestimento em Capacidade</h4><p>Participação financeira em expansão ou atualização tecnológica. Garante prioridade de fornecimento e compartilha o risco. Usado pela Apple com fornecedores de displays OLED.</p></div>
+      <div class="tl-item"><h4>Kaizen Colaborativo</h4><p>Equipes mistas empresa-fornecedor para resolver gargalos. Reduções de 10–25% no TCO são comuns — sem demandar concessão de preço.</p></div>
+      <div class="tl-item"><h4>Programas de Certificação</h4><p>Selos de qualidade (Boeing Supplier Excellence, Toyota TPS Certified) criam ativo de reputação — incentivo para manter padrões além da vigência do contrato.</p></div>
+    </div>
+
+    <div class="dilema-box">
+      <button class="dilema-trigger" onclick="toggleDilema(this)">
+        <div class="dilema-trigger-left"><span class="dilema-icon">🎯</span><h4>Dilemas Executivos — SRM</h4></div>
+        <span class="dilema-chevron">▼</span>
+      </button>
+      <div class="dilema-body">
+        <ul class="dilema-list">
+          <li data-num="01">Nossos fornecedores estratégicos têm scorecard trimestral formal — ou apenas avaliação informal?</li>
+          <li data-num="02">Investimos ativamente no desenvolvimento de fornecedores críticos, ou esperamos que evoluam sozinhos?</li>
+          <li data-num="03">Quando um fornecedor performa abaixo do SLA, temos protocolo claro de escalonamento?</li>
+          <li data-num="04">Monitoramos a saúde financeira dos nossos top 10 fornecedores trimestralmente?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="case-box">
+      <div class="case-label">📌 Caso — Toyota Production System</div>
+      <h4>SRM como Vantagem Competitiva Irreproduzível</h4>
+      <p>A Toyota mantém desenvolvimento de fornecedores há mais de 60 anos: envia engenheiros do TPS para instalações, compartilha ferramentas e cria ecossistema de parceiros certificados. Resultado: fornecedores Toyota entregam DPPM 10× inferior à média da indústria.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 6 — INOVAÇÃO & ESG
+══════════════════════════════════════════ -->
+<div class="section" id="s-futuro">
+  <div class="hero-banner">
+    <div class="hero-eyebrow">Capítulo 06 — Perspectivas Futuras</div>
+    <h2>Compras na Era da <em>IA, ESG e Indústria 5.0</em></h2>
+    <p>A digitalização torna a estratégia possível em escala. Resiliência, sustentabilidade e ética são critérios competitivos — não opcionais.</p>
+  </div>
+  <div class="content">
+
+    <div class="trends">
+      <div class="trend-card tc-1"><div class="trend-icon">🤖</div><div><h4>Inteligência Artificial em Compras</h4><p>Modelos preditivos de demanda, análise de risco em tempo real, otimização logística. A IA não substitui a decisão estratégica — libera o gestor para tomá-la com melhor informação. Coupa, Jaggaer e SAP Ariba já embarcam IA nos fluxos.</p></div></div>
+      <div class="trend-card tc-2"><div class="trend-icon">🌿</div><div><h4>ESG na Cadeia de Suprimentos</h4><p>O CSRD europeu exige reporte de emissões Scope 3 — incluindo fornecedores. ESG migrou de "boa prática" para obrigação regulatória com impacto no acesso a capital. EcoVadis permite avaliação sistemática do desempenho ESG.</p></div></div>
+      <div class="trend-card tc-3"><div class="trend-icon">⛓️</div><div><h4>Blockchain e Rastreabilidade</h4><p>Registro imutável de cada etapa da cadeia. Walmart rastreia produtos frescos em minutos (antes: dias). De Beers rastreia diamantes da mina ao varejista, eliminando "diamantes de conflito".</p></div></div>
+      <div class="trend-card tc-4"><div class="trend-icon">🏭</div><div><h4>Indústria 5.0 — Além da Automação</h4><p>Reintegra o humano ao centro — com foco em resiliência e bem-estar. Em compras: fornecedores locais por design, cadeias mais curtas, parceiros com capacidade de adaptação rápida.</p></div></div>
+    </div>
+
+    <div class="section-title">3 Prioridades para C-Level</div>
+    <div class="acc-group">
+      <div class="acc-item">
+        <button class="acc-btn" onclick="toggleAcc(this)">01 — Resiliência Sistêmica<span class="acc-chevron">▼</span></button>
+        <div class="acc-body"><p>Cadeias otimizadas só para custo são estruturalmente frágeis. O novo paradigma: diversificação geográfica planejada (friendshoring), estoques estratégicos para itens críticos e planos de contingência testados.</p><p><em>Métrica: % de categorias estratégicas com fonte alternativa qualificada em &lt; 90 dias.</em></p></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" onclick="toggleAcc(this)">02 — Sustentabilidade Mensurável<span class="acc-chevron">▼</span></button>
+        <div class="acc-body"><p>ESG passou de diferencial para requisito. Walmart, Apple e BMW exigem conformidade ESG de fornecedores como critério contratual. Quem não prepara sua cadeia perderá contratos — não por preço, mas por risco regulatório.</p><p><em>Métrica: Score EcoVadis para 100% dos fornecedores estratégicos.</em></p></div>
+      </div>
+      <div class="acc-item">
+        <button class="acc-btn" onclick="toggleAcc(this)">03 — Parcerias de Inovação Aberta<span class="acc-chevron">▼</span></button>
+        <div class="acc-body"><p>Os próximos avanços competitivos de muitas indústrias nascerão em fornecedores — não internamente. Parcerias de codesenvolvimento geram acesso antecipado à inovação e poder de exclusividade temporária.</p><p><em>Métrica: % de inovações lançadas com participação de fornecedor estratégico.</em></p></div>
+      </div>
+    </div>
+
+    <div class="dilema-box">
+      <button class="dilema-trigger" onclick="toggleDilema(this)">
+        <div class="dilema-trigger-left"><span class="dilema-icon">🎯</span><h4>Dilemas Executivos — Futuro</h4></div>
+        <span class="dilema-chevron">▼</span>
+      </button>
+      <div class="dilema-body">
+        <ul class="dilema-list">
+          <li data-num="01">Nossa cadeia sobreviveria a uma disrupção de 90 dias em um único país de importação estratégica?</li>
+          <li data-num="02">Sabemos qual é a pegada de carbono (Scope 3) da nossa cadeia? Estamos preparados para o CSRD?</li>
+          <li data-num="03">Nossos contratos incluem cláusulas de codesenvolvimento e propriedade intelectual compartilhada?</li>
+          <li data-num="04">Nossa equipe usa IA para análise — ou ainda depende de planilhas e intuição?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="case-box">
+      <div class="case-label">📌 Caso — NVIDIA (2023–2024)</div>
+      <h4>Quem Gerencia a Cadeia Controla o Mercado</h4>
+      <p>A NVIDIA bloqueou antecipadamente capacidade de produção na TSMC com contratos plurianuais em 2021 — antes que a demanda por GPUs para IA explodisse. Em 2023, tinha fornecimento garantido a preços pré-acordados enquanto concorrentes pagavam prêmios de 3–5×. Gestão estratégica de compras criou um monopólio temporário de 18 meses.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SECTION 7 — SÍNTESE
+══════════════════════════════════════════ -->
+<div class="section" id="s-sintese">
+  <div class="hero-banner">
+    <div class="hero-eyebrow">Síntese da Sessão</div>
+    <h2>10 Pontos-Chave e <em>Questões Executivas</em></h2>
+    <p>Para consolidar os aprendizados e levar ao ambiente profissional os princípios que definem gestão de compras de alto desempenho.</p>
+  </div>
+  <div class="content">
+
+    <div class="section-title">Os 10 Pontos-Chave</div>
+    <div class="kp-list">
+      <div class="kp-item"><div class="kp-num">01</div><div class="kp-body"><h4>Gestão diferenciada por criticidade</h4><p>Fornecedores estratégicos exigem abordagem radicalmente diferente. Tratar todos igual é erro de alocação com custo direto no P&amp;L.</p></div></div>
+      <div class="kp-item"><div class="kp-num">02</div><div class="kp-body"><h4>Matriz Kraljic como ponto de partida</h4><p>4 quadrantes, 4 estratégias distintas. A classificação correta define onde concentrar energia gerencial e poder de negociação.</p></div></div>
+      <div class="kp-item"><div class="kp-num">03</div><div class="kp-body"><h4>Chessboard calibra a tática</h4><p>O equilíbrio de poder real determina qual das 64 alavancas usar. Estratégias de Zona II em relações de Zona IV destroem valor.</p></div></div>
+      <div class="kp-item"><div class="kp-num">04</div><div class="kp-body"><h4>TCO supera preço como critério</h4><p>O fornecedor mais barato raramente é o mais econômico. Qualidade, risco, logística e switching cost impactam o EBITDA.</p></div></div>
+      <div class="kp-item"><div class="kp-num">05</div><div class="kp-body"><h4>Seleção multicritério é inegociável</h4><p>Capacidade técnica, TCO, saúde financeira, ESG e inovação — não apenas o preço da proposta.</p></div></div>
+      <div class="kp-item"><div class="kp-num">06</div><div class="kp-body"><h4>KPIs e SLAs são a fundação</h4><p>OTIF, DPPM, price variance — sem métricas objetivas, gestão de fornecedores é percepção, não gestão.</p></div></div>
+      <div class="kp-item"><div class="kp-num">07</div><div class="kp-body"><h4>SRM: fornecedores como parceiros</h4><p>Executive sponsorship, QBRs estruturados e portais de comunicação convertem contratos em vantagem operacional real.</p></div></div>
+      <div class="kp-item"><div class="kp-num">08</div><div class="kp-body"><h4>Desenvolvimento é investimento</h4><p>Capacitar e coinvestir em fornecedores estratégicos gera retornos em qualidade, resiliência e inovação.</p></div></div>
+      <div class="kp-item"><div class="kp-num">09</div><div class="kp-body"><h4>Trade-offs devem ser explícitos</h4><p>Concentração vs. diversificação, curto vs. longo prazo — o gestor competente os torna visíveis ao board com critérios claros.</p></div></div>
+      <div class="kp-item"><div class="kp-num">10</div><div class="kp-body"><h4>Frameworks são ferramentas, não dogmas</h4><p>Kraljic, Chessboard e Strategic Sourcing são mapas. O julgamento contextual e a experiência humana são insubstituíveis.</p></div></div>
+    </div>
+
+    <div class="section-title">Questões Executivas Centrais</div>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem;line-height:1.6;">Toque em cada pergunta para revelar o insight estratégico. Use em reuniões de diretoria ou autoavaliação de maturidade.</p>
+
+    <div class="eq-group">
+      <div class="eq-group-label">Portfólio e Segmentação</div>
+      <div class="eq-item" onclick="this.classList.toggle('open')"><div class="eq-q">Quando revisamos formalmente a segmentação do portfólio pela Matriz Kraljic?</div><div class="eq-insight">Organizações que não revisam anualmente aplicam estratégias erradas a categorias que migraram de quadrante — como ocorreu com semicondutores em 2020.</div></div>
+      <div class="eq-item" onclick="this.classList.toggle('open')"><div class="eq-q">Qual é o TCO dos nossos 5 maiores fornecedores — não apenas o valor da nota fiscal?</div><div class="eq-insight">Se a resposta não estiver disponível em menos de 48h, a organização não tem dados para gestão estratégica. Spend analytics é pré-requisito, não luxo.</div></div>
+      <div class="eq-item" onclick="this.classList.toggle('open')"><div class="eq-q">Temos fornecedores de gargalo sem plano de contingência documentado e testado?</div><div class="eq-insight">Itens de gargalo são os mais traiçoeiros: baixo valor percebido, mas capazes de paralisar operações inteiras. Merecem atenção prioritária.</div></div>
+    </div>
+
+    <div class="eq-group">
+      <div class="eq-group-label">Negociação e Contratos</div>
+      <div class="eq-item" onclick="this.classList.toggle('open')"><div class="eq-q">Sabemos o poder de compra real em cada fornecedor crítico — e usamos a estratégia correta do Chessboard?</div><div class="eq-insight">Estratégias de Zona II (pressão) com fornecedores de Zona IV (parceria) destroem relacionamentos e perdem inovação sem ganhar preço.</div></div>
+      <div class="eq-item" onclick="this.classList.toggle('open')"><div class="eq-q">Nossos contratos estratégicos incluem SLA com penalidades, exit management e direito de auditoria?</div><div class="eq-insight">Contratos sem exit management criam dependência implícita. O custo de troca real supera frequentemente o custo contratual visível.</div></div>
+      <div class="eq-item" onclick="this.classList.toggle('open')"><div class="eq-q">Qual % dos contratos vence nos próximos 12 meses? Já iniciamos a renegociação?</div><div class="eq-insight">Renegociar sob pressão do vencimento garante as piores condições. Regra de ouro: comece 12–18 meses antes.</div></div>
+    </div>
+
+    <div class="eq-group">
+      <div class="eq-group-label">Monitoramento e Desenvolvimento</div>
+      <div class="eq-item" onclick="this.classList.toggle('open')"><div class="eq-q">Nossos fornecedores estratégicos têm scorecard trimestral com KPIs objetivos?</div><div class="eq-insight">Sem scorecard, decisões de troca são baseadas em percepção e relacionamento — favorecendo acesso político, não desempenho.</div></div>
+      <div class="eq-item" onclick="this.classList.toggle('open')"><div class="eq-q">Monitoramos a saúde financeira dos nossos top 10 fornecedores trimestralmente?</div><div class="eq-insight">A falência de um fornecedor estratégico raramente surpresa quem acompanha rating de crédito, DRE e fluxo de caixa. A maioria das empresas ignora esses alertas precoces.</div></div>
+    </div>
+
+    <div class="eq-group">
+      <div class="eq-group-label">Futuro e Resiliência</div>
+      <div class="eq-item" onclick="this.classList.toggle('open')"><div class="eq-q">Nossa cadeia sobreviveria a uma disrupção de 90 dias num único país de importação estratégica?</div><div class="eq-insight">Cadeias otimizadas só para custo são frágeis. A pandemia revelou que a maioria das empresas não tinha essa resposta — e pagou caro.</div></div>
+      <div class="eq-item" onclick="this.classList.toggle('open')"><div class="eq-q">Nossa função de compras tem assento no comitê estratégico e fala a linguagem do CFO e CTO?</div><div class="eq-insight">Redução de 3% em suprimentos = +15% de receita em EBITDA. CPOs que só falam de savings perdem essa batalha de visibilidade — e de orçamento.</div></div>
+    </div>
+
+    <div class="reflection">
+      <div class="ref-label">💡 Reflexão Final</div>
+      <h4>A Pergunta que Define Maturidade</h4>
+      <p>Se seu principal concorrente contratar hoje seu melhor fornecedor estratégico em exclusividade — qual seria o impacto em 6, 12 e 24 meses? Se você não souber responder em menos de 5 minutos, a gestão estratégica de suprimentos da sua organização ainda tem um longo caminho a percorrer.</p>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <p><strong>Gestão Estratégica de Compras e Suprimentos</strong></p>
+    <p style="margin-top:0.3rem;font-size:0.7rem;">Material didático complementar · EMBA</p>
+  </footer>
+</div>
+
+<!-- BOTTOM TAB BAR -->
+<nav class="tab-bar">
+  <button class="tab-btn active" onclick="showSection('s-overview', this)">
+    <span class="tab-icon">🏠</span>
+    <span class="tab-label">Visão Geral</span>
+  </button>
+  <button class="tab-btn" onclick="showSection('s-sourcing', this)">
+    <span class="tab-icon">🔄</span>
+    <span class="tab-label">Sourcing</span>
+  </button>
+  <button class="tab-btn" onclick="showSection('s-kraljic', this)">
+    <span class="tab-icon">📊</span>
+    <span class="tab-label">Kraljic</span>
+  </button>
+  <button class="tab-btn" onclick="showSection('s-chess', this)">
+    <span class="tab-icon">♟️</span>
+    <span class="tab-label">Chessboard</span>
+  </button>
+  <button class="tab-btn" onclick="showSection('s-srm', this)">
+    <span class="tab-icon">🤝</span>
+    <span class="tab-label">SRM</span>
+  </button>
+  <button class="tab-btn" onclick="showSection('s-futuro', this)">
+    <span class="tab-icon">🚀</span>
+    <span class="tab-label">Futuro</span>
+  </button>
+  <button class="tab-btn" onclick="showSection('s-sintese', this)">
+    <span class="tab-icon">🏆</span>
+    <span class="tab-label">Síntese</span>
+  </button>
+</nav>
+
+<script>
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleAcc(btn) {
+  const body = btn.nextElementSibling;
+  const isOpen = btn.classList.contains('open');
+  // close siblings
+  btn.closest('.acc-group').querySelectorAll('.acc-btn').forEach(b => {
+    b.classList.remove('open');
+    if (b.nextElementSibling) b.nextElementSibling.classList.remove('open');
+  });
+  if (!isOpen) {
+    btn.classList.add('open');
+    body.classList.add('open');
+  }
+}
+
+function toggleDilema(btn) {
+  const body = btn.nextElementSibling;
+  const isOpen = btn.classList.contains('open');
+  btn.classList.toggle('open', !isOpen);
+  body.classList.toggle('open', !isOpen);
+}
+</script>
+</body>
+</html>

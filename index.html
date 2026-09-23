@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Processos, Operações e Supply Chain · EMBA T29 · COPPEAD</title>
+<meta name="description" content="Página da disciplina Processos, Operações e Supply Chain — EMBA Turma 29 COPPEAD/UFRJ. Prof. Dr. Thiago Lima.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0a1628; --navy2:#13274a; --gold:#e3b54e; --gold-dk:#8a6214;
+  --paper:#fbfaf6; --line:#d9d3c4; --ink:#0a1628; --ink2:#2e3b52; --white:#fff;
+  --serif:'Playfair Display',Georgia,serif; --sans:'DM Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:17px;line-height:1.6;-webkit-text-size-adjust:100%}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:3px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 22px}
+
+/* barra superior */
+.top{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;border-bottom:3px solid var(--gold)}
+.top .wrap{display:flex;align-items:center;gap:18px;height:58px}
+.top .mark{font-family:var(--serif);font-weight:700;font-size:1.05rem;white-space:nowrap}
+.top nav{margin-left:auto;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.top nav::-webkit-scrollbar{display:none}
+.top nav a{color:#e8ecf3;text-decoration:none;font-size:.9rem;font-weight:500;padding:8px 12px;border-radius:6px;white-space:nowrap}
+.top nav a:hover{background:var(--navy2);color:var(--gold)}
+
+/* abertura */
+.hero{background:var(--navy);color:#fff;padding:56px 0 64px}
+.hero .grid{display:grid;grid-template-columns:1.35fr 1fr;gap:48px;align-items:end}
+.hero .inst{color:var(--gold);font-weight:700;font-size:.95rem;margin-bottom:14px}
+.hero h1{font-family:var(--serif);font-weight:800;font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.05;letter-spacing:-.01em}
+.hero .who{margin-top:18px;font-size:1.05rem;color:#dfe5ee}
+.hero .who b{color:#fff}
+.hero .span{margin-top:6px;color:#b9c3d3;font-size:.95rem}
+.next{background:#fff;color:var(--ink);border-radius:10px;padding:22px 24px;border-left:8px solid var(--gold)}
+.next .lbl{font-size:.9rem;font-weight:700;color:var(--gold-dk)}
+.next .when{font-family:var(--serif);font-size:1.9rem;font-weight:700;line-height:1.15;margin:4px 0 2px}
+.next .what{font-size:1.05rem;font-weight:500}
+.next .prep{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:.95rem;color:var(--ink2)}
+.next a.go{display:inline-block;margin-top:14px;background:var(--navy);color:#fff;text-decoration:none;font-weight:700;font-size:.95rem;padding:10px 16px;border-radius:6px}
+.next a.go:hover{background:var(--navy2)}
+
+section.block{padding:60px 0 20px}
+h2{font-family:var(--serif);font-size:clamp(1.7rem,3.4vw,2.3rem);line-height:1.15;margin-bottom:10px}
+.lead{color:var(--ink2);max-width:68ch;margin-bottom:30px}
+
+/* percurso */
+.route{list-style:none;position:relative}
+.route::before{content:"";position:absolute;left:128px;top:8px;bottom:8px;width:3px;background:var(--navy)}
+.stop{display:grid;grid-template-columns:112px 1fr;gap:40px;padding:0 0 34px;position:relative}
+.stop::after{content:"";position:absolute;left:121px;top:10px;width:17px;height:17px;border-radius:50%;background:var(--paper);border:4px solid var(--navy)}
+.stop.is-next::after{background:var(--gold);border-color:var(--navy);box-shadow:0 0 0 5px rgba(227,181,78,.35)}
+.stop.is-past{opacity:.62}
+.date{text-align:right}
+.date .d{font-family:var(--serif);font-size:2rem;font-weight:800;line-height:1}
+.date .m{font-weight:700;font-size:.95rem;color:var(--ink2)}
+.date .h{font-size:.85rem;white-space:nowrap;color:var(--ink2);margin-top:4px;line-height:1.3}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px 22px}
+.stop.is-next .card{border:2px solid var(--navy)}
+.card .ses{font-size:.9rem;font-weight:700;color:var(--gold-dk)}
+.card h3{font-family:var(--serif);font-size:1.4rem;line-height:1.2;margin:2px 0 12px}
+.rows{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.97rem}
+.rows dt{font-weight:700;color:var(--ink)}
+.rows dd{color:var(--ink2)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;font-size:.93rem;padding:9px 14px;border-radius:6px;border:2px solid var(--navy);color:var(--navy);background:#fff}
+.btn:hover{background:var(--navy);color:#fff}
+.btn.primary{background:var(--navy);color:#fff}
+.btn.primary:hover{background:var(--navy2)}
+.tag{display:inline-block;font-size:.8rem;font-weight:700;background:var(--gold);color:var(--navy);padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:2px}
+
+/* atividades */
+.acts{display:grid;gap:14px}
+details.act{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+details.act summary{list-style:none;cursor:pointer;padding:18px 22px;display:grid;grid-template-columns:1fr auto;gap:4px 16px;align-items:center}
+details.act summary::-webkit-details-marker{display:none}
+details.act summary h3{font-family:var(--serif);font-size:1.3rem;line-height:1.25}
+details.act summary .meta{grid-column:1;font-size:.93rem;color:var(--ink2)}
+details.act summary .plus{grid-row:1/3;grid-column:2;width:34px;height:34px;border-radius:50%;border:2px solid var(--navy);display:grid;place-items:center;font-weight:700;font-size:1.2rem;transition:transform .2s}
+details.act[open] summary .plus{transform:rotate(45deg);background:var(--navy);color:#fff}
+details.act[open] summary{border-bottom:1px solid var(--line)}
+.act .body{padding:18px 22px 22px}
+.act .body p{margin-bottom:10px;max-width:72ch}
+.act .body ul{margin:6px 0 12px 20px}
+.act .body li{margin-bottom:5px;max-width:70ch}
+.act .body h4{font-size:1rem;margin:14px 0 4px}
+.quote{border-left:5px solid var(--gold);padding:6px 14px;background:#fff8e6;font-style:italic;margin:6px 0 14px}
+
+/* tabela */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:.96rem;min-width:560px}
+th{background:var(--navy);color:#fff;text-align:left;padding:11px 14px;font-weight:700}
+td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:top}
+tr:nth-child(even) td{background:#f5f2ea}
+
+/* livro */
+.book{display:grid;grid-template-columns:220px 1fr;gap:36px;align-items:start;background:var(--navy);color:#fff;border-radius:12px;padding:32px}
+.cover{aspect-ratio:2/3;border-radius:4px;background:linear-gradient(160deg,#13274a,#0a1628);border:2px solid var(--gold);padding:18px 16px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:8px 8px 0 rgba(227,181,78,.35)}
+.cover .t{font-family:var(--serif);font-weight:800;font-size:1.45rem;line-height:1.1;color:#fff}
+.cover .s{font-size:.78rem;color:#dfe5ee;margin-top:8px;line-height:1.35}
+.cover .a{font-size:.82rem;color:var(--gold);font-weight:700}
+.book h3{font-family:var(--serif);font-size:1.5rem;margin-bottom:6px}
+.book .ref{color:#dfe5ee;font-size:.95rem;margin-bottom:18px}
+.chap{list-style:none;display:grid;gap:10px}
+.chap li{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:baseline;border-top:1px solid rgba(255,255,255,.18);padding-top:10px}
+.chap .n{font-family:var(--serif);font-weight:700;color:var(--gold);font-size:1.05rem}
+.chap .x{color:#fff}
+.chap .x small{display:block;color:#b9c3d3;font-size:.88rem}
+
+.eval{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.eval .box{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px 22px}
+.eval .pct{font-family:var(--serif);font-size:2.6rem;font-weight:800;line-height:1}
+.eval h3{font-size:1.05rem;margin:6px 0 4px}
+.eval p{color:var(--ink2);font-size:.96rem}
+
+footer{margin-top:60px;background:var(--navy);color:#dfe5ee;padding:30px 0 calc(30px + env(safe-area-inset-bottom));font-size:.93rem}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+footer a{color:var(--gold)}
+
+@media (max-width:820px){
+  .hero{padding:36px 0 44px}
+  .hero .grid{grid-template-columns:1fr;gap:28px}
+  .route::before{left:14px}
+  .stop{grid-template-columns:1fr;gap:10px;padding-left:44px}
+  .stop::after{left:7px;top:4px}
+  .date{text-align:left;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .date .d{font-size:1.6rem}
+  .book{grid-template-columns:1fr;padding:24px}
+  .cover{max-width:180px}
+  .eval{grid-template-columns:1fr}
+  .top .mark{display:none}
+  .top nav{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+@media print{.top,.next a.go{display:none}.hero{background:#fff;color:#000}.stop.is-past{opacity:1}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <span class="mark">EMBA T29 · COPPEAD</span>
+    <nav aria-label="Seções">
+      <a href="#percurso">Sessões</a>
+      <a href="#atividades">Atividades</a>
+      <a href="#prazos">Prazos</a>
+      <a href="#livro">Livro</a>
+      <a href="#avaliacao">Avaliação</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap grid">
+    <div>
+      <div class="inst">COPPEAD/UFRJ · EMBA Turma 29 · 2026</div>
+      <h1>Processos, Operações e Supply Chain</h1>
+      <p class="who">Prof. Dr. <b>Thiago Lima</b></p>
+      <p class="span">Nove sessões entre 10 de outubro e 5 de dezembro, com casos, três atividades aplicadas e o trabalho final.</p>
+    </div>
+    <aside class="next" id="next" aria-live="polite">
+      <div class="lbl" id="nextLbl">Próxima sessão</div>
+      <div class="when" id="nextWhen">—</div>
+      <div class="what" id="nextWhat"></div>
+      <div class="prep" id="nextPrep"></div>
+      <a class="go" id="nextGo" href="#percurso">Ver a sessão</a>
+    </aside>
+  </div>
+</section>
+
+<main>
+<section class="block" id="percurso">
+  <div class="wrap">
+    <h2>Sessões</h2>
+    <p class="lead">Leia as Notas de Ensino e o capítulo indicado do livro antes de cada encontro. Os casos são distribuídos pela coordenação.</p>
+    <ol class="route" id="route"></ol>
+  </div>
+</section>
+
+<section class="block" id="atividades">
+  <div class="wrap">
+    <h2>Atividades aplicadas</h2>
+    <p class="lead">Três atividades em grupo percorrem a disciplina. As entregas compõem a nota de participação e alimentam o trabalho final.</p>
+    <div class="acts">
+
+      <details class="act" id="kata">
+        <summary><h3>Lean Kata na sua organização</h3><span class="meta">Início em 24/10 · ciclos semanais até 28/11</span><span class="plus" aria-hidden="true">+</span></summary>
+        <div class="body">
+          <p>Cada grupo escolhe um processo real da organização de um dos integrantes e conduz um ciclo de melhoria com a rotina do Kata. O Kata é uma prática de repetição: o resultado vem dos experimentos feitos ao longo das semanas, não da sessão em sala.</p>
+          <h4>Antes da sessão (até 23/10)</h4>
+          <ul>
+            <li>Descrição do processo escolhido e do desafio de negócio a que ele se vincula.</li>
+            <li>Um indicador de resultado com dados recentes — no mínimo quatro medições. Sem dados reais, não há condição atual; sem condição atual, não há Kata.</li>
+          </ul>
+          <h4>Em sala (24/10)</h4>
+          <ul>
+            <li>Classificação do problema no Cynefin, para confirmar que o contexto pede uma abordagem experimental.</li>
+            <li>Direção (desafio), condição atual e condição-alvo com data de verificação em 28/11.</li>
+            <li>Obstáculos e desenho do primeiro experimento.</li>
+            <li>Kata de Coaching em trios — aprendiz, coach e observador — com as cinco perguntas.</li>
+          </ul>
+          <h4>Entre as sessões</h4>
+          <p>Experimentos semanais na organização e atualização do storyboard (condição-alvo, condição atual, obstáculos e registro de experimentos) em 30/10, 06/11, 13/11 e 27/11. O ciclo pode ser uma das ferramentas do trabalho final.</p>
+        </div>
+      </details>
+
+      <details class="act" id="walmart">
+        <summary><h3>O modelo do caso ainda explica o Walmart de hoje?</h3><span class="meta">Entrega até 06/11 · 1 página + 1 slide</span><span class="plus" aria-hidden="true">+</span></summary>
+        <div class="body">
+          <p>Cada grupo recebe uma lente e investiga como a cadeia do Walmart evoluiu desde o período retratado no caso.</p>
+          <ul>
+            <li><b>Canais e última milha:</b> comércio eletrônico, omnicanalidade e o papel das lojas na distribuição.</li>
+            <li><b>Internacionalização:</b> expansão, adaptação e saída de mercados, inclusive a operação brasileira.</li>
+            <li><b>Tecnologia, dados e automação:</b> centros de distribuição, sistemas e compartilhamento de informação.</li>
+            <li><b>Fornecedores:</b> poder de barganha, integração e colaboração na cadeia.</li>
+            <li><b>Resultado econômico:</b> margem, giro e capital empregado na operação.</li>
+          </ul>
+          <h4>A entrega responde a três perguntas</h4>
+          <ul>
+            <li>Que elemento do modelo do caso a sua lente examina?</li>
+            <li>Quais são as evidências? No mínimo três, datadas e com fonte — de preferência relatórios anuais e o formulário 10-K.</li>
+            <li>Qual o veredito: o modelo foi mantido, adaptado ou abandonado, à luz de Fisher (1997)?</li>
+          </ul>
+          <p class="quote">Descrições cronológicas sem veredito não atendem à entrega.</p>
+          <p>Em sala, a Sessão 5 discute o caso. Na Sessão 6, cada grupo defende seu veredito em cinco minutos e os demais podem contestar as evidências.</p>
+        </div>
+      </details>
+
+      <details class="act" id="circular">
+        <summary><h3>Práticas de cadeia circular</h3><span class="meta">Entrega até 27/11 · 1 página + 1 slide</span><span class="plus" aria-hidden="true">+</span></summary>
+        <div class="body">
+          <p>Use o <a href="notas/cadeia-circular.html">mapa interativo da Cadeia Circular</a> como base teórica e investigue uma prática efetivamente implementada por uma empresa — de preferência do setor de um dos integrantes. A prática deve ser diferente dos exemplos da seção Casos Práticos, que serve como modelo de análise.</p>
+          <h4>A entrega cobre cinco pontos</h4>
+          <ul>
+            <li><b>Diagrama de borboleta:</b> ciclo técnico ou biológico, e qual loop a prática opera — e por que não um loop mais interno, que preservaria mais valor.</li>
+            <li><b>Lente teórica:</b> o autor e o conceito do Quadro Teórico que melhor explicam a prática.</li>
+            <li><b>Fluxo reverso:</b> quem coleta, quem processa e quem paga.</li>
+            <li><b>Escala e economia:</b> evidência de volume ou de participação na receita (ou reconhecimento de que é piloto) e quem captura o valor recuperado.</li>
+            <li><b>Debate de fronteira:</b> confronto com ao menos um debate da Agenda — mensuração da circularidade, trade-off de carbono na logística reversa ou dimensão social (catadores e cooperativas).</li>
+          </ul>
+          <p>Em sala, as práticas dos grupos são posicionadas em um diagrama de borboleta coletivo. A discussão parte da distribuição resultante: por que as empresas se concentram nos loops externos, de menor valor preservado?</p>
+        </div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<section class="block" id="prazos">
+  <div class="wrap">
+    <h2>Prazos</h2>
+    <p class="lead">Entregas pelo formulário da turma, na data indicada.</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Entrega</th><th>Formato</th><th>Prazo</th></tr></thead>
+        <tbody>
+          <tr><td>Formação dos grupos e escolha do processo para o Lean Kata</td><td>Formulário online</td><td>17/10</td></tr>
+          <tr><td>Dados do processo (condição atual preliminar)</td><td>Formulário online</td><td>23/10</td></tr>
+          <tr><td>Atualizações do storyboard do Lean Kata</td><td>Foto ou arquivo do storyboard</td><td>30/10, 06/11, 13/11 e 27/11</td></tr>
+          <tr><td>Pesquisa: evolução da cadeia do Walmart</td><td>1 página + 1 slide</td><td>06/11</td></tr>
+          <tr><td>Pesquisa: práticas de cadeia circular</td><td>1 página + 1 slide</td><td>27/11</td></tr>
+          <tr><td>Trabalho final</td><td>Apresentação de 15 minutos</td><td>05/12</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="livro">
+  <div class="wrap">
+    <h2>Livro de referência</h2>
+    <p class="lead">O livro acompanha todas as sessões. Os capítulos indicados são leitura obrigatória, junto com as Notas de Ensino.</p>
+    <div class="book">
+      <div class="cover" aria-hidden="true">
+        <div><div class="t">Excelência operacional</div><div class="s">da estratégia à execução — operações, serviços, melhoria contínua e inteligência artificial</div></div>
+        <div class="a">Thiago Fernandes Lima</div>
+      </div>
+      <div>
+        <h3>Excelência operacional: da estratégia à execução</h3>
+        <p class="ref">LIMA, Thiago Fernandes. Ponta Grossa: Atena Editora, 2026. ISBN 978-65-258-4105-2.</p>
+        <ol class="chap">
+          <li><span class="n">Cap. 1</span><span class="x">Modelo VCAP — Valor = Capacidade × (Ativos + Processos)<small>Sessão 1 · Gestão estratégica de operações</small></span></li>
+          <li><span class="n">Cap. 2</span><span class="x">Serviços<small>Sessão 4 · Gestão de serviços</small></span></li>
+          <li><span class="n">Cap. 3</span><span class="x">Gestão ágil: Cynefin, Lean e Kata<small>Sessões 2 e 3 · Excelência operacional</small></span></li>
+          <li><span class="n">Cap. 4</span><span class="x">Supply Chain Management e a tipologia de Fisher<small>Sessões 5 a 8 · Cadeia de suprimentos, compras e cadeia circular</small></span></li>
+          <li><span class="n">Cap. 5</span><span class="x">Inteligência artificial e conclusão executiva<small>Sessão 9 · leitura complementar para o trabalho final</small></span></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="avaliacao">
+  <div class="wrap">
+    <h2>Avaliação</h2>
+    <p class="lead">A disciplina é construída na discussão em classe. Preparação, presença, pontualidade e participação são responsabilidade de cada aluno.</p>
+    <div class="eval">
+      <div class="box"><div class="pct">40%</div><h3>Participação</h3><p>Todas as sessões, incluindo as entregas preparatórias das três atividades aplicadas.</p></div>
+      <div class="box"><div class="pct">60%</div><h3>Trabalho final</h3><p>Análise de um problema ou oportunidade da organização de um integrante com, no mínimo, dois conceitos ou ferramentas da disciplina. Apresentação de 15 minutos em 05/12: empresa, problema, ferramentas escolhidas, aplicação e conclusão.</p></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Processos, Operações e Supply Chain · EMBA Turma 29 · COPPEAD/UFRJ</span>
+    <span>Prof. Dr. Thiago Lima · <a href="mailto:thiago.lima@coppead.ufrj.br">thiago.lima@coppead.ufrj.br</a></span>
+  </div>
+</footer>
+
+<script>
+/* Link da Sessão 1: substituir pelo arquivo local quando disponível (notas/estrategia-operacoes.html) */
+const NOTA_S1 = "https://claude.ai/public/artifacts/bbe48e3e-e148-43e7-8a83-a2ac015ca1f1";
+
+const S = [
+ {n:"Sessão 1", d:"2026-10-10", h:"13h15 – 15h15", t:"Gestão estratégica de operações",
+  leitura:["Notas de Ensino — Estratégia de operações", NOTA_S1], livro:"Cap. 1 — Modelo VCAP", caso:"Rapid Rewards at Southwest Airlines",
+  prep:"Ao final da sessão, formação dos grupos. Até 17/10, cada grupo indica o processo do Lean Kata."},
+ {n:"Sessões 2 e 3", d:"2026-10-24", h:"10h15 – 15h15<br>com almoço", t:"Excelência operacional: Lean e Lean Kata",
+  leitura:["Notas de Ensino — Lean, Kata e Cynefin","notas/lean-kata-cynefin.html"], livro:"Cap. 3 — Gestão ágil: Cynefin, Lean e Kata", caso:"Sem caso: Lean Kata aplicado à organização do grupo",
+  prep:"Trazer o processo escolhido e o indicador com ao menos quatro medições (entrega até 23/10).", act:"#kata"},
+ {n:"Sessão 4", d:"2026-10-31", h:"13h15 – 15h15", t:"Gestão de serviços",
+  leitura:["Notas de Ensino — Gestão de serviços","notas/servicos.html"], livro:"Cap. 2 — Serviços", caso:"Commerce Bank (615-P04)",
+  prep:"Storyboard do Kata atualizado em 30/10."},
+ {n:"Sessões 5 e 6", d:"2026-11-07", h:"8h00 – 12h15", t:"Gestão da cadeia de suprimentos",
+  leitura:["Notas de Ensino — Cadeia de suprimentos","notas/cadeia-de-suprimentos.html"], livro:"Cap. 4 — Supply Chain Management", caso:"WalMart: Managing a global supply chain (traduzido)",
+  prep:"Pesquisa do Walmart entregue até 06/11, com veredito por lente.", act:"#walmart"},
+ {n:"Sessão 7", d:"2026-11-14", h:"10h15 – 12h15", t:"Compras na cadeia de suprimentos",
+  leitura:["Notas de Ensino — Compras estratégicas","notas/compras.html"], livro:"Cap. 4 — Supply Chain Management", caso:"Gestão Estratégica de Suprimentos na Whirlpool China",
+  prep:"Complementar: plataforma Gestão e Contratação de Fornecedores Estratégicos.",
+  extra:["Plataforma de fornecedores","https://tflsixsigma-png.github.io/contrata-o-e-gest-o-de-fornecedores/"]},
+ {n:"Sessão 8", d:"2026-11-28", h:"13h15 – 15h15", t:"Cadeia de suprimentos circular",
+  leitura:["Cadeia Circular — mapa conceitual interativo","notas/cadeia-circular.html"], livro:"Cap. 4 — Supply Chain Management", caso:"Sem caso: pesquisa de práticas circulares",
+  prep:"Explorar Diagrama, Quadro Teórico e Agenda; pesquisa entregue até 27/11.", act:"#circular"},
+ {n:"Sessão 9", d:"2026-12-05", h:"10h15 – 12h15", t:"Trabalho final",
+  leitura:null, livro:"Cap. 5 e conclusão executiva (complementar)", caso:"Apresentações dos grupos — 15 minutos cada",
+  prep:"Mínimo de dois conceitos ou ferramentas da disciplina; o ciclo de Kata pode ser um deles."}
+];
+const MES=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+const MESX=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+const today=new Date(); today.setHours(0,0,0,0);
+const dt=s=>{const[a,b,c]=s.split("-").map(Number);return new Date(a,b-1,c)};
+let nextIdx=S.findIndex(s=>dt(s.d)>=today);
+
+const route=document.getElementById("route");
+route.innerHTML=S.map((s,i)=>{
+  const D=dt(s.d), cls=i===nextIdx?"is-next":(nextIdx===-1||i<nextIdx?"is-past":"");
+  const btns=[];
+  if(s.leitura) btns.push(`<a class="btn primary" href="${s.leitura[1]}"${s.leitura[1].startsWith("http")?' target="_blank" rel="noopener"':''}>${s.leitura[0]}</a>`);
+  if(s.act) btns.push(`<a class="btn" href="${s.act}" data-open="${s.act}">Ver a atividade</a>`);
+  if(s.extra) btns.push(`<a class="btn" href="${s.extra[1]}" target="_blank" rel="noopener">${s.extra[0]}</a>`);
+  return `<li class="stop ${cls}" id="s${i}">
+    <div class="date"><div class="d">${D.getDate()}</div><div class="m">${MES[D.getMonth()]} · ${["dom","seg","ter","qua","qui","sex","sáb"][D.getDay()]}</div><div class="h">${s.h}</div></div>
+    <div class="card"><div class="ses">${s.n}${i===nextIdx?'<span class="tag">Próxima</span>':''}</div><h3>${s.t}</h3>
+      <dl class="rows"><dt>Caso</dt><dd>${s.caso}</dd><dt>Livro</dt><dd>${s.livro}</dd><dt>Preparação</dt><dd>${s.prep}</dd></dl>
+      ${btns.length?`<div class="btns">${btns.join("")}</div>`:""}
+    </div></li>`;
+}).join("");
+
+if(nextIdx>-1){
+  const s=S[nextIdx],D=dt(s.d);
+  const days=Math.round((D-today)/864e5);
+  document.getElementById("nextLbl").textContent=days===0?"Sessão de hoje":(days===1?"Próxima sessão · amanhã":`Próxima sessão · em ${days} dias`);
+  document.getElementById("nextWhen").textContent=`${D.getDate()} de ${MESX[D.getMonth()]}`;
+  document.getElementById("nextWhat").innerHTML=`${s.n} · ${s.t}<br><span style="color:var(--ink2)">${s.h.replace("<br>"," · ")}</span>`;
+  document.getElementById("nextPrep").textContent=s.prep;
+  document.getElementById("nextGo").href="#s"+nextIdx;
+}else{
+  document.getElementById("nextLbl").textContent="Disciplina concluída";
+  document.getElementById("nextWhen").textContent="Obrigado, turma 29";
+  document.getElementById("nextWhat").textContent="Os materiais continuam disponíveis nesta página.";
+  document.getElementById("nextPrep").remove();
+}
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-open]"); if(!a)return;
+  const d=document.querySelector(a.dataset.open); if(d) d.open=true;
+});
+if(location.hash){const d=document.querySelector(location.hash); if(d&&d.tagName==="DETAILS") d.open=true;}
+</script>
+</body>
+</html>
