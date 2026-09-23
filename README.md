@@ -1,4 +1,4 @@
-# Processos, Operações e Supply Chain — (COPPEAD/UFRJ)
+# Processos, Operações e Supply Chain — EMBA T29 (COPPEAD/UFRJ)
 
 Página da disciplina. Prof. Dr. Thiago Lima.
 
