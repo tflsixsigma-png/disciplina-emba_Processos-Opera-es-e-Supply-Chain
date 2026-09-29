@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>EMBA | Estratégia de Operações & VCAP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Josefin+Sans:wght@300;400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0f0e0c; --paper: #f7f3ec; --cream: #ede8dc;
+  --gold: #a07820; --gold-light: #c8982c; --rust: #7a2e1a;
+  --navy: #1a2e4a; --slate: #2a3040; --muted: #5a5040;
+  --line: #ccc4b4; --highlight: #f0e8d4; --green: #2a4a30; --teal: #1e3d40;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { font-size:16px; }
+body { background:var(--paper); color:var(--ink); font-family:'Josefin Sans',sans-serif; font-weight:400; line-height:1.85; overflow-x:hidden; -webkit-font-smoothing:antialiased; }
+.m-header { background:#0a1628; border-bottom:2px solid var(--gold); padding:14px 18px; display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:100; }
+.m-badge { width:34px; height:34px; border:1.5px solid var(--gold); display:flex; align-items:center; justify-content:center; font-family:'Cormorant Garamond',serif; font-size:15px; color:var(--gold); font-style:italic; flex-shrink:0; }
+.m-header-title { font-size:11px; font-weight:700; color:#fff; letter-spacing:0.08em; text-transform:uppercase; line-height:1.3; }
+.m-header-sub { font-size:9px; color:rgba(255,255,255,0.5); letter-spacing:0.12em; text-transform:uppercase; margin-top:2px; }
+.m-hero { background:#0a1628; padding:36px 20px 32px; position:relative; overflow:hidden; }
+.m-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 120% 80% at 50% 110%, rgba(29,52,97,0.9) 0%, transparent 65%); pointer-events:none; }
+.m-hero-inner { position:relative; z-index:1; }
+.m-hero-eyebrow { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.25em; text-transform:uppercase; color:var(--gold-light); margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+.m-hero-eyebrow::before { content:''; display:block; width:24px; height:1px; background:var(--gold); }
+.m-hero h1 { font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:700; line-height:1.15; color:#fff; margin-bottom:14px; }
+.m-hero h1 em { color:var(--gold-light); font-style:italic; }
+.m-hero-sub { font-size:14px; color:rgba(255,255,255,0.65); line-height:1.75; margin-bottom:22px; }
+.m-hero-pills { display:flex; gap:8px; flex-wrap:wrap; }
+.m-pill { background:rgba(160,120,32,0.12); border:1px solid rgba(160,120,32,0.3); padding:5px 12px; font-family:'DM Mono',monospace; font-size:8.5px; color:var(--gold-light); letter-spacing:0.1em; text-transform:uppercase; border-radius:2px; }
+.m-module-nav { background:#0f1a2e; position:sticky; top:62px; z-index:90; border-bottom:1px solid rgba(160,120,32,0.2); overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; display:flex; }
+.m-module-nav::-webkit-scrollbar { display:none; }
+.m-nav-btn { background:none; border:none; border-bottom:3px solid transparent; color:rgba(255,255,255,0.45); font-family:'Josefin Sans',sans-serif; font-size:12px; font-weight:600; padding:14px 18px; white-space:nowrap; cursor:pointer; transition:all 0.2s; min-height:52px; display:flex; align-items:center; }
+.m-nav-btn.active { color:var(--gold-light); border-bottom-color:var(--gold); background:rgba(160,120,32,0.06); }
+.m-modules { padding:0 0 48px; }
+.m-module { display:none; }
+.m-module.active { display:block; }
+.m-mod-hero { background:var(--navy); color:var(--paper); padding:24px 20px 20px; }
+.m-mod-num { font-family:'DM Mono',monospace; font-size:9px; color:var(--gold-light); letter-spacing:0.2em; margin-bottom:8px; }
+.m-mod-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:700; color:#fff; line-height:1.2; margin-bottom:8px; }
+.m-mod-subtitle { font-size:12px; color:rgba(255,255,255,0.6); font-style:italic; margin-bottom:12px; line-height:1.6; }
+.m-mod-tag { display:inline-block; background:rgba(160,120,32,0.2); color:var(--gold-light); font-family:'DM Mono',monospace; font-size:8px; letter-spacing:0.18em; text-transform:uppercase; padding:4px 10px; border-radius:2px; }
+.m-accordion { border-bottom:1px solid var(--line); }
+.m-acc-trigger { width:100%; background:var(--paper); border:none; padding:18px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer; text-align:left; min-height:64px; transition:background 0.2s; }
+.m-acc-trigger.open, .m-acc-trigger:active { background:var(--highlight); }
+.m-acc-label { display:flex; align-items:center; gap:10px; }
+.m-acc-icon { width:28px; height:28px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+.icon-c { background:var(--navy); color:#7ba4d4; }
+.icon-s { background:var(--rust); color:#e8a090; }
+.icon-g { background:var(--green); color:#90c890; }
+.icon-m { background:var(--teal); color:#80c0c4; }
+.icon-d { background:#3a2a50; color:#b890e4; }
+.m-acc-label-text { font-size:11px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); }
+.m-acc-trigger.open .m-acc-label-text { color:var(--ink); }
+.m-acc-chevron { font-size:12px; color:var(--gold); flex-shrink:0; transition:transform 0.25s; }
+.m-acc-trigger.open .m-acc-chevron { transform:rotate(180deg); }
+.m-acc-body { display:none; padding:0 20px 24px; background:var(--paper); }
+.m-acc-trigger.open + .m-acc-body { display:block; }
+.m-callout { background:var(--cream); border-left:3px solid var(--gold); padding:16px 18px; border-radius:0 6px 6px 0; font-size:15px; color:var(--slate); line-height:1.85; margin-bottom:16px; }
+.m-callout strong { color:var(--ink); font-weight:600; }
+.m-callout em { color:var(--gold); font-style:normal; font-weight:600; }
+.m-body { font-size:15px; color:var(--slate); line-height:1.9; margin-bottom:16px; }
+.m-body strong { color:var(--ink); font-weight:600; }
+.m-body em { color:var(--gold); font-style:normal; font-weight:600; }
+.m-strategy { background:rgba(26,46,74,0.06); border:1px solid rgba(26,46,74,0.14); padding:16px 18px; border-radius:6px; font-size:15px; color:var(--slate); line-height:1.9; margin-bottom:16px; }
+.m-quote { border-left:3px solid var(--gold); padding:14px 18px; background:var(--highlight); margin-bottom:16px; border-radius:0 6px 6px 0; }
+.m-quote p { font-family:'Cormorant Garamond',serif; font-size:17px; font-style:italic; color:var(--ink); line-height:1.55; }
+.m-quote cite { display:block; margin-top:8px; font-size:9.5px; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); }
+.m-table-wrap { overflow-x:auto; border-radius:8px; border:1px solid var(--line); margin-bottom:16px; -webkit-overflow-scrolling:touch; }
+.m-table { width:100%; border-collapse:collapse; font-size:13px; min-width:460px; }
+.m-table thead { background:var(--ink); }
+.m-table thead th { padding:10px 13px; text-align:left; font-size:8.5px; letter-spacing:0.15em; text-transform:uppercase; font-weight:600; color:var(--gold-light); white-space:nowrap; }
+.m-table tbody tr:nth-child(odd) { background:var(--paper); }
+.m-table tbody tr:nth-child(even) { background:var(--cream); }
+.m-table td { padding:10px 13px; color:var(--slate); line-height:1.55; vertical-align:top; border-bottom:1px solid var(--line); font-size:12.5px; }
+.m-table td:first-child { font-weight:700; color:var(--ink); }
+.m-guide { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+.m-guide-q { display:flex; gap:12px; padding:14px 16px; background:#eef6ee; border-radius:6px; border:1px solid #bcd8bc; font-size:14.5px; color:var(--slate); line-height:1.8; }
+.m-guide-num { font-family:'DM Mono',monospace; font-size:9px; color:var(--green); font-weight:600; flex-shrink:0; margin-top:3px; }
+.m-case { background:var(--teal); color:#ddf0f2; padding:18px; border-radius:6px; font-size:14px; line-height:1.85; margin-bottom:12px; }
+.m-case-company { font-family:'Cormorant Garamond',serif; font-size:18px; color:#fff; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+.m-case-company::before { content:'◆'; font-size:8px; color:var(--gold-light); flex-shrink:0; }
+.m-case-result { display:inline-block; margin-top:10px; padding:4px 12px; background:rgba(255,255,255,0.12); border-radius:20px; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#a0d8dc; }
+.m-dilema { background:var(--navy); border:1px solid rgba(160,120,32,0.2); border-radius:8px; margin-bottom:10px; overflow:hidden; }
+.m-dilema-trigger { width:100%; background:none; border:none; padding:16px 18px; cursor:pointer; text-align:left; min-height:60px; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.m-dilema-num { font-family:'DM Mono',monospace; font-size:8.5px; color:var(--gold-light); letter-spacing:0.15em; margin-bottom:6px; display:block; }
+.m-dilema-q { font-size:14.5px; color:rgba(255,255,255,0.9); line-height:1.65; }
+.m-dilema-chevron { font-size:12px; color:var(--gold); flex-shrink:0; margin-top:4px; transition:transform 0.25s; }
+.m-dilema.open .m-dilema-chevron { transform:rotate(180deg); }
+.m-dilema-body { display:none; padding:0 18px 18px; border-top:1px solid rgba(160,120,32,0.15); font-size:13.5px; color:#f0e8d4; line-height:1.8; }
+.m-dilema.open .m-dilema-body { display:block; padding-top:14px; }
+.m-fw-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+.m-fw-card { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:14px; }
+.m-fw-num { font-family:'DM Mono',monospace; font-size:18px; color:var(--gold); font-weight:500; margin-bottom:6px; }
+.m-fw-title { font-size:11px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:6px; }
+.m-fw-body { font-size:12.5px; color:#3a4050; line-height:1.7; }
+.m-timeline { border-left:2px solid var(--line); padding-left:20px; margin-bottom:16px; }
+.m-tl-item { position:relative; padding-bottom:22px; }
+.m-tl-item:last-child { padding-bottom:0; }
+.m-tl-item::before { content:''; position:absolute; left:-26px; top:4px; width:12px; height:12px; border-radius:50%; background:var(--gold); border:2px solid var(--paper); }
+.m-tl-year { font-family:'DM Mono',monospace; font-size:10px; color:var(--gold); margin-bottom:3px; font-weight:600; }
+.m-tl-title { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:4px; }
+.m-tl-body { font-size:13.5px; color:#3a4050; line-height:1.75; }
+.m-spectrum { border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:16px; }
+.m-spec-header { padding:12px 16px; font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.2em; text-transform:uppercase; font-weight:700; text-align:center; }
+.m-spec-func { background:var(--navy); color:#80a8d4; }
+.m-spec-innov { background:var(--rust); color:#f0b0a0; }
+.m-spec-body { padding:16px; font-size:13.5px; color:var(--slate); line-height:1.85; }
+.m-spec-body.func { background:#f0f4fc; }
+.m-spec-body.innov { background:#fdf0ec; }
+.m-spec-item { display:flex; gap:10px; margin-bottom:8px; }
+.m-spec-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:6px; }
+.m-spec-dot.f { background:var(--navy); }
+.m-spec-dot.i { background:var(--rust); }
+.m-matrix { margin-bottom:16px; }
+.m-matrix-cell { padding:16px; margin-bottom:8px; border-radius:8px; font-size:14px; line-height:1.75; color:var(--slate); }
+.m-matrix-cell strong { display:block; font-size:15px; font-weight:700; color:var(--ink); margin-bottom:8px; }
+.m-mx-ideal { background:#e8f4e8; border:2px solid #90c090; }
+.m-mx-risk { background:#fce8e0; border:2px solid #e0a090; }
+.m-mx-neutral { background:var(--cream); border:1px solid var(--line); }
+.m-mx-label { font-family:'DM Mono',monospace; font-size:8px; letter-spacing:0.15em; text-transform:uppercase; font-weight:700; margin-bottom:8px; display:block; }
+.m-mx-ideal .m-mx-label { color:#2a5a2a; }
+.m-mx-risk .m-mx-label { color:#8a2a1a; }
+.m-vcap { background:var(--ink); border-radius:8px; padding:24px 16px; text-align:center; margin-bottom:16px; }
+.m-vcap-eq { font-family:'Cormorant Garamond',serif; font-size:34px; color:var(--gold-light); font-style:italic; letter-spacing:0.1em; margin-bottom:20px; }
+.m-vcap-parts { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
+.m-vcap-circle { width:50px; height:50px; border-radius:50%; border:1.5px solid var(--gold); margin:0 auto 6px; display:flex; align-items:center; justify-content:center; font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--gold); font-weight:700; }
+.m-vcap-label { font-size:8px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.5); font-family:'DM Mono',monospace; }
+.m-sep { display:flex; align-items:center; gap:12px; margin:20px 20px; }
+.m-sep::before,.m-sep::after { content:''; flex:1; height:1px; background:var(--line); }
+.m-sep span { font-family:'DM Mono',monospace; font-size:9px; color:var(--gold); letter-spacing:0.2em; }
+.m-footer { background:var(--ink); padding:24px 20px; text-align:center; margin-top:8px; }
+.m-footer-text { font-family:'DM Mono',monospace; font-size:9.5px; color:rgba(255,255,255,0.35); letter-spacing:0.1em; line-height:2; }
+.m-footer-text strong { color:var(--gold-light); }
+</style>
+<style id="disc-back-css">
+.disc-back{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-right:12px;padding:6px 11px;border-radius:6px;
+background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui,sans-serif;text-decoration:none!important;white-space:nowrap;letter-spacing:0;text-transform:none}
+.disc-back:hover{background:#fff}.disc-back:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.disc-back .bk{font-weight:500;opacity:.85}
+@media(max-width:560px){.m-header .m-header-sub{font-size:11px}.disc-back .bk{display:none}header .header-meta{display:none}header .header-title{font-size:.95rem;line-height:1.2}}
+@media print{.disc-back{display:none}}
+</style>
+<style id="mobile-patch">
+.m-next{display:flex;justify-content:space-between;gap:10px;padding:22px 20px 34px}
+.m-next button{flex:1;min-height:50px;border-radius:8px;font:700 14px/1.2 'DM Sans',system-ui,sans-serif;cursor:pointer;padding:10px 14px}
+.m-next .pv{background:transparent;border:2px solid #0a1628;color:#0a1628}
+.m-next .nx{background:#0a1628;border:2px solid #0a1628;color:#fff}
+.m-acc-label-text{font-size:12.5px!important}
+.m-hero-eyebrow,.m-mod-num,.m-footer-text{font-size:11px!important}
+.m-mod-tag,.m-pill{font-size:10.5px!important}
+@media(min-width:900px){.m-modules,.m-hero-inner,.m-footer{max-width:860px;margin-left:auto;margin-right:auto}}
+</style>
+</head>
+<body>
+
+<header class="m-header">
+<a class="disc-back" href="../index.html" title="Voltar à página da disciplina">‹ Disciplina<span class="bk"> · Livro Cap. 1</span></a>
+  <div class="m-badge">M</div>
+  <div class="m-header-text">
+    <div class="m-header-title">MBA Executive</div>
+    <div class="m-header-sub">Estratégia de Operações & Framework VCAP</div>
+  </div>
+</header>
+
+<section class="m-hero">
+  <div class="m-hero-inner">
+    <div class="m-hero-eyebrow">Notas de Ensino · Prof. Dr. Thiago Lima</div>
+    <h1>Vantagem Competitiva via<br><em>Excelência Operacional</em></h1>
+    <p class="m-hero-sub">V = C × (A + P) — do framework à decisão executiva em operações e supply chain.</p>
+    <div class="m-hero-pills"><span class="m-pill">VCAP Framework</span><span class="m-pill">Porter 1996</span><span class="m-pill">Fisher 1997</span><span class="m-pill">WTP</span><span class="m-pill">Capacidades</span><span class="m-pill">Processos</span></div>
+  </div>
+</section>
+
+<nav class="m-module-nav"><button class="m-nav-btn active" onclick="showMModule(0)">01 · Operação Estratégica</button><button class="m-nav-btn" onclick="showMModule(1)">02 · Framework VCAP</button><button class="m-nav-btn" onclick="showMModule(2)">03 · OE vs. Estratégia</button><button class="m-nav-btn" onclick="showMModule(3)">04 · Valor &amp; WTP</button><button class="m-nav-btn" onclick="showMModule(4)">05 · Capacidades</button><button class="m-nav-btn" onclick="showMModule(5)">06 · Ativos &amp; Processos</button><button class="m-nav-btn" onclick="showMModule(6)">07 · Fisher: a cadeia certa</button><button class="m-nav-btn" onclick="showMModule(7)">08 · Conclusão</button></nav>
+
+<div class="m-modules"><div class="m-module active" id="m-mod-0">
+  <div class="m-mod-hero">
+    <div class="m-mod-num">MÓDULO 01</div>
+    <div class="m-mod-title">A Operação como Alavanca Central de Vantagem Competitiva</div>
+    
+    <span class="m-mod-tag">Fundamento Estratégico</span>
+  </div>
+  <div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-c">C</div>
+      <span class="m-acc-label-text">Conceito Central</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-callout">
+          A Estratégia de Operações é o conjunto de decisões estruturais e infraestruturais que configura o sistema de produção e entrega de uma empresa. Não é uma função de suporte — é o mecanismo que converte <strong>intenção estratégica em resultados mensuráveis</strong>. Enquanto a Estratégia Corporativa define <em>onde</em> competir, a Estratégia de Operações define <em>como</em> ganhar.
+        </div>
+<div class="m-body">A hierarquia estratégica opera em dois horizontes complementares: a <strong>Estratégia Corporativa</strong> (3–10 anos), decidida por CEOs e Conselhos, define posicionamento, mercados e portfólio; a <strong>Estratégia de Operações</strong> (dias a 18 meses), conduzida pelo C-Level funcional, executa, dimensiona capacidade e garante entrega. A ruptura entre esses dois níveis — quando a operação não reflete a estratégia declarada — é a causa mais comum de destruição silenciosa de valor.</div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-s">S</div>
+      <span class="m-acc-label-text">Visão Estratégica — Os Três Efeitos do Desalinhamento Operacional</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-strategy">
+<div class="framework-grid">
+<div class="fw-card"><div class="fw-card-num">01</div><div class="fw-card-title">Erosão de Margem</div><div class="fw-card-body">Ineficiências sistêmicas elevam o custo por unidade de valor entregue, comprimindo margens operacionais de forma progressiva e muitas vezes invisível no curto prazo.</div></div>
+<div class="fw-card"><div class="fw-card-num">02</div><div class="fw-card-title">Perda de Receita</div><div class="fw-card-body">Falhas de capacidade ou tempo de resposta resultam em perda de clientes para concorrentes mais ágeis — impacto direto na linha de topo do P&amp;L.</div></div>
+<div class="fw-card"><div class="fw-card-num">03</div><div class="fw-card-title">Destruição de Capital</div><div class="fw-card-body">Investimentos em ativos que não suportam as capacidades estratégicas necessárias geram retorno abaixo do custo de capital — ROIC negativo oculto.</div></div>
+</div>
+</div>
+<div class="m-fw-grid"><div class="m-fw-card">
+<div class="m-fw-num">01</div>
+<div class="m-fw-title">Erosão de Margem</div>
+<div class="m-fw-body">Ineficiências sistêmicas elevam o custo por unidade de valor entregue, comprimindo margens operacionais de forma progressiva e muitas vezes invisível no curto prazo.</div>
+</div><div class="m-fw-card">
+<div class="m-fw-num">02</div>
+<div class="m-fw-title">Perda de Receita</div>
+<div class="m-fw-body">Falhas de capacidade ou tempo de resposta resultam em perda de clientes para concorrentes mais ágeis — impacto direto na linha de topo do P&L.</div>
+</div><div class="m-fw-card">
+<div class="m-fw-num">03</div>
+<div class="m-fw-title">Destruição de Capital</div>
+<div class="m-fw-body">Investimentos em ativos que não suportam as capacidades estratégicas necessárias geram retorno abaixo do custo de capital — ROIC negativo oculto.</div>
+</div></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-g">G</div>
+      <span class="m-acc-label-text">Guia de Aplicação Prática</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-guide"><div class="m-guide-q"><span class="m-guide-num">01</span><span>01</span></div><div class="m-guide-q"><span class="m-guide-num">02</span><span>02</span></div><div class="m-guide-q"><span class="m-guide-num">03</span><span>03</span></div></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-m">M</div>
+      <span class="m-acc-label-text">Caso de Mercado</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-case">
+<div class="m-case-company">Amazon — A Operação como Estratégia</div>
+A Amazon não venceu pelo produto — venceu pela operação. Enquanto concorrentes debatiam estratégias de preço, ela construiu uma arquitetura operacional (centros de distribuição robotizados, AWS como infraestrutura interna, Prime como mecanismo de lock-in) que tornou sua proposta de valor impossível de replicar sem bilhões em investimento. A estratégia era a operação — não a comunicava, a incorporava. Tim Cook, antes de se tornar CEO da Apple, foi o arquiteto da cadeia de suprimentos que transformou a empresa em líder de margens do setor de tecnologia.
+<span class='m-case-result'>📌 Lição: Em empresas de excelência, estratégia e operação são inseparáveis</span>
+</div></div>
+</div>
+</div><div class="m-module" id="m-mod-1">
+  <div class="m-mod-hero">
+    <div class="m-mod-num">MÓDULO 02</div>
+    <div class="m-mod-title">O Framework VCAP: O Sistema Operacional da Estratégia</div>
+    
+    <span class="m-mod-tag">Arquitetura Analítica</span>
+  </div>
+  <div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-c">C</div>
+      <span class="m-acc-label-text">Conceito Central</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-callout">
+          O VCAP é uma arquitetura analítica para o <strong>design intencional do sistema operacional</strong> de uma empresa. Sua premissa: operações não devem ser gerenciadas reativamente, mas projetadas deliberadamente para sustentar a vantagem competitiva. A relação é <em>multiplicativa</em> — capacidades fracas anulam o valor de excelentes ativos e processos.
+        </div>
+<div class="m-vcap">
+<div class="m-vcap-eq">V = C × (A + P)</div>
+<div class="m-vcap-parts">
+  <div class="m-vcap-part"><div class="m-vcap-circle">V</div><div class="m-vcap-label">Valor</div></div>
+  <div class="m-vcap-part" style="display:flex;align-items:center;padding-bottom:24px;color:rgba(255,255,255,0.3);font-size:22px;font-family:'Cormorant Garamond',serif">=</div>
+  <div class="m-vcap-part"><div class="m-vcap-circle">C</div><div class="m-vcap-label">Capacidades</div></div>
+  <div class="m-vcap-part" style="display:flex;align-items:center;padding-bottom:24px;color:rgba(255,255,255,0.3);font-size:22px;font-family:'Cormorant Garamond',serif">×</div>
+  <div class="m-vcap-part"><div class="m-vcap-circle">A</div><div class="m-vcap-label">Ativos</div></div>
+  <div class="m-vcap-part" style="display:flex;align-items:center;padding-bottom:24px;color:rgba(255,255,255,0.3);font-size:22px;font-family:'Cormorant Garamond',serif">+</div>
+  <div class="m-vcap-part"><div class="m-vcap-circle">P</div><div class="m-vcap-label">Processos</div></div>
+</div></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-s">S</div>
+      <span class="m-acc-label-text">Visão Estratégica — Os Quatro Componentes</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-fw-grid"><div class="m-fw-card">
+<div class="m-fw-num">V</div>
+<div class="m-fw-title">Valor</div>
+<div class="m-fw-body">Ponto de partida: o que o cliente percebe como valioso. WTP — Willingness to Pay — é o instrumento central. Tudo começa pela perspectiva do mercado, não da operação.</div>
+</div><div class="m-fw-card">
+<div class="m-fw-num">C</div>
+<div class="m-fw-title">Capacidades</div>
+<div class="m-fw-body">Competências operacionais distintivas. O elo entre o que a estratégia exige e o que a operação entrega — custo, tempo, qualidade e flexibilidade.</div>
+</div><div class="m-fw-card">
+<div class="m-fw-num">A</div>
+<div class="m-fw-title">Ativos</div>
+<div class="m-fw-body">O substrato material e intelectual. Tangíveis (instalações, equipamentos) e intangíveis (reputação, know-how, dados). A base física e cognitiva da operação.</div>
+</div><div class="m-fw-card">
+<div class="m-fw-num">P</div>
+<div class="m-fw-title">Processos</div>
+<div class="m-fw-body">A dinâmica que ativa os ativos. Fluxo de trabalho, tomada de decisão e transformações que convertem insumos em entrega de valor ao cliente.</div>
+</div></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-m">M</div>
+      <span class="m-acc-label-text">Caso de Mercado</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-case">
+<div class="m-case-company">Zara (Inditex) — VCAP em Ação</div>
+V: Moda atualizada a preço acessível com alta rotatividade. C: Velocidade e variedade — novos designs em 2–3 semanas (vs. 6 meses da indústria). A: Fábricas próprias em Portugal e Espanha, TI integrada, capital humano em design ágil. P: Feedback em tempo real das lojas para os designers, produção em pequenos lotes. O sistema é coeso e difícil de imitar porque todos os elementos se reforçam mutuamente — replicar uma prática isolada não replica a vantagem.
+<span class='m-case-result'>📌 Lição: Vantagem competitiva reside na coesão do sistema, não em práticas isoladas</span>
+</div></div>
+</div>
+</div><div class="m-module" id="m-mod-2">
+  <div class="m-mod-hero">
+    <div class="m-mod-num">MÓDULO 03</div>
+    <div class="m-mod-title">Eficácia Operacional vs. Estratégia: A Distinção que Define Líderes</div>
+    
+    <span class="m-mod-tag">Porter · Posicionamento</span>
+  </div>
+  <div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-c">C</div>
+      <span class="m-acc-label-text">Conceito Central — A Distinção de Porter</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-callout">
+          Confundir Eficácia Operacional com Estratégia é um dos erros mais custosos que líderes executivos cometem. <strong>Eficácia Operacional (OE)</strong> significa executar as mesmas atividades dos concorrentes de forma superior — alcançar a fronteira da produtividade. <strong>Estratégia</strong> significa executar atividades <em>diferentes</em> ou atividades semelhantes de maneiras fundamentalmente distintas, criando um posicionamento único e um sistema de atividades difícil de replicar.
+        </div>
+<div class="m-quote"><p>"A maioria das empresas falha não por falta de estratégia, mas por incapacidade de executá-la. A lacuna entre o planejamento e a entrega é, em essência, uma falha operacional."</p><cite>— Michael Porter, What is Strategy?, HBR, 1996</cite></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-s">S</div>
+      <span class="m-acc-label-text">Visão Estratégica — As 4 Dimensões de Valor para o Cliente</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-strategy">
+<div class="framework-grid">
+<div class="fw-card" style="border-top: 3px solid #3b82f6"><div class="fw-card-num" style="color:#3b82f6">$</div><div class="fw-card-title">Preço / Custo</div><div class="fw-card-body">Custo total de aquisição e posse. Dimensão crítica em mercados de commodities e segmentos price-sensitive. Competição por eficiência de custo.</div></div>
+<div class="fw-card" style="border-top: 3px solid #f59e0b"><div class="fw-card-num" style="color:#f59e0b">◎</div><div class="fw-card-title">Qualidade</div><div class="fw-card-body">Confiabilidade, durabilidade, excelência percebida. Diferencial em setores de luxo, saúde, aeronáutica e alta precisão.</div></div>
+<div class="fw-card" style="border-top: 3px solid #10b981"><div class="fw-card-num" style="color:#10b981">⚡</div><div class="fw-card-title">Velocidade / Resposta</div><div class="fw-card-body">Velocidade, pontualidade, disponibilidade. Vital em e-commerce, serviços financeiros e saúde de urgência.</div></div>
+<div class="fw-card" style="border-top: 3px solid #8b5cf6"><div class="fw-card-num" style="color:#8b5cf6">∞</div><div class="fw-card-title">Variedade / Flexibilidade</div><div class="fw-card-body">Personalização, amplitude de oferta. Crítico em moda, tecnologia de consumo e serviços profissionais.</div></div>
+</div>
+<div class="section-body" style="margin-top:12px;font-size:12px;color:var(--muted)">⚠ Nenhuma empresa sustenta liderança simultânea nas quatro dimensões. A <strong>escolha explícita</strong> é o ato estratégico central — e as operações devem ser projetadas em torno dessa escolha.</div>
+</div>
+<div class="m-body">⚠ Nenhuma empresa sustenta liderança simultânea nas quatro dimensões. A <strong>escolha explícita</strong> é o ato estratégico central — e as operações devem ser projetadas em torno dessa escolha.</div>
+<div class="m-fw-grid"><div class="m-fw-card">
+<div class="m-fw-num">$</div>
+<div class="m-fw-title">Preço / Custo</div>
+<div class="m-fw-body">Custo total de aquisição e posse. Dimensão crítica em mercados de commodities e segmentos price-sensitive. Competição por eficiência de custo.</div>
+</div><div class="m-fw-card">
+<div class="m-fw-num">◎</div>
+<div class="m-fw-title">Qualidade</div>
+<div class="m-fw-body">Confiabilidade, durabilidade, excelência percebida. Diferencial em setores de luxo, saúde, aeronáutica e alta precisão.</div>
+</div><div class="m-fw-card">
+<div class="m-fw-num">⚡</div>
+<div class="m-fw-title">Velocidade / Resposta</div>
+<div class="m-fw-body">Velocidade, pontualidade, disponibilidade. Vital em e-commerce, serviços financeiros e saúde de urgência.</div>
+</div><div class="m-fw-card">
+<div class="m-fw-num">∞</div>
+<div class="m-fw-title">Variedade / Flexibilidade</div>
+<div class="m-fw-body">Personalização, amplitude de oferta. Crítico em moda, tecnologia de consumo e serviços profissionais.</div>
+</div></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-g">G</div>
+      <span class="m-acc-label-text">Guia de Aplicação Prática</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-guide"><div class="m-guide-q"><span class="m-guide-num">01</span><span>01</span></div><div class="m-guide-q"><span class="m-guide-num">02</span><span>02</span></div><div class="m-guide-q"><span class="m-guide-num">03</span><span>03</span></div></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-m">M</div>
+      <span class="m-acc-label-text">Caso de Mercado</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-case">
+<div class="m-case-company">Toyota — O Limite da Eficácia Operacional</div>
+A Toyota liderou com eficiência operacional superior (TPS/Lean) por duas décadas. Quando as montadoras ocidentais dominaram o Lean, a vantagem se erodiu. A lição: a Toyota precisou evoluir para uma estratégia de integração vertical, inovação em mobilidade e reputação de confiabilidade para manter diferenciação. A OE foi ponto de partida, não de chegada. Ironicamente, o mesmo Toyota que ensinou Lean ao mundo foi forçado a rever seus estoques zero após a crise de semicondutores de 2021 — o próprio criador do JIT reconheceu seus limites sistêmicos.
+<span class='m-case-result'>📌 Lição: OE é condição de sobrevivência; estratégia é condição de prosperidade</span>
+</div></div>
+</div>
+</div><div class="m-module" id="m-mod-3">
+  <div class="m-mod-hero">
+    <div class="m-mod-num">MÓDULO 04</div>
+    <div class="m-mod-title">Valor (V): A Perspectiva do Cliente como Bússola Estratégica</div>
+    
+    <span class="m-mod-tag">WTP · Criação de Valor</span>
+  </div>
+  <div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-c">C</div>
+      <span class="m-acc-label-text">Conceito Central</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-callout">
+          Valor é sempre relacional: benefício percebido em relação ao preço pago, sempre comparado às alternativas disponíveis. O ponto de partida do VCAP é o <strong>Valor Percebido pelo Cliente</strong> — não o valor que a empresa acredita entregar. A <strong>Willingness to Pay (WTP)</strong> é o instrumento central: o preço máximo que um cliente pagaria antes de optar por uma alternativa.
+        </div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-s">S</div>
+      <span class="m-acc-label-text">Visão Estratégica — A Equação de Criação e Apropriação de Valor</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-strategy">
+          A lógica estratégica central: <em>cada decisão operacional deve ser avaliada pelo seu impacto na WTP dos clientes-alvo</em>. Um investimento que reduz custo mas também reduz WTP pode destruir valor líquido. Um investimento que eleva WTP mais do que eleva custo cria valor econômico — mesmo que reduza eficiência aparente.
+        </div>
+<div class="m-body">A lógica estratégica central: <em>cada decisão operacional deve ser avaliada pelo seu impacto na WTP dos clientes-alvo</em>. Um investimento que reduz custo mas também reduz WTP pode destruir valor líquido. Um investimento que eleva WTP mais do que eleva custo cria valor econômico — mesmo que reduza eficiência aparente.</div>
+<div class="m-table-wrap"><table class="m-table">
+<thead><tr><th>Parte</th><th>O que Captura</th><th>Como Ampliar</th></tr></thead>
+<tbody>
+<tr><td>Cliente</td><td>WTP − Preço pago (surplus do consumidor)</td><td>Elevar WTP via qualidade, inovação, experiência percebida</td></tr>
+<tr><td>Empresa</td><td>Preço − Custo operacional (margem)</td><td>Elevar WTP e/ou reduzir custo via eficiência operacional</td></tr>
+<tr><td>Fornecedores</td><td>Custo da empresa − Custo do insumo</td><td>Gestão estratégica de fornecimento e poder de barganha</td></tr>
+</tbody>
+</table></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-g">G</div>
+      <span class="m-acc-label-text">Guia de Aplicação Prática</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-guide"><div class="m-guide-q"><span class="m-guide-num">01</span><span>01</span></div><div class="m-guide-q"><span class="m-guide-num">02</span><span>02</span></div><div class="m-guide-q"><span class="m-guide-num">03</span><span>03</span></div></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-m">M</div>
+      <span class="m-acc-label-text">Caso de Mercado</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-case">
+<div class="m-case-company">Apple iPhone — WTP por Ecossistema</div>
+A Apple sustenta WTP consistentemente 30–50% superior a concorrentes Android de hardware equivalente. Isso não resulta de componentes melhores — é produto de um ecossistema integrado (iOS, iCloud, App Store, suporte Apple), design percebido e marca construída ao longo de décadas. Cada decisão operacional da Apple — da embalagem à Apple Store, do design industrial ao Genius Bar — contribui para sustentar e elevar sistematicamente essa WTP . A operação não suporta a estratégia; ela é a estratégia.
+<span class='m-case-result'>📌 Lição: WTP é construída sistemicamente, não por produto ou atributo isolado</span>
+</div></div>
+</div>
+</div><div class="m-module" id="m-mod-4">
+  <div class="m-mod-hero">
+    <div class="m-mod-num">MÓDULO 05</div>
+    <div class="m-mod-title">Capacidades (C): A Arquitetura da Competitividade Operacional</div>
+    
+    <span class="m-mod-tag">Gap Analysis · Competências</span>
+  </div>
+  <div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-c">C</div>
+      <span class="m-acc-label-text">Conceito Central</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-callout">
+          Capacidades são competências operacionais distintivas na interseção entre o que a empresa <em>pode</em> fazer (visão interna) e o que o mercado <em>exige</em> (visão externa). O gap entre essas duas perspectivas é o principal objeto de trabalho da Estratégia de Operações — e a agenda mais honesta de transformação organizacional.
+        </div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-s">S</div>
+      <span class="m-acc-label-text">Visão Estratégica — Análise Dual de Capacidades</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-table-wrap"><table class="m-table">
+<thead><tr><th>Perspectiva</th><th>Foco</th><th>Perguntas-Chave para o Gestor</th></tr></thead>
+<tbody>
+<tr><td>Visão Interna (Real)</td><td>Diagnóstico honesto das capacidades atuais</td><td>Qual é nosso custo total? Lead time real? Taxa de qualidade? Flexibilidade máxima de volume e mix?</td></tr>
+<tr><td>Visão Externa (Desejada)</td><td>Capacidades necessárias ao posicionamento almejado</td><td>O que clientes exigem? O que concorrentes oferecem? Qual é a fronteira de capacidade do setor?</td></tr>
+</tbody>
+</table></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-g">G</div>
+      <span class="m-acc-label-text">Guia de Aplicação Prática</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-guide"><div class="m-guide-q"><span class="m-guide-num">01</span><span>01</span></div><div class="m-guide-q"><span class="m-guide-num">02</span><span>02</span></div></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-m">M</div>
+      <span class="m-acc-label-text">Caso de Mercado</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-case">
+<div class="m-case-company">Netflix — Capacidade como Vantagem Dinâmica</div>
+A capacidade central da Netflix não é entretenimento — é personalização em escala e velocidade de decisão de conteúdo . Quando a Disney+ entrou com vasto catálogo, a Netflix respondeu investindo em capacidade de produção local (Brasil, Coreia, Índia) — demonstrando flexibilidade estratégica como capacidade deliberadamente construída, não reação oportunista. A Netflix entende que sua vantagem não está em qualquer título específico, mas na capacidade sistêmica de identificar e produzir conteúdo relevante para segmentos globais.
+<span class='m-case-result'>📌 Lição: Capacidades dinâmicas — a habilidade de reconfigurar capacidades — são meta-vantagens competitivas</span>
+</div></div>
+</div>
+</div><div class="m-module" id="m-mod-5">
+  <div class="m-mod-hero">
+    <div class="m-mod-num">MÓDULO 06</div>
+    <div class="m-mod-title">Ativos (A) e Processos (P): O Capital Estratégico e a Dinâmica da Operação</div>
+    
+    <span class="m-mod-tag">Portfólio · Decisões Estruturais</span>
+  </div>
+  <div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-c">C</div>
+      <span class="m-acc-label-text">Conceito Central — Ativos</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-callout">
+          Ativos são o substrato estratégico da operação. <strong>Tangíveis</strong>: capital humano, instalações, equipamentos, estoques. <strong>Intangíveis</strong>: reputação de marca, know-how, relacionamentos, cultura, dados e propriedade intelectual. Em economias de plataforma e serviços, os ativos intangíveis são frequentemente mais valiosos do que toda a infraestrutura física combinada — e mais difíceis de replicar.
+        </div>
+<div class="m-quote"><p>"O ativo mais valioso da TSMC não são suas fábricas de silício — é o conhecimento organizacional acumulado de 30 anos que nenhuma empresa pode simplesmente comprar."</p><cite>— Síntese sobre Ativos Intangíveis Estratégicos</cite></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-s">S</div>
+      <span class="m-acc-label-text">Visão Estratégica — As 4 Decisões sobre Ativos e as 5 sobre Processos</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-table-wrap"><table class="m-table">
+<thead><tr><th>Decisão</th><th>Questão Central</th><th>Implicação Financeira</th></tr></thead>
+<tbody>
+<tr><td>Dimensionamento</td><td>Quanta capacidade instalar?</td><td>CAPEX, custo fixo, risco de sub/supercapacidade</td></tr>
+<tr><td>Timing</td><td>Quando expandir ou contrair?</td><td>Timing de capital, lead time de equipamentos</td></tr>
+<tr><td>Tipo</td><td>Ativos dedicados ou flexíveis?</td><td>Custo de troca, risco de obsolescência tecnológica</td></tr>
+<tr><td>Localização</td><td>Onde alocar na rede global?</td><td>Frete, impostos, proximidade ao mercado, risco geopolítico</td></tr>
+</tbody>
+</table></div>
+<div class="m-table-wrap"><table class="m-table">
+<thead><tr><th>Decisão</th><th>Questão Estratégica</th><th>Dilema Típico</th></tr></thead>
+<tbody>
+<tr><td>Suprimentos</td><td>Make or Buy? Integração vertical ou parceria?</td><td>Produzir internamente ou terceirizar logística?</td></tr>
+<tr><td>Tecnologia</td><td>Quais tecnologias de processo e informação adotar?</td><td>Automação robótica vs. capital humano especializado?</td></tr>
+<tr><td>Demanda</td><td>Como alinhar oferta e demanda em tempo real?</td><td>Gestão de capacidade em picos sazonais e demanda incerta</td></tr>
+<tr><td>Inovação</td><td>Como melhorar e inovar continuamente os processos?</td><td>Kaizen incremental vs. reengenharia disruptiva</td></tr>
+<tr><td>Riscos</td><td>Como identificar e mitigar riscos operacionais e de cadeia?</td><td>Dual-sourcing, redundância, planos de continuidade</td></tr>
+</tbody>
+</table></div>
+<div class="m-dilema" onclick="toggleMDilema(this)" style="margin-bottom:10px">
+  <button class="m-dilema-trigger">
+    <div class="m-dilema-q" style="color:rgba(255,255,255,0.85);font-size:13.5px">Ver: As 4 Decisões Estratégicas sobre Ativos</div>
+    <span class="m-dilema-chevron">▼</span>
+  </button>
+  <div class="m-dilema-body" style="color:#e8e0d4">
+<div class="data-table-wrap">
+<table class="data-table">
+<thead><tr><th>Decisão</th><th>Questão Central</th><th>Implicação Financeira</th></tr></thead>
+<tbody>
+<tr><td>Dimensionamento</td><td>Quanta capacidade instalar?</td><td>CAPEX, custo fixo, risco de sub/supercapacidade</td></tr>
+<tr><td>Timing</td><td>Quando expandir ou contrair?</td><td>Timing de capital, lead time de equipamentos</td></tr>
+<tr><td>Tipo</td><td>Ativos dedicados ou flexíveis?</td><td>Custo de troca, risco de obsolescência tecnológica</td></tr>
+<tr><td>Localização</td><td>Onde alocar na rede global?</td><td>Frete, impostos, proximidade ao mercado, risco geopolítico</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="m-dilema" onclick="toggleMDilema(this)" style="margin-bottom:10px">
+  <button class="m-dilema-trigger">
+    <div class="m-dilema-q" style="color:rgba(255,255,255,0.85);font-size:13.5px">Ver: As 5 Decisões Estratégicas sobre Processos</div>
+    <span class="m-dilema-chevron">▼</span>
+  </button>
+  <div class="m-dilema-body" style="color:#e8e0d4">
+<div class="data-table-wrap">
+<table class="data-table">
+<thead><tr><th>Decisão</th><th>Questão Estratégica</th><th>Dilema Típico</th></tr></thead>
+<tbody>
+<tr><td>Suprimentos</td><td>Make or Buy? Integração vertical ou parceria?</td><td>Produzir internamente ou terceirizar logística?</td></tr>
+<tr><td>Tecnologia</td><td>Quais tecnologias de processo e informação adotar?</td><td>Automação robótica vs. capital humano especializado?</td></tr>
+<tr><td>Demanda</td><td>Como alinhar oferta e demanda em tempo real?</td><td>Gestão de capacidade em picos sazonais e demanda incerta</td></tr>
+<tr><td>Inovação</td><td>Como melhorar e inovar continuamente os processos?</td><td>Kaizen incremental vs. reengenharia disruptiva</td></tr>
+<tr><td>Riscos</td><td>Como identificar e mitigar riscos operacionais e de cadeia?</td><td>Dual-sourcing, redundância, planos de continuidade</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-g">G</div>
+      <span class="m-acc-label-text">Guia de Aplicação Prática</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-guide"><div class="m-guide-q"><span class="m-guide-num">01</span><span>01</span></div><div class="m-guide-q"><span class="m-guide-num">02</span><span>02</span></div></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-m">M</div>
+      <span class="m-acc-label-text">Caso de Mercado</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-case">
+<div class="m-case-company">Boeing vs. Airbus — O Custo de Processos Degradados</div>
+O colapso do processo de certificação do 737 MAX na Boeing revelou como a terceirização excessiva de componentes críticos (decisão de suprimentos) e a degradação dos processos de controle de qualidade podem destruir décadas de reputação e bilhões em valor de mercado. A Airbus manteve maior integração vertical em sistemas críticos — uma escolha de processo que se mostrou estrategicamente superior mesmo com custo operacional mais elevado. Processos superiores são construídos ao longo do tempo, incorporam conhecimento tácito e são extremamente difíceis de replicar — ou recuperar uma vez perdidos.
+<span class='m-case-result'>📌 Lição: Processos centrais terceirizados por eficiência podem ser perdidos por décadas</span>
+</div></div>
+</div>
+</div><div class="m-module" id="m-mod-6">
+  <div class="m-mod-hero">
+    <div class="m-mod-num">MÓDULO 07</div>
+    <div class="m-mod-title">A Cadeia Certa para o Produto Certo: O Framework Fisher (HBR, 1997)</div>
+    
+    <span class="m-mod-tag">Fisher · Produto Funcional vs. Inovador</span>
+  </div>
+  <div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-c">C</div>
+      <span class="m-acc-label-text">Conceito Central</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-callout">
+          O artigo seminal de Marshall Fisher (Wharton, 1997) oferece um diagnóstico preciso de por que tantas cadeias de suprimentos falham apesar do investimento em tecnologia e metodologias: <strong>o problema não é a cadeia — é o desalinhamento entre o tipo de produto e o tipo de cadeia</strong>. Fisher propõe que os produtos se dividem em dois tipos fundamentais, cada um exigindo uma filosofia operacional radicalmente diferente.
+        </div>
+<div class="m-quote"><p>"A causa raiz dos problemas que assolam muitas cadeias de suprimentos é um desalinhamento entre o tipo de produto e o tipo de cadeia de suprimentos."</p><cite>— Marshall L. Fisher, What is the Right Supply Chain for Your Product?, HBR, 1997</cite></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-s">S</div>
+      <span class="m-acc-label-text">Visão Estratégica — Produtos Funcionais vs. Inovadores</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-body">Fisher observa uma armadilha frequente: empresas que, por pressão competitiva, <em>transformam produtos funcionais em inovadores</em> (acrescentando variedade e lançamentos constantes) sem perceber que sua cadeia continua calibrada para eficiência física — gerando custos de mediação de mercado crescentes e invisíveis.</div>
+<div class="m-spectrum">
+<div class="m-spec-header m-spec-func">Produtos Funcionais</div>
+<div class="m-spec-body func"><div class="m-spec-item"><div class="m-spec-dot f"></div><span>Satisfazem necessidades básicas estáveis ao longo do tempo</span></div><div class="m-spec-item"><div class="m-spec-dot f"></div><span>Ciclo de vida longo (mais de 2 anos)</span></div><div class="m-spec-item"><div class="m-spec-dot f"></div><span>Demanda previsível e estável</span></div><div class="m-spec-item"><div class="m-spec-dot f"></div><span>Margens de contribuição baixas (5%–20%)</span></div><div class="m-spec-item"><div class="m-spec-dot f"></div><span>Baixa variedade (10–20 variantes por categoria)</span></div><div class="m-spec-item"><div class="m-spec-dot f"></div><span>Erro de previsão médio: ~10%</span></div><div class="m-spec-item"><div class="m-spec-dot f"></div><span>Taxa de ruptura de estoque: 1%–2%</span></div><div class="m-spec-item"><div class="m-spec-dot f"></div><span>Exemplos:Sopas Campbell, pasta de dente básica, itens de mercearia</span></div></div>
+<div class="m-spec-header m-spec-innov">Produtos Inovadores</div>
+<div class="m-spec-body innov"><div class="m-spec-item"><div class="m-spec-dot i"></div><span>Criam razões novas de compra via tecnologia ou moda</span></div><div class="m-spec-item"><div class="m-spec-dot i"></div><span>Ciclo de vida curto (3 meses a 1 ano)</span></div><div class="m-spec-item"><div class="m-spec-dot i"></div><span>Demanda imprevisível e volátil</span></div><div class="m-spec-item"><div class="m-spec-dot i"></div><span>Margens de contribuição altas (20%–60%)</span></div><div class="m-spec-item"><div class="m-spec-dot i"></div><span>Alta variedade (frequentemente milhões de variantes)</span></div><div class="m-spec-item"><div class="m-spec-dot i"></div><span>Erro de previsão médio: 40%–100%</span></div><div class="m-spec-item"><div class="m-spec-dot i"></div><span>Taxa de ruptura de estoque: 10%–40%</span></div><div class="m-spec-item"><div class="m-spec-dot i"></div><span>Exemplos:Moda esportiva, PCs, smartphones, bicicletas custom</span></div></div>
+</div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-c">C</div>
+      <span class="m-acc-label-text">As Duas Funções da Cadeia de Suprimentos</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-strategy">
+          Para <strong>produtos funcionais</strong>, a demanda previsível torna a mediação de mercado trivial. O foco deve ser minimizar custos físicos — produção enxuta, máxima utilização, lead times reduzidos por eficiência. Para <strong>produtos inovadores</strong>, os custos de mediação de mercado dominam. Rupturas de estoque com margem de 40% representam perdas de 10% da receita. O investimento em responsividade sempre se paga — mas apenas para o tipo de produto certo.
+        </div>
+<div class="m-body">Para <strong>produtos funcionais</strong>, a demanda previsível torna a mediação de mercado trivial. O foco deve ser minimizar custos físicos — produção enxuta, máxima utilização, lead times reduzidos por eficiência. Para <strong>produtos inovadores</strong>, os custos de mediação de mercado dominam. Rupturas de estoque com margem de 40% representam perdas de 10% da receita. O investimento em responsividade sempre se paga — mas apenas para o tipo de produto certo.</div>
+<div class="m-table-wrap"><table class="m-table">
+<thead><tr><th>Função</th><th>Descrição</th><th>Custos Associados</th><th>Produto Prioritário</th></tr></thead>
+<tbody>
+<tr><td>Função Física</td><td>Conversão de matérias-primas em produtos acabados e transporte entre pontos da cadeia</td><td>Produção, transporte, armazenagem</td><td>Funcional — previsível, otimizável</td></tr>
+<tr><td>Mediação de Mercado</td><td>Garantir que a variedade de produtos que chega ao mercado coincida com o que os consumidores desejam</td><td>Markdowns por excesso de estoque, vendas perdidas por ruptura</td><td>Inovador — imprevisível, crítico</td></tr>
+</tbody>
+</table></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-s">S</div>
+      <span class="m-acc-label-text">Visão Estratégica — A Matriz de Alinhamento Fisher</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-body">Fisher identifica a <strong>célula superior direita</strong> como a mais comum e a mais problemática: empresas que inovaram seus produtos mas mantiveram cadeias calibradas para eficiência. O sinal de alerta: gestores reclamam de "estoque excessivo de produtos indesejados" e "falta dos produtos certos" simultaneamente.</div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-c">C</div>
+      <span class="m-acc-label-text">Cadeias Eficientes vs. Responsivas — Características Operacionais</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-table-wrap"><table class="m-table"><thead><tr><th>Dimensão Operacional</th><th>Cadeia Eficiente</th><th>Cadeia Responsiva</th></tr></thead><tbody><tr><td>Objetivo Primário</td><td>Suprir demanda previsível ao menor custo possível</td><td>Responder rapidamente à demanda incerta, minimizando rupturas e markdowns</td></tr><tr><td>Foco de Manufatura</td><td>Alta utilização média de capacidade</td><td>Capacidade excedente disponível (buffer)</td></tr><tr><td>Gestão de Estoque</td><td>Alta rotatividade, mínimo de inventário em toda a cadeia</td><td>Estoques estratégicos de componentes ou produtos acabados</td></tr><tr><td>Foco em Lead Time</td><td>Redução enquanto não aumentar custo</td><td>Redução agressiva independentemente do custo</td></tr><tr><td>Seleção de Fornecedores</td><td>Prioritariamente por custo e qualidade</td><td>Prioritariamente por velocidade, flexibilidade e qualidade</td></tr><tr><td>Design de Produto</td><td>Maximizar performance, minimizar custo de fabricação</td><td>Design modular para postergar diferenciação o máximo possível (Postponement)</td></tr></tbody></table></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-s">S</div>
+      <span class="m-acc-label-text">As Três Estratégias para Gerenciar Incerteza em Produtos Inovadores</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-fw-grid"><div class="m-fw-card">
+<div class="m-fw-num">01</div>
+<div class="m-fw-title">Reduzir a Incerteza</div>
+<div class="m-fw-body">Buscar fontes de dados que sirvam como indicadores antecedentes de demanda. Compartilhar componentes entre produtos para tornar a demanda agregada mais previsível. Solicitar pedidos antecipados dos maiores clientes. <em>Exemplo: Sport Obermeyer e seus 25 maiores varejistas reduzindo erro de 200% para 10%.</em></div>
+</div><div class="m-fw-card">
+<div class="m-fw-num">02</div>
+<div class="m-fw-title">Evitar a Incerteza</div>
+<div class="m-fw-body">Cortar lead times e aumentar flexibilidade para produzir mais próximo do momento em que a demanda se materializa. Design modular com postergação (Postponement). <em>Exemplo: National Bicycle — 2 milhões de variantes, produção sob pedido em 2 semanas, market share de 5% a 29%.</em></div>
+</div><div class="m-fw-card">
+<div class="m-fw-num">03</div>
+<div class="m-fw-title">Proteger-se da Incerteza Residual</div>
+<div class="m-fw-body">Após reduzir e evitar ao máximo, proteger com buffers de estoque ou excesso de capacidade posicionados estrategicamente. Usar modelos de "accurate response" para determinar quanto produzir de cada item e quando. <em>Exemplo: Sport Obermeyer aumentou lucros em 60% com essa abordagem.</em></div>
+</div></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-g">G</div>
+      <span class="m-acc-label-text">Guia de Aplicação Prática</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-guide"><div class="m-guide-q"><span class="m-guide-num">01</span><span>01</span></div><div class="m-guide-q"><span class="m-guide-num">02</span><span>02</span></div><div class="m-guide-q"><span class="m-guide-num">03</span><span>03</span></div><div class="m-guide-q"><span class="m-guide-num">04</span><span>04</span></div></div></div>
+</div><div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-m">M</div>
+      <span class="m-acc-label-text">Casos de Mercado</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-case">
+<div class="m-case-company">Campbell Soup — Modelo de Cadeia Eficiente</div>
+Em 1991, a Campbell lançou programa de reposição contínua via EDI com seus maiores varejistas. A cada manhã, os varejistas informavam eletronicamente demanda e estoques; caminhões saíam no mesmo dia. Resultado: inventário dos varejistas caiu de 4 para 2 semanas — redução equivalente a 1% das vendas em custo, suficiente para aumentar o lucro do varejista em 50%. A Campbell também identificou que promoções de preço criavam picos artificiais de demanda que destruíam eficiência operacional sem criar valor real — um caso claro de como incentivos comerciais podem sabotar uma cadeia bem projetada.
+<span class='m-case-result'>📌 Cadeia eficiente para produto funcional: o modelo de referência</span>
+</div>
+<div class="m-case">
+<div class="m-case-company">Sport Obermeyer — Modelo de Cadeia Responsiva</div>
+Fabricante de moda esportiva de esqui com 95% dos produtos novos a cada ano e erro de previsão de até 200%. A empresa desenvolveu a estratégia de "accurate response": (1) identificar quais produtos tinham previsões consensuais entre os compradores — esses eram produzidos primeiro; (2) aguardar pedidos antecipados dos 25 maiores varejistas em fevereiro para calibrar produção tardia; (3) modelar quanto produzir de cada item minimizando perdas por excesso e ruptura. Resultado: custo de desequilíbrio cortado pela metade, lucros aumentados em 60%, e nota máxima de serviço pelos varejistas.
+<span class='m-case-result'>📌 Cadeia responsiva para produto inovador: o alinhamento que gera vantagem</span>
+</div></div>
+</div>
+</div><div class="m-module" id="m-mod-7">
+  <div class="m-mod-hero">
+    <div class="m-mod-num">MÓDULO 08</div>
+    <div class="m-mod-title">Conclusão Executiva: O Sistema Operacional da Vantagem Competitiva</div>
+    
+    <span class="m-mod-tag">Síntese Estratégica</span>
+  </div>
+  <div class="m-accordion">
+  <button class="m-acc-trigger" onclick="toggleAcc(this)">
+    <div class="m-acc-label">
+      <div class="m-acc-icon icon-c">C</div>
+      <span class="m-acc-label-text">A Mensagem Central</span>
+    </div>
+    <span class="m-acc-chevron">▼</span>
+  </button>
+  <div class="m-acc-body"><div class="m-callout">
+          Vantagem competitiva sustentável não emerge de uma única inovação, prática ou ativo. Ela é produto de um <strong>sistema operacional coeso</strong> — onde Capacidades distintivas são construídas sobre Ativos estrategicamente selecionados, ativados por Processos robustos, tudo deliberadamente projetado para maximizar e capturar Valor para o cliente. E esse sistema deve ser calibrado para o <em>tipo de produto</em> que a empresa oferece — funcional ou inovador — com a cadeia de suprimentos correspondente.
+        </div></div>
+</div>
+</div></div>
+
+<footer class="m-footer">
+  <div class="m-footer-text"><strong>MBA Executive — Estratégia de Operações & Framework VCAP</strong><br>Prof. Dr. Thiago Lima · Material de Ensino</div>
+</footer>
+
+<script>
+function showMModule(idx) {
+  document.querySelectorAll('.m-module').forEach((m,i) => m.classList.toggle('active', i===idx));
+  document.querySelectorAll('.m-nav-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  const nav = document.querySelector('.m-module-nav');
+  // scroll active btn into view
+  const activeBtn = document.querySelectorAll('.m-nav-btn')[idx];
+  if (activeBtn) activeBtn.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+  window.scrollTo({top: nav.offsetTop - 62, behavior:'smooth'});
+}
+function toggleAcc(btn) {
+  btn.classList.toggle('open');
+}
+function toggleMDilema(el) {
+  el.classList.toggle('open');
+  const chev = el.querySelector('.m-dilema-chevron');
+  if (chev) chev.textContent = el.classList.contains('open') ? '▲' : '▼';
+}
+</script>
+<script id="mobile-patch-js">
+(function(){
+  var mods=document.querySelectorAll('.m-module'),N=mods.length,labels=["Operação Estratégica", "Framework VCAP", "OE vs. Estratégia", "Valor & WTP", "Capacidades", "Ativos & Processos", "Fisher: a cadeia certa", "Conclusão"];
+  mods.forEach(function(m,i){var d=document.createElement('div');d.className='m-next';
+    d.innerHTML=(i>0?'<button class="pv" onclick="showMModule('+(i-1)+')">‹ Anterior</button>':'')+
+      (i<N-1?'<button class="nx" onclick="showMModule('+(i+1)+')">Próximo: '+labels[i+1]+' ›</button>':'');
+    m.appendChild(d);});
+  var h=document.querySelector('.m-header'),nav=document.querySelector('.m-module-nav');
+  function fit(){nav.style.top=h.offsetHeight+'px';}
+  fit();addEventListener('resize',fit);
+  var orig=window.showMModule;window.showMModule=function(i){orig(i);window.scrollTo({top:nav.offsetTop-h.offsetHeight,behavior:'smooth'});};
+})();
+</script>
+</body>
+</html>
