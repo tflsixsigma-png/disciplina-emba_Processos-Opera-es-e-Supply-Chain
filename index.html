@@ -38,6 +38,13 @@ a{color:inherit}
 .hero .who{margin-top:18px;font-size:1.05rem;color:#dfe5ee}
 .hero .who b{color:#fff}
 .hero .span{margin-top:6px;color:#b9c3d3;font-size:.95rem}
+.prof{display:flex;align-items:center;gap:16px;margin-top:20px}
+.prof img{width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);flex:none}
+.prof .who{margin-top:0}
+.prof .links{margin-top:4px;font-size:.95rem;display:flex;gap:10px;flex-wrap:wrap}
+.prof .links a{color:var(--gold);font-weight:700;text-decoration:none}
+.prof .links a:hover{text-decoration:underline}
+.prof .links span{color:#b9c3d3}
 .next{background:#fff;color:var(--ink);border-radius:10px;padding:22px 24px;border-left:8px solid var(--gold)}
 .next .lbl{font-size:.9rem;font-weight:700;color:var(--gold-dk)}
 .next .when{font-family:var(--serif);font-size:1.9rem;font-weight:700;line-height:1.15;margin:4px 0 2px}
@@ -179,7 +186,6 @@ footer a{color:var(--gold)}
       <a href="#atividades">Atividades</a>
       <a href="#livro">Livros</a>
       <a href="#avaliacao">Avaliação</a>
-      <a class="nav-prog" href="docs/programa-emba-t29.pdf" target="_blank" rel="noopener">Programa</a>
     </nav>
   </div>
 </header>
@@ -189,7 +195,13 @@ footer a{color:var(--gold)}
     <div>
       <div class="inst">COPPEAD/UFRJ · EMBA Turma 29 · 2026</div>
       <h1>Processos, Operações e Supply Chain</h1>
-      <p class="who">Prof. Dr. <b>Thiago Lima</b></p>
+      <div class="prof">
+        <img src="img/thiago-lima.jpg" alt="Foto do Prof. Dr. Thiago Lima" width="72" height="72">
+        <div>
+          <p class="who">Prof. Dr. <b>Thiago Lima</b></p>
+          <p class="links"><a href="https://www.linkedin.com/in/thiago-lima-phd-8b69012a/" target="_blank" rel="noopener">LinkedIn</a><span aria-hidden="true">·</span><a href="http://lattes.cnpq.br/0204895344524909" target="_blank" rel="noopener">Currículo Lattes</a></p>
+        </div>
+      </div>
       <p class="span">Nove sessões entre 10 de outubro e 5 de dezembro, com casos, quatro atividades aplicadas e o trabalho final.</p>
       <div class="btns" style="margin-top:22px"><a class="btn book-dl" href="docs/programa-emba-t29.pdf" target="_blank" rel="noopener">Programa da disciplina (PDF)</a></div>
     </div>
