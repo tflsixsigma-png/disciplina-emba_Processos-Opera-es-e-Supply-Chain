@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Gestão da Cadeia de Suprimentos · Mapa da Evolução</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: app de tela cheia com barra fixa, mapa de forças e vistas de leitura; tema escuro único, alto contraste para projetor */
+  :root{
+    --bg:#0a1020; --bg2:#0e1629; --panel:#121c33; --panel2:#1a2744;
+    --ink:#f4f7fc; --body:#e3e9f4; --muted:#b6c2d6; --line:#2c3a5c;
+    --core:#facc15; --teoria:#c4b5fd; --autor:#fdba74; --pratica:#4ade80;
+    --tec:#67e8f9; --barreira:#f87171; --lacuna:#f0abfc;
+    --accent:#facc15; --onaccent:#1a1400;
+    --f-ui:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --f-data:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:var(--f-ui);
+    background:var(--bg) radial-gradient(1200px 800px at 70% -10%,#1b2748 0%,var(--bg) 55%);
+    color:var(--ink);overflow:hidden;
+  }
+  /* ---------- Top bar ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;height:62px;z-index:30;
+    display:flex;align-items:center;gap:18px;padding:0 22px;
+    background:linear-gradient(180deg,rgba(10,16,32,.95),rgba(10,16,32,.78));
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.3px;flex:none}
+  .brand>div{white-space:nowrap;line-height:1.18}
+  .brand .dot{width:13px;height:13px;border-radius:50%;background:var(--core);flex:none;
+    box-shadow:0 0 0 4px rgba(250,204,21,.18),0 0 18px rgba(250,204,21,.6)}
+  .brand small{display:block;font-weight:500;font-size:11px;color:var(--muted);letter-spacing:1.4px;text-transform:uppercase}
+  nav{display:flex;gap:6px;margin-left:6px;overflow-x:auto;min-width:0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  nav::-webkit-scrollbar{display:none}
+  nav button{
+    background:transparent;border:1px solid transparent;color:var(--muted);flex:none;white-space:nowrap;
+    padding:8px 15px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;
+    transition:.15s;font-family:inherit;letter-spacing:.2px;
+  }
+  nav button:hover{color:var(--ink);background:rgba(255,255,255,.04)}
+  nav button.active{color:var(--onaccent);background:var(--core);border-color:var(--core)}
+  .vbadge{background:var(--core);color:var(--onaccent);font-weight:700;font-size:11px;letter-spacing:.4px;
+    padding:4px 9px;border-radius:20px;white-space:nowrap}
+  .spacer{flex:1}
+  .searchbox{position:relative}
+  .searchbox input{
+    background:var(--panel);border:1px solid var(--line);color:var(--ink);
+    padding:8px 12px 8px 32px;border-radius:9px;font-size:13px;width:200px;font-family:inherit;outline:none;
+  }
+  .searchbox input:focus{border-color:var(--core)}
+  .searchbox svg{position:absolute;left:10px;top:9px;opacity:.5}
+  /* ---------- Views ---------- */
+  .view{position:fixed;inset:62px 0 0 0;display:none}
+  .view.active{display:block}
+  /* ---------- Map ---------- */
+  #stage{width:100%;height:100%;cursor:grab;display:block;touch-action:none}
+  #stage.grabbing{cursor:grabbing}
+  .legend{
+    position:absolute;left:18px;top:16px;z-index:10;background:rgba(18,28,51,.82);
+    border:1px solid var(--line);border-radius:13px;padding:13px 15px;backdrop-filter:blur(6px);max-width:230px;
+  }
+  .legend h4{margin:0 0 9px;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .legend .item{display:flex;align-items:center;gap:9px;font-size:13px;padding:4px 6px;border-radius:7px;cursor:pointer;transition:.12s;user-select:none}
+  .legend .item:hover{background:rgba(255,255,255,.05)}
+  .legend .item.off{opacity:.32}
+  .legend .swatch{width:12px;height:12px;border-radius:50%;flex:none}
+  .hint{position:absolute;left:18px;bottom:16px;z-index:10;font-size:12px;color:var(--muted);
+    background:rgba(18,28,51,.7);border:1px solid var(--line);border-radius:9px;padding:8px 12px;max-width:260px;line-height:1.5}
+  .ctrls{position:absolute;right:calc(18px + var(--panelw,0px));bottom:16px;z-index:10;display:flex;gap:8px;transition:right .25s}
+  .ctrls button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgba(18,28,51,.85);
+    color:var(--ink);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
+  .ctrls button:hover{border-color:var(--core);color:var(--core)}
+  /* nodes */
+  .link{stroke:var(--line);stroke-width:1.4;transition:stroke .2s,stroke-width .2s,opacity .2s}
+  .link.hot{stroke:var(--core);stroke-width:2.4;opacity:1}
+  .node{cursor:pointer}
+  .node circle{stroke:var(--bg);stroke-width:2.5;transition:r .15s}
+  .node text{fill:var(--ink);font-size:11.5px;font-weight:600;pointer-events:none;paint-order:stroke;
+    stroke:var(--bg);stroke-width:3px;stroke-linejoin:round}
+  .node.dim{opacity:.16}
+  .link.dim{opacity:.06}
+  .node.sel circle{stroke:#fff;stroke-width:3.5}
+  /* ---------- Detail panel ---------- */
+  #panel{
+    position:fixed;top:62px;right:0;bottom:0;width:380px;z-index:25;
+    background:linear-gradient(180deg,var(--panel),var(--bg2));border-left:1px solid var(--line);
+    transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+    display:flex;flex-direction:column;
+  }
+  #panel.open{transform:translateX(0)}
+  .pclose{position:absolute;top:13px;right:14px;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
+    background:transparent;color:var(--muted);cursor:pointer;font-size:17px}
+  .pclose:hover{color:var(--ink);border-color:var(--core)}
+  .pbody{padding:26px 26px 30px;overflow-y:auto}
+  .ptag{display:inline-block;font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
+    padding:5px 11px;border-radius:30px;margin-bottom:14px}
+  #panel h2{margin:0 0 4px;font-size:23px;line-height:1.2}
+  .pauthor{color:var(--core);font-size:13.5px;font-weight:600;margin-bottom:18px}
+  .pdesc{font-size:14.5px;line-height:1.62;color:var(--body);margin-bottom:20px}
+  .pblock{margin-bottom:18px}
+  .pblock h5{margin:0 0 8px;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .pblock ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--body)}
+  .pblock li{margin-bottom:5px}
+  .chip{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:20px;
+    padding:5px 12px;font-size:12px;margin:0 6px 7px 0;color:var(--body)}
+  .relnode{display:inline-flex;align-items:center;gap:7px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:9px;padding:7px 11px;font-size:12.5px;margin:0 7px 7px 0;cursor:pointer;transition:.12s}
+  .relnode:hover{border-color:var(--core);transform:translateY(-1px)}
+  .relnode .sw{width:9px;height:9px;border-radius:50%;flex:none}
+  /* ---------- Content views (timeline/table/synth) ---------- */
+  .scroller{height:100%;overflow-y:auto;padding:46px 8vw 80px}
+  .scroller h1{font-size:30px;margin:0 0 6px;font-weight:800;letter-spacing:-.5px}
+  .scroller .sub{color:var(--muted);font-size:15px;margin-bottom:40px;max-width:680px;line-height:1.6}
+  /* timeline */
+  .tl{position:relative;max-width:880px}
+  .tl::before{content:"";position:absolute;left:88px;top:8px;bottom:8px;width:2px;background:var(--line)}
+  .tlitem{position:relative;padding:0 0 30px 130px;cursor:pointer}
+  .tlitem .yr{position:absolute;left:0;top:-2px;width:72px;text-align:right;font-weight:600;font-size:18px;color:var(--autor);font-family:var(--f-data);font-variant-numeric:tabular-nums}
+  .tlitem .nub{position:absolute;left:81px;top:4px;width:16px;height:16px;border-radius:50%;background:var(--autor);
+    border:3px solid var(--bg);box-shadow:0 0 0 3px rgba(253,186,116,.18)}
+  .tlcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 19px;transition:.15s}
+  .tlitem:hover .tlcard{border-color:var(--autor);transform:translateX(3px)}
+  .tlcard h3{margin:0 0 3px;font-size:17px}
+  .tlcard .who{color:var(--core);font-size:13px;font-weight:600;margin-bottom:8px}
+  .tlcard p{margin:0;font-size:13.5px;line-height:1.55;color:var(--body)}
+  /* table */
+  .ctable{width:100%;max-width:980px;border-collapse:separate;border-spacing:0;font-size:14px}
+  .ctable th,.ctable td{text-align:left;padding:15px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+  .ctable thead th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .ctable tbody tr{transition:.12s}
+  .ctable tbody tr:hover{background:rgba(250,204,21,.05)}
+  .ctable .nm{font-weight:700;font-size:15px}
+  .ctable .nm small{display:block;font-weight:500;color:var(--muted);font-size:11.5px;margin-top:3px;letter-spacing:.3px}
+  .scopebar{height:7px;border-radius:5px;background:linear-gradient(90deg,var(--core),var(--pratica));margin-top:9px}
+  /* synth */
+  .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;max-width:920px;margin-bottom:46px}
+  .scard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;position:relative;overflow:hidden}
+  .scard .n{font-size:34px;font-weight:800;color:var(--core);opacity:.32;position:absolute;top:12px;right:18px}
+  .scard h3{margin:0 0 9px;font-size:16px;color:var(--core)}
+  .scard p{margin:0;font-size:14px;line-height:1.6;color:var(--body)}
+  .qbox{max-width:920px}
+  .qbox h2{font-size:21px;margin:0 0 18px}
+  .q{display:flex;gap:16px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:18px 20px;margin-bottom:13px}
+  .q .qn{font-size:24px;font-weight:800;color:var(--lacuna);line-height:1;flex:none}
+  .q p{margin:0;font-size:15px;line-height:1.55}
+  .pullquote{max-width:820px;margin:8px 0 40px;font-size:21px;line-height:1.5;font-weight:600;
+    color:var(--ink);border-left:3px solid var(--lacuna);padding-left:22px;font-style:italic}
+  .pullquote cite{display:block;font-style:normal;font-size:13px;color:var(--muted);margin-top:12px;font-weight:500}
+  /* cases */
+  .cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(390px,1fr));gap:20px;max-width:1120px}
+  .case{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;display:flex;flex-direction:column}
+  .case .ch{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:3px}
+  .case h3{margin:0;font-size:18px}
+  .case .loc{font-size:11px;color:var(--muted);letter-spacing:.5px;white-space:nowrap;text-transform:uppercase;flex:none}
+  .case .tag{font-size:14.5px;font-style:italic;color:var(--pratica);font-weight:600;margin:7px 0 13px}
+  .case p.cd{margin:0 0 16px;font-size:13.5px;line-height:1.58;color:var(--body)}
+  .case .row{display:flex;gap:12px;font-size:12.5px;padding:9px 0;border-top:1px solid var(--line)}
+  .case .row .k{flex:none;width:62px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:10px;padding-top:2px}
+  .case .row .v{color:var(--body);line-height:1.5}
+  .case .row .v b{color:var(--autor);font-weight:700}
+  .loop-chip{display:inline-block;font:700 11px/1 ui-monospace,monospace;color:#4ade80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.34);border-radius:20px;padding:5px 11px;letter-spacing:.04em;text-transform:uppercase;margin:2px 0 4px}
+  .case .gomap{margin-top:16px;align-self:flex-start;background:transparent;border:1px solid var(--line);color:var(--core);
+    border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.13s}
+  .case .gomap:hover{border-color:var(--core);background:rgba(250,204,21,.08);transform:translateY(-1px)}
+  /* refs */
+  .refgroup{font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--core);font-weight:700;margin:36px 0 6px;max-width:1000px}
+  .refrow{max-width:1000px;padding:13px 0 13px 30px;text-indent:-30px;border-bottom:1px solid var(--line);
+    font-size:14px;line-height:1.6;color:var(--body)}
+  .refrow i{color:var(--ink)}
+  .refrow a{color:var(--core);text-decoration:none;font-size:13px;word-break:break-all}
+  .refrow a:hover{text-decoration:underline}
+  .refrow.hide{display:none}
+  .reffilter{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:7px 12px;border-radius:9px;
+    font-size:13px;font-family:inherit;outline:none;margin-left:10px;width:240px}
+  .reffilter:focus{border-color:var(--core)}
+  /* shared "ver no mapa" button */
+  .gomap{margin-top:16px;align-self:flex-start;background:transparent;border:1px solid var(--line);color:var(--core);
+    border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.13s}
+  .gomap:hover{border-color:var(--core);background:rgba(250,204,21,.08);transform:translateY(-1px)}
+  /* quadro teórico */
+  .qtable{display:flex;flex-direction:column;gap:16px;max-width:1080px}
+  .qrow{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 24px;transition:.13s}
+  .qrow:hover{border-color:var(--line)}
+  .qhead{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:6px}
+  .qdotwrap{position:relative;display:inline-flex;flex:none}
+  .qdot{width:15px;height:15px;border-radius:50%;cursor:help;flex:none;box-shadow:0 0 0 3px rgba(255,255,255,.05)}
+  .qtip{position:absolute;left:24px;top:50%;transform:translateY(-50%);z-index:25;width:330px;max-width:72vw;
+    background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:13px 15px;
+    box-shadow:0 14px 34px rgba(0,0,0,.55);display:none;font-size:12.5px;line-height:1.5;color:var(--body)}
+  .qdotwrap:hover .qtip{display:block}
+  .qtip .c{display:block;font-weight:700;margin-bottom:7px;font-size:13.5px}
+  .qtip h6{margin:0 0 5px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .qconcept{font-weight:700;font-size:14.5px;padding:5px 13px;border-radius:30px;flex:none}
+  .qauthor{font-weight:700;font-size:15.5px}
+  .qpaper{font-style:italic;color:var(--muted);font-size:12.5px;margin-bottom:4px}
+  .qbody{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:14px}
+  .qcol h6{margin:0 0 6px;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .qcol p{margin:0;font-size:13.5px;line-height:1.56;color:var(--body)}
+  /* intro / how-to-use modal */
+  .helpbtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--core);
+    font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;flex:none}
+  .helpbtn:hover{border-color:var(--core)}
+  .introwrap{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:20px;
+    background:rgba(4,8,18,.74);backdrop-filter:blur(7px)}
+  .introwrap.show{display:flex}
+  .introcard{position:relative;background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);
+    border-radius:20px;max-width:580px;width:100%;padding:34px 36px;box-shadow:0 30px 80px rgba(0,0,0,.55);
+    max-height:88vh;overflow-y:auto}
+  .introcard .ptag{display:inline-block;font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
+    padding:5px 11px;border-radius:30px;margin-bottom:14px;background:rgba(250,204,21,.16);color:var(--core)}
+  .introcredit{font-size:12.5px;color:var(--core);font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:12px}
+  .introcard h2{margin:0 0 12px;font-size:25px;line-height:1.2}
+  .introcard .lead{font-size:15px;line-height:1.62;color:var(--body);margin:0 0 22px}
+  .introsteps{display:flex;flex-direction:column;gap:12px;margin-bottom:26px}
+  .introsteps .s{display:flex;gap:12px;font-size:13.5px;line-height:1.5;color:var(--body)}
+  .introsteps .s .sw{width:10px;height:10px;border-radius:50%;flex:none;margin-top:5px}
+  .introsteps .s b{color:var(--ink)}
+  .introgo{background:var(--core);color:var(--onaccent);border:none;border-radius:11px;padding:12px 24px;font-size:14.5px;
+    font-weight:700;cursor:pointer;font-family:inherit}
+  .introgo:hover{filter:brightness(1.08)}
+  .introx{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
+    background:transparent;color:var(--muted);cursor:pointer;font-size:16px}
+  .introx:hover{color:var(--ink);border-color:var(--core)}
+  /* apresentação / viewer */
+  .apswrap{height:100%;display:flex;flex-direction:column;padding:22px 4vw 16px}
+  .apstop{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:13px;gap:14px;flex-wrap:wrap}
+  .apstop h1{font-size:22px;margin:0}
+  .apssub{color:var(--muted);font-size:12.5px;margin-top:3px}
+  .apsactions{display:flex;gap:8px}
+  .apsbtn{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:8px 14px;
+    font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .apsbtn:hover{border-color:var(--core);color:var(--core)}
+  .apsstage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
+    background:#070b17;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .apsstage img{max-width:100%;max-height:100%;object-fit:contain;display:block;cursor:pointer}
+  .apsmaplink{position:absolute;top:12px;right:12px;background:var(--core);color:var(--onaccent);border:none;
+    border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;
+    box-shadow:0 4px 14px rgba(0,0,0,.35)}
+  .apsmaplink:hover{filter:brightness(1.08)}
+  .apsnav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(18,28,51,.82);color:#fff;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .apsnav:hover{border-color:var(--core);color:var(--core)}
+  .apsprev{left:14px}.apsnext{right:14px}
+  .apscounter{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(10,16,32,.82);
+    border:1px solid var(--line);border-radius:20px;padding:5px 14px;font-size:12.5px;color:var(--muted)}
+  .apsmeta{margin:13px 0 9px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+  .apsmeta .t{font-weight:700;font-size:15px}
+  .apschips{display:flex;flex-wrap:wrap;gap:7px}
+  .apschip{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;transition:.12s}
+  .apschip:hover{border-color:var(--core);transform:translateY(-1px)}
+  .apschip .sw{width:8px;height:8px;border-radius:50%;flex:none}
+  .apsthumbs{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 2px}
+  .apsthumb{flex:none;width:104px;height:58px;border-radius:7px;border:2px solid transparent;overflow:hidden;cursor:pointer;opacity:.5;background:#000;transition:.12s}
+  .apsthumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .apsthumb.active{opacity:1;border-color:var(--core)}
+  .apsthumb:hover{opacity:1}
+  /* tela cheia */
+  .fswrap{position:fixed;inset:0;z-index:80;display:none;background:#000;align-items:center;justify-content:center}
+  .fswrap.show{display:flex}
+  .fswrap img{max-width:100vw;max-height:100vh;object-fit:contain}
+  .fsx{position:absolute;top:16px;right:18px;width:40px;height:40px;border-radius:9px;border:1px solid #333;
+    background:rgba(0,0,0,.5);color:#fff;font-size:17px;cursor:pointer}
+  .fsx:hover{border-color:var(--core);color:var(--core)}
+  .fsnav{position:absolute;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;border:1px solid #444;
+    background:rgba(0,0,0,.4);color:#fff;font-size:26px;line-height:1;cursor:pointer}
+  .fsnav:hover{border-color:var(--core);color:var(--core)}
+  .fsprev{left:20px}.fsnext{right:20px}
+  .fscounter{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:#bbb;font-size:13px}
+  .fsmaplink{position:absolute;bottom:14px;right:20px;background:var(--core);color:var(--onaccent);border:none;
+    border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+    box-shadow:0 4px 14px rgba(0,0,0,.4)}
+  .fsmaplink:hover{filter:brightness(1.08)}
+  .bfybox{max-width:1040px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .bfybox svg{width:100%;height:auto;display:block}
+  .bfyacts{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .bfyacts .gomap{margin-top:0;text-decoration:none}
+  .agh{font-size:13px;letter-spacing:1.2px;text-transform:uppercase;color:var(--core);font-weight:700;margin:36px 0 14px}
+  #view-agenda .scard .gomap{margin-top:14px}
+  @media(max-width:760px){.qbody{grid-template-columns:1fr;gap:14px}.introcard{padding:26px 22px}
+    .apswrap{padding:16px 14px}.apsnav{width:36px;height:36px;font-size:18px}}
+  @media(max-width:760px){
+    .grid4{grid-template-columns:1fr}.scroller{padding:34px 22px 80px}
+    header{gap:10px;padding:0 12px}
+    nav{flex:1;margin-left:0}
+    nav button{padding:8px 11px;font-size:12.5px}
+    .searchbox{display:none}.vbadge{display:none}.spacer{display:none}
+    #panel{width:100%}.brand small{display:none}
+  }
+
+  body{height:100%}
+  header{padding-top:env(safe-area-inset-top,0px)}
+  button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--core);outline-offset:2px}
+  .scroller .sub b{color:var(--ink)}
+  .vbadge,.tlcard .who,.pauthor{font-variant-numeric:tabular-nums}
+  /* fases da linha do tempo */
+  .tlphase{position:relative;padding:6px 0 22px 130px;max-width:880px}
+  .tlphase h2{margin:10px 0 4px;font-size:13px;letter-spacing:1.4px;text-transform:uppercase;color:var(--core);font-weight:700}
+  .tlphase p{margin:0;font-size:14px;line-height:1.55;color:var(--muted);max-width:640px}
+  .tlphase::before{content:"";position:absolute;left:83px;top:12px;width:12px;height:12px;background:var(--core);transform:rotate(45deg)}
+  /* slides em HTML */
+  .slide{container-type:inline-size;aspect-ratio:16/9;width:min(100%, calc((100vh - 330px) * 16 / 9));max-width:100%;
+    background:#0b1224;border:1px solid var(--line);border-radius:10px;padding:5.5cqw 7cqw;color:var(--ink);cursor:pointer;
+    display:flex;flex-direction:column;justify-content:center;gap:2.2cqw;overflow:hidden;text-align:left}
+  .apsstage .slide{min-width:0}
+  .slide .eyebrow{font-family:var(--f-data);font-size:1.7cqw;letter-spacing:.14em;text-transform:uppercase;color:var(--core)}
+  .slide h2{margin:0;font-size:5cqw;line-height:1.08;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+  .slide p,.slide li{font-size:2.35cqw;line-height:1.45;color:var(--body)}
+  .slide ul,.slide ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:.9cqw}
+  .slide b{color:var(--core);font-weight:600}
+  .slide .big{font-size:3cqw;line-height:1.35;color:var(--ink);max-width:80%;margin:0}
+  .slide .note{font-size:1.9cqw;color:var(--muted);margin:0}
+  .slide .formula{font-family:var(--f-data);font-size:3.4cqw;color:var(--core);border:2px solid var(--core);border-radius:8px;padding:1.2cqw 2.2cqw;align-self:flex-start}
+  .slide .cols2,.slide .cols3{display:grid;gap:2.2cqw}
+  .slide .cols2{grid-template-columns:1fr 1fr}.slide .cols3{grid-template-columns:repeat(3,1fr)}
+  .slide .cols2>div,.slide .cols3>div{border-top:3px solid var(--core);padding-top:1.4cqw}
+  .slide h3{margin:0 0 .8cqw;font-size:2.6cqw;color:var(--ink)}
+  .slide .cols2 p,.slide .cols3 p{margin:0;font-size:2.1cqw}
+  .slide .phases{display:grid;grid-template-columns:repeat(5,1fr);gap:1.4cqw}
+  .slide .phases div{border-left:3px solid var(--core);padding:.6cqw 0 .6cqw 1.4cqw;display:flex;flex-direction:column;gap:.5cqw}
+  .slide .phases b{font-family:var(--f-data);font-size:3.6cqw;color:var(--core)}
+  .slide .phases span{font-size:2.1cqw;font-weight:600}
+  .slide .phases em{font-style:normal;font-family:var(--f-data);font-size:1.7cqw;color:var(--muted)}
+  .slide .sl-cover{display:flex;flex-direction:column;gap:2.4cqw}
+  .slide .sl-cover h2{font-size:7.4cqw;color:var(--core)}
+  .slide .sl-foot{font-family:var(--f-data);font-size:1.8cqw;color:var(--muted)}
+  .fswrap .fsslide{width:min(94vw, calc(94vh * 16 / 9));border-radius:0;cursor:default}
+  .apsthumb{display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:150px;height:auto;min-height:58px;padding:7px 9px;
+    background:var(--panel);color:var(--body);font:500 11.5px/1.3 var(--f-ui);text-align:left;border:2px solid var(--line)}
+  .apsthumb b{font-family:var(--f-data);color:var(--core);font-size:12px}
+  .apsthumb span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .apsthumb.active{border-color:var(--core)}
+  .refrow a{color:var(--core)}
+  .bfybox{overflow-x:auto}
+  .bfybox svg{min-width:680px}
+  @media(max-width:760px){.slide{width:100%}.slide .cols3,.slide .phases{grid-template-columns:1fr 1fr}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style id="disc-back-css">
+.disc-back{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-right:12px;padding:6px 11px;border-radius:6px;
+background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui,sans-serif;text-decoration:none!important;white-space:nowrap;letter-spacing:0;text-transform:none}
+.disc-back:hover{background:#fff}.disc-back:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.disc-back .bk{font-weight:500;opacity:.85}
+@media(max-width:560px){.disc-back .bk{display:none}header .header-meta{display:none}header .header-title{font-size:.95rem;line-height:1.2}}
+@media print{.disc-back{display:none}}
+</style>
+<style id="mobile-patch">
+@media (max-width:700px){
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+  th{font-size:12px!important} td{font-size:14px!important;line-height:1.5}
+  .tab-btn{font-size:14px!important;min-height:44px}
+}
+@media (max-width:760px){
+  header{height:auto!important;flex-wrap:wrap;padding:8px 10px 0!important;gap:8px 10px!important}
+  header .brand{flex:1;min-width:0}
+  header nav{order:10;flex:1 0 100%!important;margin:0 -10px!important;padding:0 10px 8px;border-top:1px solid var(--line);padding-top:8px}
+  header nav button{padding:9px 12px!important;font-size:13.5px!important;min-height:40px}
+  .helpbtn{min-width:40px;min-height:40px}
+  .view{inset:var(--hh,108px) 0 0 0!important}
+  #panel{top:var(--hh,108px)!important}
+  .legend{top:10px!important;left:10px!important;padding:8px 12px!important;max-width:72vw!important}
+  .legend h4{cursor:pointer;margin:0!important;font-size:12px!important}
+  .legend h4::after{content:" ▾";text-transform:none}
+  .legend.open h4{margin-bottom:8px!important}
+  .legend.open h4::after{content:" ▴"}
+  .legend:not(.open) #legendItems{display:none}
+  .legend .item{font-size:14px!important;padding:7px 6px!important}
+  .hint{display:none!important}
+  .pdesc,.pblock li{font-size:15.5px!important}
+  .pbody{padding:22px 18px 40px!important}
+  .pclose{width:40px!important;height:40px!important}
+}
+
+@media (max-width:760px){
+  .apsstage{padding-bottom:52px!important}
+  .apsnav{top:auto!important;bottom:8px!important;transform:none!important}
+  .apsprev{left:calc(50% - 88px)!important}
+  .apsnext{right:calc(50% - 88px)!important}
+  .apscounter{bottom:14px!important}
+}
+</style>
+</head>
+<body>
+<header>
+<a class="disc-back" href="../index.html" title="Voltar à página da disciplina">‹ Disciplina<span class="bk"> · Livro Cap. 4</span></a>
+  <div class="brand"><span class="dot"></span><div>Cadeia de Suprimentos<small>Sessões 5 e 6 · 1958–2026</small></div></div>
+  <span class="vbadge">v1 · out 2026</span>
+  <nav id="nav">
+    <button data-view="apresentacao" class="active">Apresentação</button>
+    <button data-view="map">Mapa Conceitual</button>
+    <button data-view="diagrama">Diagrama</button>
+    <button data-view="timeline">Linha do Tempo</button>
+    <button data-view="cases">Casos Práticos</button>
+    <button data-view="quadro">Quadro Teórico</button>
+    <button data-view="agenda">Agenda</button>
+    <button data-view="refs">Referências</button>
+  </nav>
+  <div class="spacer"></div>
+  <button id="helpBtn" class="helpbtn" title="Como usar / comece aqui">?</button>
+  <div class="searchbox">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search" placeholder="Buscar conceito ou autor…" autocomplete="off">
+  </div>
+</header>
+
+<!-- ============ MAP ============ -->
+<section class="view" id="view-map">
+  <svg id="stage"></svg>
+  <div class="legend">
+    <h4>Categorias <span style="font-weight:500;text-transform:none;letter-spacing:0">(clique p/ filtrar)</span></h4>
+    <div id="legendItems"></div>
+  </div>
+  <div class="hint">Clique num nó para detalhes · arraste para reorganizar · roda do mouse para zoom</div>
+  <div class="ctrls" id="ctrls">
+    <button id="zin" title="Aproximar">+</button>
+    <button id="zout" title="Afastar">−</button>
+    <button id="zfit" title="Centralizar" style="font-size:14px">⤢</button>
+  </div>
+</section>
+
+<!-- ============ APRESENTAÇÃO ============ -->
+<section class="view active" id="view-apresentacao">
+  <div class="apswrap">
+    <div class="apstop">
+      <div><h1>Apresentação da Aula</h1><div class="apssub">Gestão da Cadeia de Suprimentos: qual é a cadeia certa para o produto certo? · Prof. Dr. Thiago Lima</div></div>
+      <div class="apsactions">
+        <button class="apsbtn" id="apsFull">⛶ Tela cheia</button>
+      </div>
+    </div>
+    <div class="apsstage">
+      <button class="apsnav apsprev" id="apsPrev" aria-label="anterior">‹</button>
+      <div class="slide" id="apsSlide"></div>
+      <button class="apsnav apsnext" id="apsNext" aria-label="próximo">›</button>
+      <div class="apscounter" id="apsCounter"></div>
+      <button class="apsmaplink" id="apsMapLink">⊕ Explorar no mapa →</button>
+    </div>
+    <div class="apsmeta">
+      <span class="t" id="apsTitle"></span>
+      <span class="apschips" id="apsChips"></span>
+    </div>
+    <div class="apsthumbs" id="apsThumbs"></div>
+  </div>
+</section>
+
+<!-- ============ DIAGRAMA ============ -->
+<section class="view" id="view-diagrama">
+  <div class="scroller">
+<h1>Diagrama da Matriz de Fisher</h1>
+    <p class="sub">A imagem-síntese da aula. Nas colunas, a <b>natureza da demanda</b>; nas linhas, o <b>desenho da cadeia</b>. As células verdes são alinhadas; as vermelhas mostram o custo que o desalinhamento produz: físico, quando a cadeia responsiva atende produto funcional, ou de <b>mediação de mercado</b>, quando a cadeia eficiente atende produto inovador. Embaixo, o efeito chicote: com demanda final estável, os pedidos oscilam cada vez mais a montante. Fisher (1997); Lee et al. (1997).</p>
+    <div class="bfybox">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 700" font-family="'IBM Plex Sans',Arial,Helvetica,sans-serif" role="img" aria-label="Matriz de Fisher e efeito chicote">
+        <rect width="1180" height="700" fill="#0a1020"/>
+        <defs><marker id="cs-arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e8eef8"/></marker></defs>
+        <text x="495" y="36" text-anchor="middle" fill="#e8eef8" font-size="15" font-weight="700" letter-spacing="1.5">NATUREZA DA DEMANDA</text>
+        <text x="120" y="36" text-anchor="middle" fill="#e8eef8" font-size="15" font-weight="700" letter-spacing="1.5">DESENHO DA CADEIA</text>
+        <text x="350" y="72" text-anchor="middle" fill="#facc15" font-size="19" font-weight="700">PRODUTO FUNCIONAL</text>
+        <text x="640" y="72" text-anchor="middle" fill="#c4b5fd" font-size="19" font-weight="700">PRODUTO INOVADOR</text>
+        <rect x="30" y="90" width="170" height="160" rx="12" fill="#121c33" stroke="#67e8f9" stroke-width="2.5"/>
+        <text x="115" y="148" text-anchor="middle" fill="#67e8f9" font-size="18" font-weight="700">CADEIA</text>
+        <text x="115" y="172" text-anchor="middle" fill="#67e8f9" font-size="18" font-weight="700">EFICIENTE</text>
+        <text x="115" y="202" text-anchor="middle" fill="#e8eef8" font-size="14">custo mínimo,</text>
+        <text x="115" y="222" text-anchor="middle" fill="#e8eef8" font-size="14">alto giro</text>
+        <rect x="30" y="262" width="170" height="160" rx="12" fill="#121c33" stroke="#fdba74" stroke-width="2.5"/>
+        <text x="115" y="320" text-anchor="middle" fill="#fdba74" font-size="18" font-weight="700">CADEIA</text>
+        <text x="115" y="344" text-anchor="middle" fill="#fdba74" font-size="18" font-weight="700">RESPONSIVA</text>
+        <text x="115" y="374" text-anchor="middle" fill="#e8eef8" font-size="14">velocidade,</text>
+        <text x="115" y="394" text-anchor="middle" fill="#e8eef8" font-size="14">capacidade extra</text>
+        <rect x="210" y="90" width="280" height="160" rx="12" fill="#121c33" stroke="#4ade80" stroke-width="3"/>
+        <text x="350" y="130" text-anchor="middle" fill="#4ade80" font-size="21" font-weight="700">✓ ALINHADO</text>
+        <text x="350" y="164" text-anchor="middle" fill="#e8eef8" font-size="16">minimiza custos físicos</text>
+        <text x="350" y="188" text-anchor="middle" fill="#e8eef8" font-size="16">produção e estoque enxutos</text>
+        <text x="350" y="232" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="600">ex.: Campbell Soup (Fisher, 1997)</text>
+        <rect x="500" y="90" width="280" height="160" rx="12" fill="#121c33" stroke="#f87171" stroke-width="3"/>
+        <text x="640" y="130" text-anchor="middle" fill="#f87171" font-size="21" font-weight="700">✗ DESALINHADO</text>
+        <text x="640" y="164" text-anchor="middle" fill="#e8eef8" font-size="16">falta, remarcação e obsolescência</text>
+        <text x="640" y="188" text-anchor="middle" fill="#e8eef8" font-size="16">custo de mediação dispara</text>
+        <text x="640" y="232" text-anchor="middle" fill="#f87171" font-size="14" font-weight="600">o desalinhamento mais comum</text>
+        <rect x="210" y="262" width="280" height="160" rx="12" fill="#121c33" stroke="#f87171" stroke-width="3"/>
+        <text x="350" y="302" text-anchor="middle" fill="#f87171" font-size="21" font-weight="700">✗ DESALINHADO</text>
+        <text x="350" y="336" text-anchor="middle" fill="#e8eef8" font-size="16">capacidade e estoque ociosos</text>
+        <text x="350" y="360" text-anchor="middle" fill="#e8eef8" font-size="16">custo físico sem retorno</text>
+        <rect x="500" y="262" width="280" height="160" rx="12" fill="#121c33" stroke="#4ade80" stroke-width="3"/>
+        <text x="640" y="302" text-anchor="middle" fill="#4ade80" font-size="21" font-weight="700">✓ ALINHADO</text>
+        <text x="640" y="336" text-anchor="middle" fill="#e8eef8" font-size="16">velocidade paga pela margem</text>
+        <text x="640" y="360" text-anchor="middle" fill="#e8eef8" font-size="16">minimiza custo de mediação</text>
+        <text x="640" y="404" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="600">ex.: Zara (Ferdows et al., 2004)</text>
+        <rect x="810" y="52" width="340" height="176" rx="12" fill="#121c33" stroke="#facc15" stroke-width="2.5"/>
+        <text x="832" y="84" fill="#facc15" font-size="17" font-weight="700">PRODUTO FUNCIONAL</text>
+        <text x="832" y="114" fill="#e8eef8" font-size="15">• demanda previsível</text>
+        <text x="832" y="137" fill="#e8eef8" font-size="15">• ciclo de vida longo</text>
+        <text x="832" y="160" fill="#e8eef8" font-size="15">• margem de contribuição baixa</text>
+        <text x="832" y="183" fill="#e8eef8" font-size="15">• pouca variedade</text>
+        <text x="832" y="206" fill="#e8eef8" font-size="15">• falta e remarcação raras</text>
+        <rect x="810" y="246" width="340" height="176" rx="12" fill="#121c33" stroke="#c4b5fd" stroke-width="2.5"/>
+        <text x="832" y="278" fill="#c4b5fd" font-size="17" font-weight="700">PRODUTO INOVADOR</text>
+        <text x="832" y="308" fill="#e8eef8" font-size="15">• demanda imprevisível</text>
+        <text x="832" y="331" fill="#e8eef8" font-size="15">• ciclo de vida curto</text>
+        <text x="832" y="354" fill="#e8eef8" font-size="15">• margem de contribuição alta</text>
+        <text x="832" y="377" fill="#e8eef8" font-size="15">• muita variedade</text>
+        <text x="832" y="400" fill="#e8eef8" font-size="15">• falta e remarcação frequentes</text>
+        <line x1="30" y1="456" x2="1150" y2="456" stroke="#2c3a5c" stroke-width="1.5"/>
+        <text x="30" y="490" fill="#e8eef8" font-size="17" font-weight="700">Efeito chicote · a variabilidade dos pedidos cresce a montante</text>
+        <text x="1150" y="490" text-anchor="end" fill="#b6c2d6" font-size="13">ilustrativo, sem escala · Lee et al. (1997)</text>
+        <rect x="30" y="508" width="190" height="172" rx="12" fill="#121c33" stroke="#4ade80" stroke-width="2"/>
+        <text x="125.0" y="536" text-anchor="middle" fill="#4ade80" font-size="16" font-weight="700">CONSUMIDOR</text>
+        <text x="125.0" y="556" text-anchor="middle" fill="#e8eef8" font-size="13">demanda final</text>
+        <line x1="44" y1="618" x2="206" y2="618" stroke="#2c3a5c" stroke-width="1"/>
+        <polyline points="46.0,618.0 59.2,615.5 72.3,619.5 85.5,613.5 98.7,622.0 111.8,616.0 125.0,621.0 138.2,613.0 151.3,620.5 164.5,616.5 177.7,622.5 190.8,615.0 204.0,618.0" fill="none" stroke="#4ade80" stroke-width="3" stroke-linejoin="round"/>
+        <line x1="225" y1="594" x2="257" y2="594" stroke="#e8eef8" stroke-width="2.2" marker-end="url(#cs-arw)"/>
+        <rect x="262" y="508" width="190" height="172" rx="12" fill="#121c33" stroke="#fdba74" stroke-width="2"/>
+        <text x="357.0" y="536" text-anchor="middle" fill="#fdba74" font-size="16" font-weight="700">VAREJO</text>
+        <text x="357.0" y="556" text-anchor="middle" fill="#e8eef8" font-size="13">pedidos</text>
+        <line x1="276" y1="618" x2="438" y2="618" stroke="#2c3a5c" stroke-width="1"/>
+        <polyline points="278.0,618.0 291.2,611.0 304.3,622.2 317.5,605.4 330.7,629.2 343.8,612.4 357.0,626.4 370.2,604.0 383.3,625.0 396.5,613.8 409.7,630.6 422.8,609.6 436.0,618.0" fill="none" stroke="#fdba74" stroke-width="3" stroke-linejoin="round"/>
+        <line x1="457" y1="594" x2="489" y2="594" stroke="#e8eef8" stroke-width="2.2" marker-end="url(#cs-arw)"/>
+        <rect x="494" y="508" width="190" height="172" rx="12" fill="#121c33" stroke="#fdba74" stroke-width="2"/>
+        <text x="589.0" y="536" text-anchor="middle" fill="#fdba74" font-size="16" font-weight="700">ATACADO</text>
+        <text x="589.0" y="556" text-anchor="middle" fill="#e8eef8" font-size="13">pedidos</text>
+        <line x1="508" y1="618" x2="670" y2="618" stroke="#2c3a5c" stroke-width="1"/>
+        <polyline points="510.0,618.0 523.2,605.0 536.3,625.8 549.5,594.6 562.7,638.8 575.8,607.6 589.0,633.6 602.2,592.0 615.3,631.0 628.5,610.2 641.7,641.4 654.8,602.4 668.0,618.0" fill="none" stroke="#fdba74" stroke-width="3" stroke-linejoin="round"/>
+        <line x1="689" y1="594" x2="721" y2="594" stroke="#e8eef8" stroke-width="2.2" marker-end="url(#cs-arw)"/>
+        <rect x="726" y="508" width="190" height="172" rx="12" fill="#121c33" stroke="#f87171" stroke-width="2"/>
+        <text x="821.0" y="536" text-anchor="middle" fill="#f87171" font-size="16" font-weight="700">FABRICANTE</text>
+        <text x="821.0" y="556" text-anchor="middle" fill="#e8eef8" font-size="13">pedidos</text>
+        <line x1="740" y1="618" x2="902" y2="618" stroke="#2c3a5c" stroke-width="1"/>
+        <polyline points="742.0,618.0 755.2,599.0 768.3,629.4 781.5,583.8 794.7,648.4 807.8,602.8 821.0,640.8 834.2,580.0 847.3,637.0 860.5,606.6 873.7,652.2 886.8,595.2 900.0,618.0" fill="none" stroke="#f87171" stroke-width="3" stroke-linejoin="round"/>
+        <line x1="921" y1="594" x2="953" y2="594" stroke="#e8eef8" stroke-width="2.2" marker-end="url(#cs-arw)"/>
+        <rect x="958" y="508" width="190" height="172" rx="12" fill="#121c33" stroke="#f87171" stroke-width="2"/>
+        <text x="1053.0" y="536" text-anchor="middle" fill="#f87171" font-size="16" font-weight="700">FORNECEDOR</text>
+        <text x="1053.0" y="556" text-anchor="middle" fill="#e8eef8" font-size="13">pedidos</text>
+        <line x1="972" y1="618" x2="1134" y2="618" stroke="#2c3a5c" stroke-width="1"/>
+        <polyline points="974.0,618.0 987.2,593.0 1000.3,633.0 1013.5,573.0 1026.7,658.0 1039.8,598.0 1053.0,648.0 1066.2,568.0 1079.3,643.0 1092.5,603.0 1105.7,663.0 1118.8,588.0 1132.0,618.0" fill="none" stroke="#f87171" stroke-width="3" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="bfyacts">
+      <button class="gomap" data-go="fit">Ver o Alinhamento no mapa →</button>
+      <button class="gomap" data-go="desalinho">Ver o Desalinhamento no mapa →</button>
+      <button class="gomap" data-go="chicote">Ver o Efeito chicote no mapa →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AGENDA ============ -->
+<section class="view" id="view-agenda">
+  <div class="scroller">
+<h1>Agenda de Pesquisa</h1>
+    <p class="sub">A matriz de Fisher é uma das ideias mais usadas de SCM, mas o teste empírico é parcial e o contexto mudou: portfólios mistos, canais múltiplos e rupturas frequentes. A fronteira está em medir o alinhamento, ligá-lo ao desempenho financeiro e conciliá-lo com a resiliência. <em>Fisher (1997); Lee (2002); Selldin &amp; Olhager (2007); Wagner et al. (2012); Sheffi &amp; Rice (2005).</em></p>
+    <h3 class="agh">Cinco lacunas da literatura</h3>
+    <div class="grid4">
+      <div class="scard"><h3>Medir a natureza do produto</h3><p><b>Evidência:</b> funcional e inovador são tratados como categorias, mas a incerteza de demanda é contínua. <b>Oportunidade:</b> escalas de incerteza e de margem que permitam posicionar cada item na matriz.</p></div>
+      <div class="scard"><h3>Portfólios e canais mistos</h3><p><b>Evidência:</b> a matriz supõe um produto por cadeia. <b>Oportunidade:</b> estudar a segmentação de cadeias quando o mesmo item é vendido na loja e no online.</p></div>
+      <div class="scard"><h3>Evidência causal do fit</h3><p><b>Evidência:</b> os testes são em geral surveys de corte transversal com apoio parcial. <b>Oportunidade:</b> dados em painel sobre mudança de desenho e efeito em ROA e ciclo de caixa.</p></div>
+      <div class="scard"><h3>Eficiência × resiliência</h3><p><b>Evidência:</b> a cadeia eficiente de Fisher reduz folgas que a resiliência exige. <b>Oportunidade:</b> critérios para decidir quanto de redundância ou flexibilidade pagar.</p></div>
+      <div class="scard"><h3>Migração ao longo do ciclo de vida</h3><p><b>Evidência:</b> um produto inovador tende a se tornar funcional. <b>Oportunidade:</b> quando e como a empresa deve migrar o produto de uma cadeia para a outra.</p></div>
+    </div>
+    <h3 class="agh">Três debates de fronteira</h3>
+    <div class="grid4">
+      <div class="scard"><h3 style="color:var(--lacuna)">Eficiência ou resiliência?</h3><p>Estoque enxuto e fornecedor único baixam custo e aumentam a exposição. Aisin e Philips mostraram o preço; a dúvida é quanto seguro a cadeia deve comprar.</p><button class="gomap" data-go="resil">Ver no mapa →</button></div>
+      <div class="scard"><h3 style="color:var(--lacuna)">Fisher vale no omnicanal?</h3><p>O mesmo item pode ter demanda estável na loja e volátil no online. Isso pede cadeias segmentadas dentro do mesmo portfólio.</p><button class="gomap" data-go="hibridas">Ver no mapa →</button></div>
+      <div class="scard"><h3 style="color:var(--lacuna)">Coordenação ou poder?</h3><p>O varejista grande coordena a cadeia com dados e padrões, mas também transfere custos a fornecedores. O ganho é da cadeia ou de um elo?</p><button class="gomap" data-go="poder">Ver no mapa →</button></div>
+    </div>
+    <h3 class="agh">Direções de tese · perguntas em aberto</h3>
+    <div class="qbox">
+      <div class="q"><span class="qn">?</span><p>Como medir o alinhamento produto–cadeia de forma contínua, item a item, e qual o seu efeito no ciclo de caixa e no ROIC?</p></div>
+      <div class="q"><span class="qn">?</span><p>Em que condições uma cadeia segmentada (eficiente para a base, responsiva para os picos) supera uma cadeia única?</p></div>
+      <div class="q"><span class="qn">?</span><p>Quais capacidades, no sentido do VCAP, explicam por que empresas com ativos e processos parecidos obtêm alinhamentos diferentes?</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TIMELINE ============ -->
+<section class="view" id="view-timeline">
+  <div class="scroller">
+    <h1>Encadeamento Teórico do Campo</h1>
+    <p class="sub">Da dinâmica industrial de Forrester (1958) aos testes empíricos da matriz de Fisher e à ponte com o capital. O campo atravessa cinco fases: a cadeia como sistema, tempo e estratégia, agilidade e integração, alinhamento e resiliência, e evidência. Cada fase responde a um problema deixado pela anterior.</p>
+    <div class="tl" id="tl"></div>
+  </div>
+</section>
+
+<!-- ============ QUADRO TEÓRICO ============ -->
+<section class="view" id="view-quadro">
+  <div class="scroller">
+    <h1>Quadro Teórico · do autor à prática</h1>
+    <p class="sub">Os trabalhos que sustentam a gestão da cadeia de suprimentos, lidos da teoria à prática. Cada linha conecta o autor ao conceito-chave, à sua principal contribuição e à prática que dela deriva. A cor do conceito segue a legenda do mapa; use “ver no mapa” para localizá-lo na rede.</p>
+    <div class="qtable" id="quadroRows"></div>
+  </div>
+</section>
+
+<!-- ============ CASES ============ -->
+<section class="view" id="view-cases">
+  <div class="scroller">
+    <h1>Casos Práticos · da teoria à prática</h1>
+    <p class="sub">Cada caso real conecta uma decisão de cadeia à lente teórica que a explica. O Walmart é o caso da sessão; os demais servem de contraste para a matriz de Fisher, o efeito chicote e a resiliência. Use “ver no mapa” para abrir o nó relacionado.</p>
+    <div class="cases" id="caseList"></div>
+  </div>
+</section>
+
+<!-- ============ REFERENCES ============ -->
+<section class="view" id="view-refs">
+  <div class="scroller">
+    <h1>Referências Citadas</h1>
+    <p class="sub"><span id="refCount"></span> obras citadas ou recomendadas para a aula, em APA 7. Quando disponível, clique no link para abrir a fonte original.
+      <input class="reffilter" id="refFilter" placeholder="filtrar por autor, título…" autocomplete="off"></p>
+    <div id="refGroups"></div>
+  </div>
+</section>
+
+<!-- ============ INTRO / COMO USAR ============ -->
+<div class="introwrap" id="intro">
+  <div class="introcard">
+    <button class="introx" id="introClose">✕</button>
+    <div class="introcredit">Material produzido por Prof. Dr. Thiago Lima</div>
+    <div class="ptag">Comece por aqui · como usar</div>
+    <h2>Qual é a cadeia certa para o produto certo?</h2>
+    <p class="lead">Toda empresa faz parte de uma cadeia que produz, move e armazena antes de vender. <b>Gestão da cadeia de suprimentos</b> é coordenar esses elos como um sistema. A tese de Fisher (1997) organiza a aula: o desenho da cadeia, eficiente ou responsiva, precisa casar com a natureza do produto, funcional ou inovador. Este app organiza o tema nas seguintes áreas:</p>
+    <div class="introsteps">
+      <div class="s"><span class="sw" style="background:var(--core)"></span><div><b>Mapa Conceitual</b> · clique nas bolinhas para abrir cada conceito com sua explicação, o autor de referência e as conexões. Cada conceito leva ao slide correspondente.</div></div>
+      <div class="s"><span class="sw" style="background:var(--pratica)"></span><div><b>Apresentação</b> · os slides da aula, navegáveis e em tela cheia; clique no slide para saltar ao conceito no mapa.</div></div>
+      <div class="s"><span class="sw" style="background:var(--tec)"></span><div><b>Diagrama</b> · a matriz de Fisher e o efeito chicote, lado a lado.</div></div>
+      <div class="s"><span class="sw" style="background:var(--autor)"></span><div><b>Linha do Tempo</b> · como o campo se formou em cinco fases, de Forrester (1958) ao VCAP (2026).</div></div>
+      <div class="s"><span class="sw" style="background:var(--teoria)"></span><div><b>Quadro Teórico</b> · autor → paper → conceito-chave → contribuição → prática.</div></div>
+      <div class="s"><span class="sw" style="background:var(--barreira)"></span><div><b>Casos Práticos</b> · Walmart, Campbell, P&amp;G, Zara, Dell, Li &amp; Fung, Toyota e Nokia × Ericsson, ligados de volta à teoria.</div></div>
+      <div class="s"><span class="sw" style="background:var(--lacuna)"></span><div><b>Agenda</b> · lacunas, debates de fronteira e direções de tese.</div></div>
+      <div class="s"><span class="sw" style="background:var(--muted)"></span><div><b>Referências</b> · todas as obras citadas em APA 7, com DOI clicável.</div></div>
+    </div>
+    <button class="introgo" id="introGo">Começar a explorar →</button>
+  </div>
+</div>
+
+<!-- ============ TELA CHEIA ============ -->
+<div class="fswrap" id="fs">
+  <button class="fsx" id="fsClose" aria-label="fechar">✕</button>
+  <button class="fsnav fsprev" id="fsPrev" aria-label="anterior">‹</button>
+  <div class="slide fsslide" id="fsSlide"></div>
+  <button class="fsnav fsnext" id="fsNext" aria-label="próximo">›</button>
+  <div class="fscounter" id="fsCounter"></div>
+  <button class="fsmaplink" id="fsMapLink">⊕ Explorar no mapa →</button>
+</div>
+
+<!-- ============ DETAIL PANEL ============ -->
+<aside id="panel">
+  <button class="pclose" id="pclose">✕</button>
+  <div class="pbody" id="pbody"></div>
+</aside>
+
+<script>
+/* ====================== DATA ====================== */
+const CAT = {
+  core:    {name:"Núcleo conceitual",    color:"#facc15"},
+  teoria:  {name:"Lentes teóricas",      color:"#c4b5fd"},
+  autor:   {name:"Autores principais",   color:"#fdba74"},
+  pratica: {name:"Práticas",             color:"#4ade80"},
+  tec:     {name:"Tecnologia & dados",   color:"#67e8f9"},
+  barreira:{name:"Riscos & tensões",     color:"#f87171"},
+  lacuna:  {name:"Lacunas & agenda",     color:"#f0abfc"},
+};
+const SHORT = {
+  "Gestão da Cadeia de Suprimentos":"Gestão da Cadeia",
+  "Alinhamento produto–cadeia":"Alinhamento (fit)",
+  "Natureza do produto: funcional × inovador":"Funcional × inovador",
+  "Desenho da cadeia: eficiente × responsiva":"Eficiente × responsiva",
+  "Custos físicos × custos de mediação de mercado":"Custos físico × mediação",
+  "Modelo VCAP · V = C × (A + P)":"Modelo VCAP",
+  "Cadeia e capital (ciclo de caixa · ROIC)":"Cadeia e capital",
+  "Competição por capacidades":"Capacidades",
+  "Leagile e ponto de desacoplamento":"Leagile",
+  "Triple-A: agilidade, adaptabilidade, alinhamento":"Triple-A",
+  "Resiliência da cadeia":"Resiliência",
+  "Reposição contínua e VMI":"Reposição contínua/VMI",
+  "Postergação (postponement)":"Postergação",
+  "Preço baixo todo dia (EDLP)":"EDLP",
+  "Dados de ponto de venda (POS)":"Dados de POS",
+  "Desalinhamento (mismatch)":"Desalinhamento",
+  "Promoções e compras antecipadas":"Promoções",
+  "Rupturas e fornecedor único":"Rupturas",
+  "Poder do varejista sobre fornecedores":"Poder do varejista",
+  "Cadeias híbridas e segmentadas":"Cadeias híbridas",
+  "Stalk, Evans & Shulman · 1992":"Stalk et al. · 1992",
+  "Lee, Padmanabhan & Whang · 1997":"Lee et al. · 1997",
+  "Christopher & Peck · 2004":"Christopher & Peck",
+  "Selldin & Olhager · 2007":"Selldin · 2007",
+};
+
+const NODES = [
+  // ---- núcleo
+  {id:"scm", label:"Gestão da Cadeia de Suprimentos", cat:"core", r:34, author:"Mentzer et al., 2001 · Chopra & Meindl, 2016 · Lima, 2026",
+   desc:"Coordenação sistêmica e estratégica das funções de negócio dentro de cada empresa e entre as empresas da cadeia, com o objetivo de melhorar o desempenho de longo prazo de cada uma e da cadeia como um todo (Mentzer et al., 2001). A pergunta que organiza a aula é qual é a cadeia certa para o produto certo.",
+   bullets:["Três fluxos: físico, de informação e financeiro","Unidade de análise: a cadeia, não a empresa isolada","Decisão central: casar o desenho da cadeia com a natureza da demanda"]},
+  {id:"fit", label:"Alinhamento produto–cadeia", cat:"core", r:26, author:"Fisher, 1997 · Lee, 2002 · Wagner et al., 2012",
+   desc:"A tese de Fisher (1997): produtos funcionais pedem cadeias fisicamente eficientes; produtos inovadores pedem cadeias responsivas ao mercado. Muitos problemas de cadeia vêm do descasamento entre as duas coisas, e não de má execução.",
+   bullets:["Duas células alinhadas: funcional + eficiente; inovador + responsiva","Duas desalinhadas: funcional + responsiva; inovador + eficiente","O desalinhamento mais comum, segundo Fisher: produto inovador em cadeia eficiente","Wagner et al. (2012): maior alinhamento, maior ROA"]},
+  {id:"produto", label:"Natureza do produto: funcional × inovador", cat:"core", r:22, author:"Fisher, 1997",
+   desc:"Produtos funcionais atendem necessidades básicas, mudam pouco, têm demanda previsível e margem baixa. Produtos inovadores têm ciclo de vida curto, muita variedade, margem alta e demanda difícil de prever. A classificação vem da demanda, não do setor.",
+   bullets:["Funcional: ciclo de vida longo, pouca variedade, erro de previsão baixo","Inovador: ciclo de vida curto, muita variedade, falta e remarcação frequentes","O mesmo produto pode migrar de inovador para funcional ao longo do ciclo de vida"]},
+  {id:"desenho", label:"Desenho da cadeia: eficiente × responsiva", cat:"core", r:22, author:"Fisher, 1997 · Chopra & Meindl, 2016",
+   desc:"A cadeia fisicamente eficiente busca atender demanda previsível ao menor custo: alta utilização, alto giro de estoque, fornecedores escolhidos por custo e qualidade. A cadeia responsiva ao mercado busca reagir rápido à demanda incerta: capacidade de reserva, estoques de segurança posicionados, fornecedores escolhidos por velocidade e flexibilidade.",
+   bullets:["Eficiente: reduzir lead time só se não aumentar custo","Responsiva: investir para reduzir lead time","Responsiva: projeto modular para postergar a diferenciação"]},
+  {id:"custos", label:"Custos físicos × custos de mediação de mercado", cat:"core", r:20, author:"Fisher, 1997",
+   desc:"Fisher separa duas funções da cadeia. A função física (produzir, transportar, armazenar) gera custos físicos. A função de mediação de mercado (fazer a oferta encontrar a demanda) gera custos de remarcação, vendas perdidas e estoque obsoleto. No produto funcional dominam os primeiros; no inovador, os segundos.",bullets:[]},
+  {id:"vcap", label:"Modelo VCAP · V = C × (A + P)", cat:"core", r:22, author:"Lima, 2026 (Cap. 1)",
+   desc:"Valor = Capacidades × (Ativos + Processos). Na cadeia, ativos são CDs, frota, estoques e sistemas; processos são cross-docking, reposição e planejamento; capacidades são a coordenação com fornecedores e o uso de dados. C multiplica: sem capacidade organizacional, ativos e processos não viram valor.",
+   bullets:["Atividade da sessão: que elementos do VCAP o Walmart alterou desde o período do caso?","Stalk et al. (1992) já liam o Walmart como competição por capacidades"]},
+  // ---- teoria
+  {id:"dinamica", label:"Dinâmica industrial", cat:"teoria", r:20, author:"Forrester, 1958 · Forrester, 1961",
+   desc:"Forrester modelou a cadeia de produção e distribuição como um sistema com atrasos e realimentação. Pequenas variações na demanda do varejo geram oscilações crescentes nos pedidos e na produção a montante, por causa das defasagens de informação e de material.",bullets:[]},
+  {id:"chicote", label:"Efeito chicote", cat:"teoria", r:24, author:"Lee, Padmanabhan & Whang, 1997 · Sterman, 1989",
+   desc:"A variabilidade dos pedidos aumenta à medida que se sobe na cadeia, mesmo quando a demanda final é estável. Lee et al. (1997) mostram que o fenômeno decorre de decisões racionais de cada elo e apontam quatro causas.",
+   bullets:["Atualização da previsão de demanda a cada elo","Agrupamento de pedidos em lotes","Flutuação de preços e promoções","Jogo do racionamento em situações de escassez"]},
+  {id:"capab", label:"Competição por capacidades", cat:"teoria", r:20, author:"Stalk, Evans & Shulman, 1992",
+   desc:"A vantagem vem de processos de negócio transformados em capacidades estratégicas que servem ao cliente, e não de produtos ou mercados isolados. O exemplo central do artigo é o Walmart e seu sistema de reposição com cross-docking.",bullets:[]},
+  {id:"agil", label:"Cadeia ágil", cat:"teoria", r:20, author:"Christopher, 2000 · Christopher & Towill, 2001",
+   desc:"Cadeia desenhada para mercados voláteis: sensível ao mercado, baseada em informação compartilhada, com processos integrados entre parceiros e organizada em rede. É a versão de Christopher para a cadeia responsiva de Fisher.",bullets:[]},
+  {id:"leagile", label:"Leagile e ponto de desacoplamento", cat:"teoria", r:20, author:"Naylor, Naim & Berry, 1999 · Christopher & Towill, 2001",
+   desc:"Lean a montante e ágil a jusante, separados pelo ponto de desacoplamento: até ele, a produção segue previsão e busca eficiência; depois dele, responde ao pedido real. Permite combinar os dois desenhos de Fisher em uma mesma cadeia.",bullets:[]},
+  {id:"triplea", label:"Triple-A: agilidade, adaptabilidade, alinhamento", cat:"teoria", r:20, author:"Lee, 2004 · Lee, 2002",
+   desc:"Lee (2004) argumenta que velocidade e custo não bastam. A cadeia de alto desempenho responde rápido a mudanças de curto prazo (agilidade), ajusta a estrutura a mudanças de mercado (adaptabilidade) e alinha os incentivos dos parceiros (alinhamento). Em 2002, Lee acrescentara a incerteza de oferta à matriz de Fisher.",bullets:[]},
+  {id:"resil", label:"Resiliência da cadeia", cat:"teoria", r:21, author:"Christopher & Peck, 2004 · Sheffi & Rice, 2005 · Tang, 2006",
+   desc:"Capacidade de a cadeia voltar ao estado original, ou a um estado melhor, depois de uma ruptura. Sheffi e Rice distinguem redundância (estoque e capacidade extras) de flexibilidade (processos e fornecedores capazes de se reconfigurar).",
+   bullets:["Redundância custa sempre; flexibilidade custa ao ser construída","Tang (2006): estratégias robustas ajudam no dia a dia e na crise","Tensão com a cadeia eficiente de Fisher"]},
+  {id:"capital", label:"Cadeia e capital (ciclo de caixa · ROIC)", cat:"teoria", r:20, author:"Wagner et al., 2012 · Hendricks & Singhal, 2005 · Lima, 2026",
+   desc:"O desenho da cadeia define quanto capital fica preso em estoque, recebíveis e ativos. Giro alto de estoque encurta o ciclo de caixa; alinhamento produto–cadeia se associa a maior retorno sobre ativos; rupturas afetam o valor de mercado. A ponte detalhada está no livro A Interface entre Supply Chain e Finanças Corporativas.",
+   bullets:["CCC = DIO + DSO − DPO","ROIC: o capital investido da cadeia entra no denominador"]},
+  // ---- autores
+  {id:"forrester", label:"Forrester · 1958", cat:"autor", r:16, author:"Dinâmica industrial",
+   desc:"Artigo na HBR que inaugura a dinâmica industrial e, em 1961, o livro Industrial Dynamics: as oscilações de uma cadeia nascem da sua estrutura de atrasos e realimentação.",bullets:[]},
+  {id:"sterman", label:"Sterman · 1989", cat:"autor", r:16, author:"Beer game",
+   desc:"Com o jogo da cerveja, mostra que gestores subestimam os pedidos já em trânsito e amplificam as oscilações, mesmo com demanda final quase constante.",bullets:[]},
+  {id:"stalk", label:"Stalk, Evans & Shulman · 1992", cat:"autor", r:16, author:"Competição por capacidades",
+   desc:"Artigo da HBR que usa o Walmart para mostrar como processos como o cross-docking viram capacidades estratégicas difíceis de copiar.",bullets:[]},
+  {id:"leepw", label:"Lee, Padmanabhan & Whang · 1997", cat:"autor", r:16, author:"Efeito chicote",
+   desc:"Formalizam o efeito chicote na Management Science e o popularizam na Sloan Management Review, com as quatro causas e os remédios. Citam as fraldas Pampers da P&G como exemplo.",bullets:[]},
+  {id:"fisher", label:"Fisher · 1997", cat:"autor", r:18, author:"Qual é a cadeia certa para o seu produto?",
+   desc:"Artigo da HBR que propõe a matriz produto funcional/inovador × cadeia eficiente/responsiva e o conceito de custos de mediação de mercado.",bullets:[]},
+  {id:"naylor", label:"Naylor et al. · 1999", cat:"autor", r:16, author:"Leagility",
+   desc:"Naylor, Naim e Berry propõem combinar lean e ágil na mesma cadeia, separados pelo ponto de desacoplamento.",bullets:[]},
+  {id:"christopher", label:"Christopher · 2000", cat:"autor", r:16, author:"A cadeia ágil",
+   desc:"Define a cadeia ágil para mercados voláteis e a contrapõe à lógica lean, adequada à demanda estável.",bullets:[]},
+  {id:"cachon", label:"Cachon & Fisher · 2000", cat:"autor", r:16, author:"Valor da informação compartilhada",
+   desc:"Mostram que compartilhar dados de demanda ajuda, mas que reduzir lead time e tamanho de lote costuma render mais do que a informação sozinha.",bullets:[]},
+  {id:"mentzer", label:"Mentzer et al. · 2001", cat:"autor", r:16, author:"Definição de SCM",
+   desc:"Revisão que distingue orientação para a cadeia de gestão da cadeia e propõe uma definição unificada de SCM.",bullets:[]},
+  {id:"lee2004", label:"Lee · 2004", cat:"autor", r:16, author:"Triple-A supply chain",
+   desc:"Artigo da HBR que troca o binômio velocidade–custo pelos três As: agilidade, adaptabilidade e alinhamento.",bullets:[]},
+  {id:"peck", label:"Christopher & Peck · 2004", cat:"autor", r:16, author:"Cadeia resiliente",
+   desc:"Propõem princípios para desenhar a resiliência na cadeia: reengenharia, colaboração, agilidade e cultura de gestão de risco.",bullets:[]},
+  {id:"sheffi", label:"Sheffi & Rice · 2005", cat:"autor", r:16, author:"Empresa resiliente",
+   desc:"Descrevem o perfil de uma ruptura e o papel da redundância e da flexibilidade na recuperação. Sheffi (2005) detalha os casos Nokia × Ericsson e Toyota–Aisin.",bullets:[]},
+  {id:"selldin", label:"Selldin & Olhager · 2007", cat:"autor", r:16, author:"Teste empírico de Fisher",
+   desc:"Testam o modelo de Fisher com dados de empresas industriais suecas e encontram apoio apenas parcial.",bullets:[]},
+  {id:"wagner", label:"Wagner et al. · 2012", cat:"autor", r:16, author:"Fit e desempenho financeiro",
+   desc:"Wagner, Grosse-Ruyken e Erhun combinam survey e dados financeiros e mostram que maior alinhamento produto–cadeia se associa a maior ROA.",bullets:[]},
+  {id:"lima", label:"Lima · 2026", cat:"autor", r:18, author:"Excelência operacional (Cap. 1 e 4)",
+   desc:"Livro-base da disciplina. O Cap. 1 apresenta o modelo VCAP; o Cap. 4 trata de Supply Chain Management e da matriz de Fisher. A ponte com finanças está em A Interface entre Supply Chain e Finanças Corporativas.",bullets:[]},
+  // ---- práticas
+  {id:"crossdock", label:"Cross-docking", cat:"pratica", r:20, author:"Stalk, Evans & Shulman, 1992",
+   desc:"A mercadoria chega ao centro de distribuição e segue para os caminhões de saída sem ir para a armazenagem. Exige sincronizar fornecedores, transporte e lojas com informação em tempo quase real. É a prática que Stalk et al. usam para explicar a vantagem do Walmart.",bullets:[]},
+  {id:"crp", label:"Reposição contínua e VMI", cat:"pratica", r:19, author:"Lee et al., 1997 · Fisher, 1997",
+   desc:"O fornecedor recebe dados de consumo ou de estoque do cliente e decide a reposição. Reduz o agrupamento de pedidos e a distorção da previsão, duas causas do efeito chicote. Fisher descreve o programa de reposição contínua da Campbell Soup.",bullets:[]},
+  {id:"cpfr", label:"CPFR", cat:"pratica", r:18, author:"Cachon & Fisher, 2000 · Lee et al., 1997",
+   desc:"Planejamento, previsão e reposição colaborativos: varejista e fornecedor constroem uma previsão comum e tratam as exceções juntos. Um dos primeiros pilotos foi entre Walmart e Warner-Lambert, na década de 1990.",bullets:[]},
+  {id:"postpone", label:"Postergação (postponement)", cat:"pratica", r:19, author:"Feitzinger & Lee, 1997 · Naylor et al., 1999",
+   desc:"Adiar a diferenciação do produto para o ponto mais próximo possível da demanda real. No caso clássico da HP, as impressoras eram configuradas para cada país nos centros de distribuição, e não na fábrica.",bullets:[]},
+  {id:"edlp", label:"Preço baixo todo dia (EDLP)", cat:"pratica", r:17, author:"Lee et al., 1997 · Stalk et al., 1992",
+   desc:"Preço estável no lugar de promoções frequentes. Remove o incentivo à compra antecipada e suaviza os pedidos a montante. É parte da estratégia do Walmart descrita por Stalk et al.",bullets:[]},
+  // ---- tecnologia & dados
+  {id:"pos", label:"Dados de ponto de venda (POS)", cat:"tec", r:19, author:"Lee, So & Tang, 2000 · Cachon & Fisher, 2000",
+   desc:"Compartilhar a venda real ao consumidor com todos os elos evita que cada um reprevise a partir dos pedidos do elo seguinte. O valor da informação cresce quando a demanda é variável e os lead times são longos.",bullets:[]},
+  {id:"retaillink", label:"Retail Link", cat:"tec", r:18, author:"Walmart · início dos anos 1990",
+   desc:"Sistema do Walmart que dá aos fornecedores acesso a dados de venda e estoque por item e por loja. Transforma o dado do varejista em insumo do planejamento do fornecedor.",bullets:[]},
+  {id:"rfid", label:"RFID", cat:"tec", r:17, author:"Mandato Walmart · 2003–2005",
+   desc:"Em 2003 o Walmart anunciou que exigiria etiquetas RFID em paletes e caixas dos seus maiores fornecedores. A adoção foi mais lenta e seletiva que o previsto, mas o episódio mostrou o poder do varejista de impor tecnologia à cadeia.",bullets:[]},
+  // ---- riscos & tensões
+  {id:"desalinho", label:"Desalinhamento (mismatch)", cat:"barreira", r:21, author:"Fisher, 1997",
+   desc:"Produto inovador em cadeia eficiente gera falta e remarcação: o custo de mediação de mercado explode. Produto funcional em cadeia responsiva gera capacidade e estoque ociosos: o custo físico sobe sem retorno.",bullets:[]},
+  {id:"promo", label:"Promoções e compras antecipadas", cat:"barreira", r:18, author:"Lee et al., 1997 · Fisher, 1997",
+   desc:"Descontos temporários levam o varejista a comprar à frente da demanda. O produto é funcional, mas a cadeia passa a ver uma demanda artificialmente volátil.",bullets:[]},
+  {id:"ruptura", label:"Rupturas e fornecedor único", cat:"barreira", r:19, author:"Nishiguchi & Beaudet, 1998 · Hendricks & Singhal, 2005",
+   desc:"Cadeias enxutas e com fornecedor único são eficientes até o dia da ruptura. Hendricks e Singhal mostram que rupturas anunciadas se associam a desempenho acionário negativo por longo período.",bullets:[]},
+  {id:"poder", label:"Poder do varejista sobre fornecedores", cat:"barreira", r:18, author:"Debate de fronteira",
+   desc:"O varejista grande coordena a cadeia, mas também pode transferir custos e riscos: exigências de tecnologia, de entrega no prazo e completa (OTIF) e de prazos. A questão é se a coordenação cria valor para a cadeia ou apenas o redistribui.",bullets:[]},
+  // ---- lacunas
+  {id:"lacunas", label:"Cinco lacunas", cat:"lacuna", r:22, author:"Selldin & Olhager, 2007 · Wagner et al., 2012",
+   desc:"A matriz de Fisher é uma das ideias mais citadas de SCM, mas o teste empírico é parcial e o mundo mudou: portfólios mistos, canais múltiplos e rupturas frequentes.",
+   bullets:["Medir funcional × inovador como contínuo","Portfólios e canais mistos","Evidência causal do fit sobre o desempenho","Eficiência × resiliência","Migração do produto ao longo do ciclo de vida"]},
+  {id:"hibridas", label:"Cadeias híbridas e segmentadas", cat:"lacuna", r:19, author:"Christopher & Towill, 2001 · Lee, 2002",
+   desc:"Na prática, a empresa opera várias cadeias ao mesmo tempo: uma eficiente para a base previsível da demanda e outra responsiva para os picos e os itens novos. O comércio omnicanal torna a segmentação ainda mais necessária.",bullets:[]},
+];
+
+const LINKS = [
+  ["scm","fit","organiza-se por"],["scm","mentzer","definida por"],["scm","dinamica","lida como sistema por"],
+  ["scm","chicote","sofre"],["scm","vcap","cria valor via"],["scm","capital","move"],["scm","resil","exige"],
+  ["fit","produto","depende de"],["fit","desenho","depende de"],["produto","desenho","determina"],
+  ["fit","custos","minimiza"],["fit","desalinho","oposto de"],["fit","fisher","proposto por"],
+  ["fit","wagner","associado a ROA por"],["fit","selldin","testado por"],["fit","triplea","ampliado por"],
+  ["desenho","crossdock","eficiente usa"],["desenho","postpone","responsiva usa"],["desenho","agil","versão responsiva"],
+  ["desenho","leagile","combinado em"],["custos","desalinho","explodem no"],["custos","capital","pesam no"],
+  ["dinamica","forrester","fundada por"],["dinamica","chicote","explica"],["chicote","sterman","demonstrado por"],
+  ["chicote","leepw","formalizado por"],["chicote","promo","causado por"],["chicote","pos","atenuado por"],
+  ["chicote","crp","atenuado por"],["chicote","edlp","atenuado por"],["pos","cachon","valorado por"],
+  ["capab","stalk","proposta por"],["capab","vcap","é o C do"],["crossdock","capab","exemplo de"],
+  ["agil","christopher","proposta por"],["leagile","naylor","proposto por"],["leagile","agil","combina com lean"],
+  ["leagile","postpone","desacopla via"],["triplea","lee2004","proposto por"],
+  ["resil","peck","estruturada por"],["resil","sheffi","estruturada por"],["ruptura","resil","testa a"],
+  ["ruptura","capital","destrói valor de"],["capital","lima","ponte por"],["vcap","lima","proposto por"],
+  ["capital","wagner","evidenciado por"],["crp","cpfr","evolui para"],["pos","retaillink","compartilhado via"],
+  ["retaillink","crossdock","sincroniza"],["rfid","pos","amplia visibilidade de"],["cpfr","pos","usa"],
+  ["promo","edlp","evitado com"],["poder","rfid","impôs"],["poder","retaillink","exercido via"],
+  ["scm","poder","tensão"],["scm","lacunas","limitada por"],["lacunas","hibridas","frente de"],
+  ["lacunas","selldin","evidenciada por"],["lacunas","resil","frente de"],["hibridas","leagile","estende"],
+  ["hibridas","fit","segmenta o"],["desalinho","promo","agravado por"],["resil","desenho","tensiona o"],
+  ["fisher","produto","classifica"],["crp","fisher","descrito por"],["lima","fit","Cap. 4"],
+];
+
+/* timeline: fases e marcos */
+const TIMELINE = [
+  {phase:"Fase I · A cadeia como sistema (1958–1989)", sub:"A dinâmica industrial mostra que as oscilações nascem da estrutura da cadeia, e o termo supply chain management entra na linguagem da gestão."},
+  {yr:"1958",node:"forrester",t:"Dinâmica industrial na HBR",who:"Forrester, J. W.",d:"Atrasos e realimentação amplificam pequenas variações de demanda ao longo da cadeia de produção e distribuição."},
+  {yr:"1961",node:"dinamica",t:"Industrial Dynamics",who:"Forrester, J. W.",d:"O livro consolida o método de simulação de sistemas aplicado à produção e à distribuição."},
+  {yr:"1982",node:"scm",t:"O termo supply chain management",who:"Oliver, R. K. & Webber, M. D.",d:"Consultores da Booz Allen propõem tratar a cadeia como um sistema único, gerido de forma integrada."},
+  {yr:"1989",node:"sterman",t:"O jogo da cerveja",who:"Sterman, J. D.",d:"Em experimento, decisores ignoram os pedidos em trânsito e amplificam as oscilações."},
+  {phase:"Fase II · Tempo, informação e estratégia (1992–1998)", sub:"A cadeia vira fonte de vantagem competitiva. O efeito chicote ganha causas e remédios, e Fisher propõe a matriz produto × cadeia."},
+  {yr:"1992",node:"stalk",t:"Competição por capacidades",who:"Stalk, G., Evans, P. & Shulman, L. E.",d:"O cross-docking do Walmart como capacidade estratégica, e não como detalhe logístico."},
+  {yr:"1994",node:"custos",t:"Resposta precisa à incerteza",who:"Fisher, M. L. et al.",d:"Com a Sport Obermeyer, mostram como reduzir o custo de produzir antes de conhecer a demanda."},
+  {yr:"1997",node:"leepw",t:"O efeito chicote e suas quatro causas",who:"Lee, H. L., Padmanabhan, V. & Whang, S.",d:"Previsão, lotes, preços e racionamento: o chicote é produzido por decisões racionais de cada elo."},
+  {yr:"1997",node:"fisher",t:"Qual é a cadeia certa para o seu produto?",who:"Fisher, M. L.",d:"Funcional × inovador, eficiente × responsiva e os custos de mediação de mercado."},
+  {yr:"1997",node:"postpone",t:"Postergação na HP",who:"Feitzinger, E. & Lee, H. L.",d:"A diferenciação da impressora é adiada para o centro de distribuição de cada região."},
+  {yr:"1997",node:"mentzer",t:"SCM: mais que um novo nome para logística",who:"Cooper, M. C., Lambert, D. M. & Pagh, J. D.",d:"A gestão da cadeia abrange processos de negócio além da logística."},
+  {yr:"1998",node:"ruptura",t:"O incêndio da Aisin",who:"Nishiguchi, T. & Beaudet, A.",d:"A rede de fornecedores da Toyota se auto-organiza para repor as válvulas de freio de um fornecedor único."},
+  {phase:"Fase III · Agilidade e integração (1999–2002)", sub:"A cadeia responsiva ganha nome e método (ágil, leagile), o valor da informação compartilhada é modelado e o SCM ganha definição acadêmica."},
+  {yr:"1999",node:"naylor",t:"Leagility",who:"Naylor, J. B., Naim, M. M. & Berry, D.",d:"Lean antes e ágil depois do ponto de desacoplamento."},
+  {yr:"2000",node:"christopher",t:"A cadeia ágil",who:"Christopher, M.",d:"Sensível ao mercado, virtual, integrada por processos e organizada em rede."},
+  {yr:"2000",node:"cachon",t:"O valor da informação compartilhada",who:"Cachon, G. P. & Fisher, M. L.",d:"Informação ajuda; reduzir lead time e lote costuma ajudar mais."},
+  {yr:"2000",node:"pos",t:"Compartilhar demanda em dois níveis",who:"Lee, H. L., So, K. C. & Tang, C. S.",d:"O ganho do fornecedor com dados de demanda cresce com a variabilidade e o lead time."},
+  {yr:"2001",node:"mentzer",t:"Definição de SCM",who:"Mentzer, J. T. et al.",d:"Coordenação sistêmica e estratégica das funções dentro e entre as empresas da cadeia."},
+  {yr:"2001",node:"hibridas",t:"Modelo integrado de cadeia ágil",who:"Christopher, M. & Towill, D. R.",d:"Base previsível com lean e picos com agilidade: a segmentação da cadeia."},
+  {yr:"2002",node:"triplea",t:"Incerteza de oferta na matriz",who:"Lee, H. L.",d:"Acrescenta a incerteza de oferta à de demanda e chega a quatro tipos de cadeia."},
+  {phase:"Fase IV · Alinhamento e resiliência (2004–2006)", sub:"Depois de rupturas visíveis, a eficiência deixa de ser o único critério. Entram adaptabilidade, redundância e flexibilidade."},
+  {yr:"2004",node:"lee2004",t:"A cadeia triple-A",who:"Lee, H. L.",d:"Agilidade, adaptabilidade e alinhamento no lugar de velocidade e custo."},
+  {yr:"2004",node:"agil",t:"Zara: cadeia de resposta rápida",who:"Ferdows, K., Lewis, M. A. & Machuca, J. A. D.",d:"Integração vertical, lotes pequenos e reposição frequente para um produto de moda."},
+  {yr:"2004",node:"peck",t:"Construindo a cadeia resiliente",who:"Christopher, M. & Peck, H.",d:"Resiliência como propriedade a ser desenhada na cadeia."},
+  {yr:"2005",node:"sheffi",t:"A empresa resiliente",who:"Sheffi, Y. & Rice, J. B.",d:"Redundância ou flexibilidade: duas formas de absorver a ruptura."},
+  {yr:"2005",node:"capital",t:"Rupturas e valor ao acionista",who:"Hendricks, K. B. & Singhal, V. R.",d:"Rupturas anunciadas se associam a retorno acionário negativo e maior risco."},
+  {phase:"Fase V · Evidência e ponte com o capital (2007–2026)", sub:"A matriz de Fisher passa por testes empíricos, o alinhamento é ligado ao retorno sobre ativos e o tema volta à sala pelo VCAP."},
+  {yr:"2007",node:"selldin",t:"Testando o modelo de Fisher",who:"Selldin, E. & Olhager, J.",d:"Dados de empresas suecas dão apoio parcial à matriz."},
+  {yr:"2012",node:"wagner",t:"Fit e desempenho financeiro",who:"Wagner, S. M., Grosse-Ruyken, P. T. & Erhun, F.",d:"Maior alinhamento produto–cadeia, maior retorno sobre ativos."},
+  {yr:"2026",node:"vcap",t:"VCAP e a cadeia",who:"Lima, T. F.",d:"Capacidades multiplicam ativos e processos: a leitura da cadeia pelo livro-base (Cap. 1 e 4)."},
+];
+
+const CASES = [
+  {title:"Walmart", loc:"Varejo · EUA · 1980s até hoje", loop:"Eficiência com informação",
+   tag:"A cadeia eficiente construída sobre dados compartilhados.",
+   desc:"Stalk et al. (1992) descrevem o cross-docking do Walmart, sustentado por frota própria, comunicação entre lojas, CDs e fornecedores e preço baixo todo dia. Nos anos 1990 o sistema Retail Link abriu dados de venda aos fornecedores. Em 2003 veio o mandato de RFID. A atividade da sessão pede para seguir essa evolução, até o omnicanal, com a matriz de Fisher e o VCAP.",
+   practice:"Cross-docking, EDLP, Retail Link e colaboração com fornecedores",
+   theory:"<b>Competição por capacidades</b> · e o <b>VCAP</b>: que ativos, processos e capacidades mudaram?",
+   author:"Stalk, Evans & Shulman, 1992 · Lima, 2026", node:"crossdock"},
+  {title:"Campbell Soup", loc:"Alimentos · EUA · anos 1990", loop:"Produto funcional",
+   tag:"Sopa é funcional; a promoção a torna volátil.",
+   desc:"Fisher (1997) usa a Campbell como exemplo de produto funcional atendido por cadeia eficiente. Com o programa de reposição contínua, a empresa passou a receber dados eletrônicos de demanda dos varejistas. As promoções de preço, porém, criavam picos de pedido sem correspondência no consumo.",
+   practice:"Reposição contínua com dados do varejista",
+   theory:"<b>Alinhamento</b> funcional + eficiente · <b>promoções</b> como fonte do chicote",
+   author:"Fisher, 1997", node:"crp"},
+  {title:"P&G · Pampers", loc:"Bens de consumo · anos 1990", loop:"Efeito chicote",
+   tag:"O bebê consome em ritmo constante; os pedidos não.",
+   desc:"Lee et al. (1997) relatam que a P&G observou pedidos de distribuidores muito mais variáveis que o consumo de fraldas no varejo, e pedidos da P&G aos seus fornecedores de materiais mais variáveis ainda. O exemplo virou a ilustração clássica do chicote.",
+   practice:"Compartilhamento de dados de venda e reposição contínua",
+   theory:"<b>Efeito chicote</b> · previsão, lotes, preços e racionamento",
+   author:"Lee, Padmanabhan & Whang, 1997", node:"chicote"},
+  {title:"Zara · Inditex", loc:"Moda · Espanha", loop:"Cadeia responsiva",
+   tag:"Produto inovador, cadeia desenhada para a velocidade.",
+   desc:"Ferdows et al. (2004) descrevem a Zara: produção dos itens mais sensíveis à moda perto da Espanha, lotes pequenos, reposição frequente das lojas e um centro de distribuição central. Itens básicos podem vir de fornecedores distantes, uma forma de segmentar a cadeia.",
+   practice:"Integração vertical parcial, lotes pequenos e reposição frequente",
+   theory:"<b>Alinhamento</b> inovador + responsiva · <b>cadeia ágil</b>",
+   author:"Ferdows, Lewis & Machuca, 2004 · Christopher, 2000", node:"agil"},
+  {title:"Dell", loc:"Computadores · EUA", loop:"Montagem sob pedido",
+   tag:"Montar só depois da venda, e depois abrir o varejo.",
+   desc:"No modelo direto descrito por Magretta (1998), a Dell montava o computador depois do pedido do cliente e coordenava fornecedores com informação de demanda. Em 2007 a empresa passou também a vender em redes de varejo, entre elas o Walmart, e teve de operar dois desenhos de cadeia.",
+   practice:"Montagem sob pedido e postergação da configuração",
+   theory:"<b>Leagile</b> · ponto de desacoplamento na montagem final",
+   author:"Magretta, 1998 · Naylor et al., 1999", node:"leagile"},
+  {title:"Li & Fung", loc:"Trading · Hong Kong", loop:"Orquestração em rede",
+   tag:"Não fabrica nada e coordena a cadeia inteira.",
+   desc:"Em entrevista a Magretta (1998), Victor Fung descreve como a empresa fatiava a produção de vestuário entre fornecedores de vários países e montava, pedido a pedido, a cadeia mais adequada.",
+   practice:"Rede de fornecedores reconfigurada a cada pedido",
+   theory:"<b>Cadeia ágil</b> organizada em rede · adaptabilidade do <b>triple-A</b>",
+   author:"Magretta, 1998 · Lee, 2004", node:"triplea"},
+  {title:"Toyota · Aisin", loc:"Automotivo · Japão · 1997", loop:"Resiliência em rede",
+   tag:"Fornecedor único pegou fogo; a rede respondeu.",
+   desc:"Em fevereiro de 1997 um incêndio destruiu a fábrica da Aisin Seiki, fornecedora única de válvulas de freio da Toyota, e parou as montadoras. Dezenas de empresas da rede passaram a produzir as peças com os desenhos da Aisin e a produção foi retomada em poucos dias.",
+   practice:"Colaboração de rede (keiretsu) para recuperação",
+   theory:"<b>Rupturas e fornecedor único</b> · resiliência por colaboração",
+   author:"Nishiguchi & Beaudet, 1998", node:"ruptura"},
+  {title:"Nokia × Ericsson", loc:"Telecom · 2000", loop:"Resposta à ruptura",
+   tag:"Mesmo incêndio, dois desfechos.",
+   desc:"Em março de 2000 um incêndio atingiu uma fábrica de chips da Philips no Novo México. A Nokia detectou o problema cedo e garantiu fornecimento alternativo; a Ericsson reagiu tarde e sofreu perdas relevantes no negócio de celulares. Sheffi (2005) usa o episódio para mostrar o valor da flexibilidade.",
+   practice:"Monitoramento de fornecedores e realocação rápida de capacidade",
+   theory:"<b>Resiliência</b> · flexibilidade × redundância",
+   author:"Sheffi & Rice, 2005 · Sheffi, 2005", node:"resil"},
+];
+
+/* ---- Apresentação: slides em HTML ---- */
+const APS = [
+  {t:"Abertura · Gestão da Cadeia de Suprimentos", nodes:["scm"], h:`<div class="sl-cover"><div class="eyebrow">Aula · Prof. Dr. Thiago Lima</div><h2>Gestão da Cadeia de Suprimentos</h2><p class="big">Sessões 5 e 6 · Qual é a cadeia certa para o produto certo?</p><div class="sl-foot">Caso: WalMart · Managing a global supply chain</div></div>`},
+  {t:"A pergunta que organiza a aula", nodes:["fit","produto","desenho"], h:`<div class="eyebrow">A pergunta</div><h2>Qual é a cadeia certa para o produto certo?</h2><div class="formula">natureza do produto × desenho da cadeia</div><ul><li>Não existe a melhor cadeia; existe a cadeia <b>alinhada</b> à demanda</li><li>Muitos problemas de cadeia são de desenho, não de execução</li><li>O alinhamento aparece no custo, no serviço e no capital</li></ul>`},
+  {t:"Cinco fases do campo", nodes:["scm"], h:`<div class="eyebrow">Linha do tempo</div><h2>Cinco fases, um problema cada</h2><div class="phases"><div><b>I</b><span>A cadeia como sistema</span><em>1958–1989</em></div><div><b>II</b><span>Tempo e estratégia</span><em>1992–1998</em></div><div><b>III</b><span>Agilidade</span><em>1999–2002</em></div><div><b>IV</b><span>Resiliência</span><em>2004–2006</em></div><div><b>V</b><span>Evidência e capital</span><em>2007–2026</em></div></div>`},
+  {t:"O efeito chicote", nodes:["chicote","dinamica","leepw"], h:`<div class="eyebrow">Forrester (1958) · Sterman (1989) · Lee et al. (1997)</div><h2>O efeito chicote</h2><div class="cols2"><div><h3>Quatro causas</h3><p>Previsão refeita a cada elo · pedidos em lote · promoções · racionamento na escassez</p></div><div><h3>Remédios</h3><p>Dados de POS compartilhados · reposição contínua · preço estável (EDLP) · alocação pela venda passada</p></div></div><p class="note">Exemplo clássico: fraldas Pampers, consumo estável e pedidos voláteis.</p>`},
+  {t:"Produto funcional × inovador", nodes:["produto","fisher"], h:`<div class="eyebrow">Fisher (1997) · a demanda</div><h2>Que tipo de produto você vende?</h2><div class="cols2"><div><h3>Funcional</h3><p>Necessidade básica · ciclo de vida longo · margem baixa · pouca variedade · previsão confiável</p></div><div><h3>Inovador</h3><p>Novidade e moda · ciclo de vida curto · margem alta · muita variedade · previsão difícil</p></div></div>`},
+  {t:"Cadeia eficiente × responsiva", nodes:["desenho","custos"], h:`<div class="eyebrow">Fisher (1997) · a oferta</div><h2>Que cadeia você desenhou?</h2><div class="cols2"><div><h3>Fisicamente eficiente</h3><p>Alta utilização · alto giro · fornecedor por custo e qualidade · minimiza <b>custos físicos</b></p></div><div><h3>Responsiva ao mercado</h3><p>Capacidade de reserva · estoque posicionado · fornecedor por velocidade · minimiza <b>custos de mediação</b></p></div></div>`},
+  {t:"Alinhamento e desalinhamento", nodes:["fit","desalinho"], h:`<div class="eyebrow">A matriz de Fisher</div><h2>Duas células certas, duas erradas</h2><ul><li><b>Funcional + eficiente:</b> custo físico mínimo</li><li><b>Inovador + responsiva:</b> velocidade paga pela margem</li><li><b>Inovador + eficiente:</b> falta, remarcação e obsolescência</li><li><b>Funcional + responsiva:</b> capacidade e estoque ociosos</li></ul><p class="note">Veja a aba Diagrama.</p>`},
+  {t:"Além de Fisher", nodes:["agil","leagile","triplea"], h:`<div class="eyebrow">1999–2004</div><h2>Além da matriz</h2><div class="cols3"><div><h3>Ágil</h3><p>Christopher (2000): cadeia sensível ao mercado e organizada em rede</p></div><div><h3>Leagile</h3><p>Naylor et al. (1999): lean até o ponto de desacoplamento, ágil depois</p></div><div><h3>Triple-A</h3><p>Lee (2004): agilidade, adaptabilidade e alinhamento</p></div></div>`},
+  {t:"Resiliência", nodes:["resil","ruptura"], h:`<div class="eyebrow">Christopher &amp; Peck (2004) · Sheffi &amp; Rice (2005)</div><h2>Eficiente até o dia da ruptura</h2><ul><li><b>Toyota–Aisin (1997):</b> a rede de fornecedores repôs a peça de fornecedor único</li><li><b>Nokia × Ericsson (2000):</b> mesmo incêndio, respostas diferentes</li><li>Redundância custa sempre; flexibilidade custa ao ser construída</li></ul>`},
+  {t:"Walmart e o VCAP", nodes:["vcap","crossdock","capab"], h:`<div class="eyebrow">Atividade em grupo</div><h2>Walmart: o que mudou desde o caso?</h2><div class="formula">V = C × (A + P)</div><ul><li>Os produtos são funcionais, inovadores ou os dois?</li><li>A cadeia continua eficiente, ficou responsiva ou se segmentou?</li><li>Que <b>ativos</b>, <b>processos</b> e <b>capacidades</b> foram alterados?</li></ul>`},
+  {t:"A cadeia no balanço", nodes:["capital","wagner"], h:`<div class="eyebrow">Ponte com finanças</div><h2>A cadeia no balanço</h2><div class="formula">CCC = DIO + DSO − DPO</div><ul><li>Giro de estoque alto encurta o ciclo de caixa</li><li>Wagner et al. (2012): maior alinhamento, maior ROA</li><li>Rupturas afetam o valor de mercado (Hendricks &amp; Singhal, 2005)</li></ul><p class="note">Aprofundamento: <i>A Interface entre Supply Chain e Finanças Corporativas</i>.</p>`},
+  {t:"E daí para a segunda-feira?", nodes:["fit","hibridas"], h:`<div class="eyebrow">Aplicação</div><h2>E daí para a segunda-feira?</h2><ol><li>Classifique seus três principais produtos: funcional ou inovador?</li><li>Para cada um, sua cadeia é eficiente ou responsiva?</li><li>Onde há desalinhamento, qual custo aparece: físico ou de mediação?</li><li>Uma cadeia serve a todos, ou é preciso segmentar?</li></ol>`},
+  {t:"Agenda e debates", nodes:["lacunas","poder"], h:`<div class="eyebrow">Onde a discussão continua</div><h2>Três debates</h2><div class="cols3"><div><h3>Eficiência × resiliência</h3><p>Quanto de redundância a cadeia deve pagar?</p></div><div><h3>Fisher no omnicanal</h3><p>O mesmo item é funcional na loja e inovador no online?</p></div><div><h3>Poder do varejista</h3><p>Coordenação que cria valor ou custo transferido ao fornecedor?</p></div></div>`},
+  {t:"Explore o mapa conceitual", nodes:[], h:`<div class="sl-cover"><div class="eyebrow">Ferramenta interativa</div><h2>Explore o mapa</h2><p class="big">Conceitos, autores, práticas, casos e referências conectados. Clique em qualquer slide para saltar ao conceito correspondente.</p></div>`},
+];
+const NODE2SLIDE = {scm:1, fit:2, produto:5, desenho:6, custos:6, vcap:10, dinamica:4, chicote:4, capab:10, agil:8, leagile:8, triplea:8, resil:9, capital:11,
+  forrester:4, sterman:4, stalk:10, leepw:4, fisher:5, naylor:8, christopher:8, cachon:4, mentzer:1, lee2004:8, peck:9, sheffi:9, selldin:13, wagner:11, lima:10,
+  crossdock:10, crp:4, cpfr:4, postpone:8, edlp:4, pos:4, retaillink:10, rfid:10, desalinho:7, promo:4, ruptura:9, poder:13, lacunas:13, hibridas:12};
+
+const QUADRO = [
+  {concept:"Dinâmica industrial", cat:"teoria", author:"Forrester, J. W. (1958)",
+   paper:"Industrial dynamics: A major breakthrough for decision makers. (Harvard Business Review)",
+   contribution:"Modela a cadeia como sistema com atrasos e realimentação e mostra que as oscilações de estoque e produção nascem da estrutura.",
+   practice:"Olhar a cadeia como sistema antes de culpar um elo pelas oscilações.", node:"dinamica"},
+  {concept:"Jogo da cerveja", cat:"teoria", author:"Sterman, J. D. (1989)",
+   paper:"Modeling managerial behavior: Misperceptions of feedback in a dynamic decision making experiment. (Management Science)",
+   contribution:"Mostra em experimento que os decisores ignoram o estoque em trânsito e amplificam a variação dos pedidos.",
+   practice:"Tornar visível o pipeline de pedidos e remessas em qualquer política de reposição.", node:"chicote"},
+  {concept:"Competição por capacidades", cat:"teoria", author:"Stalk, G., Evans, P. & Shulman, L. E. (1992)",
+   paper:"Competing on capabilities: The new rules of corporate strategy. (Harvard Business Review)",
+   contribution:"Processos de negócio viram capacidades estratégicas; o cross-docking do Walmart é o exemplo central.",
+   practice:"Avaliar a cadeia como capacidade competitiva, e não só como centro de custo.", node:"capab"},
+  {concept:"Efeito chicote", cat:"teoria", author:"Lee, H. L., Padmanabhan, V. & Whang, S. (1997)",
+   paper:"Information distortion in a supply chain: The bullwhip effect. (Management Science)",
+   contribution:"Identifica quatro causas da amplificação dos pedidos: previsão, lotes, preços e racionamento.",
+   practice:"Compartilhar POS, reduzir lotes, estabilizar preços e alocar pela venda passada.", node:"chicote"},
+  {concept:"Alinhamento produto–cadeia", cat:"core", author:"Fisher, M. L. (1997)",
+   paper:"What is the right supply chain for your product? (Harvard Business Review)",
+   contribution:"Matriz funcional/inovador × eficiente/responsiva e a distinção entre custos físicos e de mediação de mercado.",
+   practice:"Classificar o portfólio pela natureza da demanda e desenhar a cadeia de cada grupo.", node:"fit"},
+  {concept:"Leagile", cat:"teoria", author:"Naylor, J. B., Naim, M. M. & Berry, D. (1999)",
+   paper:"Leagility: Integrating the lean and agile manufacturing paradigms in the total supply chain. (International Journal of Production Economics)",
+   contribution:"Combina lean a montante e ágil a jusante, separados pelo ponto de desacoplamento.",
+   practice:"Decidir onde posicionar o estoque de desacoplamento e até onde produzir por previsão.", node:"leagile"},
+  {concept:"Cadeia ágil", cat:"teoria", author:"Christopher, M. (2000)",
+   paper:"The agile supply chain: Competing in volatile markets. (Industrial Marketing Management)",
+   contribution:"Define a cadeia ágil como sensível ao mercado, virtual, integrada por processos e em rede.",
+   practice:"Desenhar a resposta a mercados voláteis com informação compartilhada e parceiros flexíveis.", node:"agil"},
+  {concept:"Valor da informação", cat:"tec", author:"Cachon, G. P. & Fisher, M. L. (2000)",
+   paper:"Supply chain inventory management and the value of shared information. (Management Science)",
+   contribution:"Quantifica o ganho do compartilhamento de dados e o compara ao de reduzir lead time e lotes.",
+   practice:"Priorizar lead time e tamanho de lote antes de apostar só em troca de dados.", node:"pos"},
+  {concept:"Definição de SCM", cat:"core", author:"Mentzer, J. T. et al. (2001)",
+   paper:"Defining supply chain management. (Journal of Business Logistics)",
+   contribution:"Separa orientação para a cadeia de gestão da cadeia e propõe definição unificada.",
+   practice:"Deixar claro, na empresa, se a cadeia é um discurso ou um sistema gerido entre empresas.", node:"scm"},
+  {concept:"Incerteza de oferta e demanda", cat:"teoria", author:"Lee, H. L. (2002)",
+   paper:"Aligning supply chain strategies with product uncertainties. (California Management Review)",
+   contribution:"Acrescenta a incerteza de oferta à matriz e propõe cadeias eficientes, de hedge de risco, responsivas e ágeis.",
+   practice:"Classificar também os insumos pela estabilidade do fornecimento.", node:"triplea"},
+  {concept:"Triple-A", cat:"teoria", author:"Lee, H. L. (2004)",
+   paper:"The triple-A supply chain. (Harvard Business Review)",
+   contribution:"Agilidade, adaptabilidade e alinhamento substituem velocidade e custo como critério de desempenho.",
+   practice:"Revisar incentivos de parceiros e a capacidade de reconfigurar a rede.", node:"triplea"},
+  {concept:"Cadeia resiliente", cat:"teoria", author:"Christopher, M. & Peck, H. (2004)",
+   paper:"Building the resilient supply chain. (The International Journal of Logistics Management)",
+   contribution:"Princípios para desenhar resiliência: reengenharia, colaboração, agilidade e cultura de risco.",
+   practice:"Mapear pontos críticos e fornecedores únicos antes da ruptura.", node:"resil"},
+  {concept:"Redundância × flexibilidade", cat:"teoria", author:"Sheffi, Y. & Rice, J. B. (2005)",
+   paper:"A supply chain view of the resilient enterprise. (MIT Sloan Management Review)",
+   contribution:"Distingue redundância e flexibilidade como formas de absorver rupturas.",
+   practice:"Escolher, por risco, entre pagar estoque extra ou construir flexibilidade.", node:"resil"},
+  {concept:"Fit e desempenho", cat:"lacuna", author:"Wagner, S. M., Grosse-Ruyken, P. T. & Erhun, F. (2012)",
+   paper:"The link between supply chain fit and financial performance of the firm. (Journal of Operations Management)",
+   contribution:"Mostra associação positiva entre alinhamento produto–cadeia e retorno sobre ativos.",
+   practice:"Usar o alinhamento como argumento financeiro na revisão do desenho da cadeia.", node:"capital"},
+  {concept:"Modelo VCAP", cat:"core", author:"Lima, T. F. (2026)",
+   paper:"Excelência operacional: da estratégia à execução (Atena), Cap. 1 e 4",
+   contribution:"V = C × (A + P): capacidades multiplicam ativos e processos. O Cap. 4 trata de SCM e da matriz de Fisher.",
+   practice:"Diagnosticar a cadeia separando o que é ativo, o que é processo e o que é capacidade.", node:"vcap"},
+];
+
+const REF_GROUPS = [
+ {title:"Fundamentos: SCM e dinâmica", refs:[
+  {apa:"Chopra, S., & Meindl, P. (2016). <i>Supply chain management: Strategy, planning, and operation</i> (6th ed.). Pearson.", doi:""},
+  {apa:"Christopher, M. (2016). <i>Logistics &amp; supply chain management</i> (5th ed.). Pearson.", doi:""},
+  {apa:"Cooper, M. C., Lambert, D. M., & Pagh, J. D. (1997). Supply chain management: More than a new name for logistics. <i>The International Journal of Logistics Management, 8</i>(1), 1–14.", doi:"https://doi.org/10.1108/09574099710805556"},
+  {apa:"Forrester, J. W. (1958). Industrial dynamics: A major breakthrough for decision makers. <i>Harvard Business Review, 36</i>(4), 37–66.", doi:""},
+  {apa:"Forrester, J. W. (1961). <i>Industrial dynamics</i>. MIT Press.", doi:""},
+  {apa:"Lima, T. F. (2026). <i>Excelência operacional: da estratégia à execução — operações, serviços, melhoria contínua e inteligência artificial</i>. Atena Editora. ISBN 978-65-258-4105-2.", doi:""},
+  {apa:"Lima, T. F. (2026). <i>A interface entre supply chain e finanças corporativas</i>. Atena Editora.", doi:""},
+  {apa:"Mentzer, J. T., DeWitt, W., Keebler, J. S., Min, S., Nix, N. W., Smith, C. D., &amp; Zacharia, Z. G. (2001). Defining supply chain management. <i>Journal of Business Logistics, 22</i>(2), 1–25.", doi:"https://doi.org/10.1002/j.2158-1592.2001.tb00001.x"},
+  {apa:"Oliver, R. K., &amp; Webber, M. D. (1982). Supply-chain management: Logistics catches up with strategy. <i>Outlook</i>. Booz, Allen &amp; Hamilton.", doi:""},
+  {apa:"Sterman, J. D. (1989). Modeling managerial behavior: Misperceptions of feedback in a dynamic decision making experiment. <i>Management Science, 35</i>(3), 321–339.", doi:"https://doi.org/10.1287/mnsc.35.3.321"},
+ ]},
+ {title:"Estratégia de cadeia: Fisher e além", refs:[
+  {apa:"Christopher, M. (2000). The agile supply chain: Competing in volatile markets. <i>Industrial Marketing Management, 29</i>(1), 37–44.", doi:"https://doi.org/10.1016/S0019-8501(99)00110-8"},
+  {apa:"Christopher, M., &amp; Towill, D. R. (2001). An integrated model for the design of agile supply chains. <i>International Journal of Physical Distribution &amp; Logistics Management, 31</i>(4), 235–246.", doi:"https://doi.org/10.1108/09600030110394914"},
+  {apa:"Feitzinger, E., &amp; Lee, H. L. (1997). Mass customization at Hewlett-Packard: The power of postponement. <i>Harvard Business Review, 75</i>(1), 116–121.", doi:""},
+  {apa:"Ferdows, K., Lewis, M. A., &amp; Machuca, J. A. D. (2004). Rapid-fire fulfillment. <i>Harvard Business Review, 82</i>(11), 104–110.", doi:""},
+  {apa:"Fisher, M. L. (1997). What is the right supply chain for your product? <i>Harvard Business Review, 75</i>(2), 105–116.", doi:""},
+  {apa:"Fisher, M. L., Hammond, J. H., Obermeyer, W. R., &amp; Raman, A. (1994). Making supply meet demand in an uncertain world. <i>Harvard Business Review, 72</i>(3), 83–93.", doi:""},
+  {apa:"Lee, H. L. (2002). Aligning supply chain strategies with product uncertainties. <i>California Management Review, 44</i>(3), 105–119.", doi:"https://doi.org/10.2307/41166135"},
+  {apa:"Lee, H. L. (2004). The triple-A supply chain. <i>Harvard Business Review, 82</i>(10), 102–112.", doi:""},
+  {apa:"Magretta, J. (1998). The power of virtual integration: An interview with Dell Computer's Michael Dell. <i>Harvard Business Review, 76</i>(2), 72–84.", doi:""},
+  {apa:"Magretta, J. (1998). Fast, global, and entrepreneurial: Supply chain management, Hong Kong style. An interview with Victor Fung. <i>Harvard Business Review, 76</i>(5), 102–114.", doi:""},
+  {apa:"Naylor, J. B., Naim, M. M., &amp; Berry, D. (1999). Leagility: Integrating the lean and agile manufacturing paradigms in the total supply chain. <i>International Journal of Production Economics, 62</i>(1–2), 107–118.", doi:"https://doi.org/10.1016/S0925-5273(98)00223-0"},
+  {apa:"Selldin, E., &amp; Olhager, J. (2007). Linking products with supply chains: Testing Fisher's model. <i>Supply Chain Management: An International Journal, 12</i>(1), 42–51.", doi:"https://doi.org/10.1108/13598540710724392"},
+  {apa:"Stalk, G., Evans, P., &amp; Shulman, L. E. (1992). Competing on capabilities: The new rules of corporate strategy. <i>Harvard Business Review, 70</i>(2), 57–69.", doi:""},
+  {apa:"Wagner, S. M., Grosse-Ruyken, P. T., &amp; Erhun, F. (2012). The link between supply chain fit and financial performance of the firm. <i>Journal of Operations Management, 30</i>(4), 340–353.", doi:"https://doi.org/10.1016/j.jom.2012.01.001"},
+ ]},
+ {title:"Informação e efeito chicote", refs:[
+  {apa:"Cachon, G. P., &amp; Fisher, M. (2000). Supply chain inventory management and the value of shared information. <i>Management Science, 46</i>(8), 1032–1048.", doi:"https://doi.org/10.1287/mnsc.46.8.1032.12029"},
+  {apa:"Lee, H. L., Padmanabhan, V., &amp; Whang, S. (1997). Information distortion in a supply chain: The bullwhip effect. <i>Management Science, 43</i>(4), 546–558.", doi:"https://doi.org/10.1287/mnsc.43.4.546"},
+  {apa:"Lee, H. L., Padmanabhan, V., &amp; Whang, S. (1997). The bullwhip effect in supply chains. <i>Sloan Management Review, 38</i>(3), 93–102.", doi:""},
+  {apa:"Lee, H. L., So, K. C., &amp; Tang, C. S. (2000). The value of information sharing in a two-level supply chain. <i>Management Science, 46</i>(5), 626–643.", doi:"https://doi.org/10.1287/mnsc.46.5.626.12047"},
+ ]},
+ {title:"Risco, resiliência e valor", refs:[
+  {apa:"Christopher, M., &amp; Peck, H. (2004). Building the resilient supply chain. <i>The International Journal of Logistics Management, 15</i>(2), 1–14.", doi:"https://doi.org/10.1108/09574090410700275"},
+  {apa:"Hendricks, K. B., &amp; Singhal, V. R. (2005). An empirical analysis of the effect of supply chain disruptions on long-run stock price performance and equity risk of the firm. <i>Production and Operations Management, 14</i>(1), 35–52.", doi:"https://doi.org/10.1111/j.1937-5956.2005.tb00008.x"},
+  {apa:"Nishiguchi, T., &amp; Beaudet, A. (1998). The Toyota group and the Aisin fire. <i>Sloan Management Review, 40</i>(1), 49–59.", doi:""},
+  {apa:"Sheffi, Y. (2005). <i>The resilient enterprise: Overcoming vulnerability for competitive advantage</i>. MIT Press.", doi:""},
+  {apa:"Sheffi, Y., &amp; Rice, J. B., Jr. (2005). A supply chain view of the resilient enterprise. <i>MIT Sloan Management Review, 47</i>(1), 41–48.", doi:""},
+  {apa:"Tang, C. S. (2006). Robust strategies for mitigating supply chain disruptions. <i>International Journal of Logistics Research and Applications, 9</i>(1), 33–45.", doi:"https://doi.org/10.1080/13675560500405584"},
+ ]},
+];
+
+const ROOT=NODES[0].id;
+
+/* ====================== MAP RENDER (force layout) ====================== */
+const NS="http://www.w3.org/2000/svg";
+const stage=document.getElementById("stage");
+const nodeById=Object.fromEntries(NODES.map(n=>[n.id,n]));
+const adj={}; NODES.forEach(n=>adj[n.id]=new Set());
+LINKS.forEach(([a,b])=>{adj[a].add(b);adj[b].add(a)});
+
+let W=innerWidth,H=innerHeight-document.querySelector("header").offsetHeight;
+// initial positions: spread on a circle, core in middle
+NODES.forEach((n,i)=>{
+  if(n.id===ROOT){n.x=W/2;n.y=H/2;}
+  else{const a=i/NODES.length*Math.PI*2; n.x=W/2+Math.cos(a)*Math.min(W,H)*0.34; n.y=H/2+Math.sin(a)*Math.min(W,H)*0.34;}
+  n.vx=0;n.vy=0;
+});
+
+const vp=document.createElementNS(NS,"g"); stage.appendChild(vp);
+const linkLayer=document.createElementNS(NS,"g"); vp.appendChild(linkLayer);
+const nodeLayer=document.createElementNS(NS,"g"); vp.appendChild(nodeLayer);
+
+const linkEls=LINKS.map(l=>{
+  const el=document.createElementNS(NS,"line"); el.setAttribute("class","link");
+  el._a=l[0];el._b=l[1]; linkLayer.appendChild(el); return el;
+});
+const nodeEls=NODES.map(n=>{
+  const g=document.createElementNS(NS,"g"); g.setAttribute("class","node"); g._n=n;
+  const c=document.createElementNS(NS,"circle");
+  c.setAttribute("r",n.r); c.setAttribute("fill",CAT[n.cat].color);
+  const t=document.createElementNS(NS,"text");
+  t.setAttribute("text-anchor","middle"); t.setAttribute("dy",n.r+15);
+  t.textContent=SHORT[n.label]||n.label;
+  g.appendChild(c); g.appendChild(t); nodeLayer.appendChild(g);
+  n._g=g;n._c=c;n._t=t; return g;
+});
+
+/* physics */
+let alpha=1;
+function tick(){
+  if(alpha<0.005){return;}
+  alpha*=0.985;
+  const k=alpha;
+  // repulsion
+  for(let i=0;i<NODES.length;i++){
+    const a=NODES[i];
+    for(let j=i+1;j<NODES.length;j++){
+      const b=NODES[j];
+      let dx=a.x-b.x,dy=a.y-b.y; let d2=dx*dx+dy*dy||0.01;
+      let d=Math.sqrt(d2);
+      const minD=a.r+b.r+72;
+      let force=(22000)/d2;
+      if(d<minD) force+= (minD-d)*1.2/d; // collision
+      const fx=dx/d*force*k, fy=dy/d*force*k;
+      if(!a._fix){a.vx+=fx;a.vy+=fy;}
+      if(!b._fix){b.vx-=fx;b.vy-=fy;}
+    }
+  }
+  // springs
+  LINKS.forEach(l=>{
+    const a=nodeById[l[0]],b=nodeById[l[1]];
+    let dx=b.x-a.x,dy=b.y-a.y; let d=Math.sqrt(dx*dx+dy*dy)||0.01;
+    const target=a.id===ROOT||b.id===ROOT?210:185;
+    const f=(d-target)*0.045*k;
+    const fx=dx/d*f,fy=dy/d*f;
+    if(!a._fix){a.vx+=fx;a.vy+=fy;}
+    if(!b._fix){b.vx-=fx;b.vy-=fy;}
+  });
+  // gravity to center
+  NODES.forEach(n=>{
+    if(n._fix)return;
+    n.vx+=(W/2-n.x)*0.0035*k; n.vy+=(H/2-n.y)*0.0035*k;
+    n.vx*=0.86; n.vy*=0.86;
+    n.x+=n.vx; n.y+=n.vy;
+  });
+  render();
+  requestAnimationFrame(tick);
+}
+function render(){
+  linkEls.forEach(el=>{
+    const a=nodeById[el._a],b=nodeById[el._b];
+    el.setAttribute("x1",a.x);el.setAttribute("y1",a.y);
+    el.setAttribute("x2",b.x);el.setAttribute("y2",b.y);
+  });
+  nodeEls.forEach(g=>{const n=g._n; g.setAttribute("transform",`translate(${n.x},${n.y})`)});
+}
+function reheat(v){alpha=Math.max(alpha,v||0.6);requestAnimationFrame(tick);}
+
+/* zoom & pan */
+let tx=0,ty=0,scale=1;
+function applyVP(){vp.setAttribute("transform",`translate(${tx},${ty}) scale(${scale})`)}
+stage.addEventListener("wheel",e=>{
+  e.preventDefault();
+  const r=stage.getBoundingClientRect();
+  const mx=e.clientX-r.left,my=e.clientY-r.top;
+  const ds=e.deltaY<0?1.12:0.893;
+  const ns=Math.min(2.6,Math.max(0.3,scale*ds));
+  tx=mx-(mx-tx)*(ns/scale); ty=my-(my-ty)*(ns/scale); scale=ns; applyVP();
+},{passive:false});
+
+let panning=false,sx,sy,stx,sty,dragNode=null,downNode=null,downX=0,downY=0;
+stage.addEventListener("pointerdown",e=>{
+  downX=e.clientX;downY=e.clientY;
+  const g=e.target.closest(".node");
+  if(g){downNode=g._n;dragNode=g._n;dragNode._fix=true;stage.setPointerCapture(e.pointerId);}
+  else{downNode=null;panning=true;stage.classList.add("grabbing");sx=e.clientX;sy=e.clientY;stx=tx;sty=ty;stage.setPointerCapture(e.pointerId);}
+});
+stage.addEventListener("pointermove",e=>{
+  if(dragNode){
+    const r=stage.getBoundingClientRect();
+    dragNode.x=(e.clientX-r.left-tx)/scale; dragNode.y=(e.clientY-r.top-ty)/scale;
+    reheat(0.25); render();
+  }else if(panning){tx=stx+(e.clientX-sx);ty=sty+(e.clientY-sy);applyVP();}
+});
+stage.addEventListener("pointerup",e=>{
+  const movedDist=Math.hypot(e.clientX-downX,e.clientY-downY);
+  if(dragNode){dragNode._fix=false;}
+  if(movedDist<6){                       // clique (não arraste): abre nó ou fecha painel
+    if(downNode) openPanel(downNode.id);
+    else closePanel();
+  }
+  if(dragNode){dragNode=null;reheat(0.3);}
+  downNode=null;panning=false;stage.classList.remove("grabbing");
+});
+
+/* interactions: hover + click */
+let selected=null;
+function neighbors(id){const s=new Set(adj[id]);s.add(id);return s;}
+function highlight(id){
+  const set=id?neighbors(id):null;
+  nodeEls.forEach(g=>{
+    const on=!set||set.has(g._n.id);
+    g.classList.toggle("dim",!on && !legendOff.has(g._n.cat)?!on:!on);
+  });
+  linkEls.forEach(el=>{
+    const hot=set&&(set.has(el._a)&&set.has(el._b)&&(el._a===id||el._b===id));
+    const on=!set||(set.has(el._a)&&set.has(el._b));
+    el.classList.toggle("hot",!!hot);
+    el.classList.toggle("dim",set&&!on);
+  });
+}
+nodeEls.forEach(g=>{
+  g.addEventListener("pointerenter",()=>{if(!selected)highlight(g._n.id)});
+  g.addEventListener("pointerleave",()=>{if(!selected)highlight(null)});
+});
+
+/* legend filter */
+const legendOff=new Set();
+const li=document.getElementById("legendItems");
+Object.entries(CAT).forEach(([k,v])=>{
+  const d=document.createElement("div"); d.className="item"; d.dataset.cat=k;
+  d.innerHTML=`<span class="swatch" style="background:${v.color}"></span>${v.name}`;
+  d.addEventListener("click",()=>{
+    if(legendOff.has(k)){legendOff.delete(k);d.classList.remove("off");}
+    else{legendOff.add(k);d.classList.add("off");}
+    applyFilter();
+  });
+  li.appendChild(d);
+});
+function applyFilter(){
+  nodeEls.forEach(g=>{g.style.display=legendOff.has(g._n.cat)?"none":""});
+  linkEls.forEach(el=>{
+    const off=legendOff.has(nodeById[el._a].cat)||legendOff.has(nodeById[el._b].cat);
+    el.style.display=off?"none":"";
+  });
+}
+
+/* zoom buttons */
+function zoomBy(f){
+  const ns=Math.min(2.6,Math.max(0.3,scale*f));
+  tx=W/2-(W/2-tx)*(ns/scale);ty=H/2-(H/2-ty)*(ns/scale);scale=ns;applyVP();
+}
+document.getElementById("zin").onclick=()=>zoomBy(1.2);
+document.getElementById("zout").onclick=()=>zoomBy(0.83);
+document.getElementById("zfit").onclick=()=>{tx=0;ty=0;scale=1;applyVP();reheat(0.5)};
+
+/* ====================== DETAIL PANEL ====================== */
+const panel=document.getElementById("panel");
+const pbody=document.getElementById("pbody");
+function openPanel(id){
+  const n=nodeById[id]; selected=id;
+  nodeEls.forEach(g=>g.classList.toggle("sel",g._n.id===id));
+  highlight(id);
+  const col=CAT[n.cat].color;
+  const rels=[...adj[id]].map(rid=>{const m=nodeById[rid];
+    return `<span class="relnode" data-go="${rid}"><span class="sw" style="background:${CAT[m.cat].color}"></span>${m.label}</span>`}).join("");
+  pbody.innerHTML=`
+    <div class="ptag" style="background:${hex2rgba(col,.16)};color:${col}">${CAT[n.cat].name}</div>
+    <h2>${n.label}</h2>
+    <div class="pauthor" style="color:${col}">${n.author||""}</div>
+    <div class="pdesc">${n.desc}</div>
+    ${n.bullets&&n.bullets.length?`<div class="pblock"><h5>Em detalhe</h5><ul>${n.bullets.map(b=>`<li>${b}</li>`).join("")}</ul></div>`:""}
+    <div class="pblock"><h5>Conexões (${adj[id].size})</h5>${rels}</div>
+    ${NODE2SLIDE[id]?`<button class="gomap" data-slide="${NODE2SLIDE[id]}">▣ Ver no slide ${NODE2SLIDE[id]} da apresentação →</button>`:""}
+  `;
+  pbody.querySelectorAll("[data-go]").forEach(el=>el.onclick=()=>openPanel(el.dataset.go));
+  const sb=pbody.querySelector("[data-slide]"); if(sb)sb.onclick=()=>{closePanel();switchView("apresentacao");setTimeout(()=>apsGo(+sb.dataset.slide-1),60)};
+  panel.classList.add("open");
+  document.documentElement.style.setProperty("--panelw","380px");
+}
+function closePanel(){
+  panel.classList.remove("open");selected=null;
+  nodeEls.forEach(g=>g.classList.remove("sel"));highlight(null);
+  document.documentElement.style.setProperty("--panelw","0px");
+}
+document.getElementById("pclose").onclick=closePanel;
+function hex2rgba(h,a){const n=parseInt(h.slice(1),16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`}
+
+/* ====================== TIMELINE / TABLE / SYNTH ====================== */
+document.getElementById("tl").innerHTML=TIMELINE.map(t=>t.phase?`
+  <div class="tlphase"><h2>${t.phase}</h2><p>${t.sub}</p></div>`:`
+  <div class="tlitem" data-go="${t.node}">
+    <div class="yr">${t.yr}</div><div class="nub"></div>
+    <div class="tlcard"><h3>${t.t}</h3><div class="who">${t.who}</div><p>${t.d}</p></div>
+  </div>`).join("");
+document.querySelectorAll("#tl .tlitem").forEach(el=>el.onclick=()=>{switchView("map");setTimeout(()=>openPanel(el.dataset.go),60)});
+
+// ---- Casos práticos
+document.getElementById("caseList").innerHTML=CASES.map(c=>`
+  <div class="case">
+    <div class="ch"><h3>${c.title}</h3><span class="loc">${c.loc}</span></div>
+    ${c.loop?'<span class="loop-chip">'+c.loop+'</span>':''}
+    <div class="tag">${c.tag}</div>
+    <p class="cd">${c.desc}</p>
+    <div class="row"><span class="k">Prática</span><span class="v">${c.practice}</span></div>
+    <div class="row"><span class="k">Teoria</span><span class="v">${c.theory}</span></div>
+    <div class="row"><span class="k">Autor</span><span class="v"><b>${c.author}</b></span></div>
+    <button class="gomap" data-go="${c.node}">Ver no mapa →</button>
+  </div>`).join("");
+document.querySelectorAll("#caseList .gomap").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+
+// ---- Quadro teórico
+document.getElementById("quadroRows").innerHTML=QUADRO.map(q=>{
+  const col=CAT[q.cat].color;
+  return `<div class="qrow">
+    <div class="qhead">
+      <span class="qdotwrap"><span class="qdot" style="background:${col}"></span>
+        <span class="qtip"><span class="c" style="color:${col}">${q.concept}</span><h6>Principal contribuição</h6>${q.contribution}</span>
+      </span>
+      <span class="qconcept" style="background:${hex2rgba(col,.16)};color:${col}">${q.concept}</span>
+      <span class="qauthor">${q.author}</span>
+    </div>
+    <div class="qpaper">${q.paper}</div>
+    <div class="qbody">
+      <div class="qcol"><h6>Principal contribuição</h6><p>${q.contribution}</p></div>
+      <div class="qcol"><h6>Prática associada</h6><p>${q.practice}</p></div>
+    </div>
+    <button class="gomap" data-go="${q.node}">Ver no mapa →</button>
+  </div>`;
+}).join("");
+document.querySelectorAll("#quadroRows .gomap").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+
+// ---- Referências
+function refRow(r){
+  const txt=(r.apa+' '+(r.doi||'')).replace(/<[^>]+>/g,'').replace(/"/g,'').toLowerCase();
+  const link=r.doi?` <a href="${r.doi}" target="_blank" rel="noopener">${r.doi}</a>`:"";
+  return `<div class="refrow" data-txt="${txt}">${r.apa}${link}</div>`;
+}
+document.getElementById("refGroups").innerHTML=REF_GROUPS.map(g=>`<h3 class="refgroup">${g.title}</h3>`+g.refs.map(refRow).join("")).join("");
+document.getElementById("refCount").textContent=REF_GROUPS.reduce((s,g)=>s+g.refs.length,0);
+document.getElementById("refFilter").addEventListener("input",e=>{
+  const q=e.target.value.trim().toLowerCase();
+  document.querySelectorAll(".refrow").forEach(r=>r.classList.toggle("hide",q&&!r.dataset.txt.includes(q)));
+});
+
+/* ====================== NAV / SEARCH ====================== */
+function switchView(v){
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("active",s.id==="view-"+v));
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
+  document.getElementById("ctrls").style.display=v==="map"?"flex":"none";
+  if(v==="map"){W=innerWidth;H=innerHeight-document.querySelector("header").offsetHeight;reheat(0.4);}
+}
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
+
+const search=document.getElementById("search");
+search.addEventListener("input",()=>{
+  const q=search.value.trim().toLowerCase();
+  if(!q){nodeEls.forEach(g=>g.classList.remove("dim"));return;}
+  let hit=null;
+  nodeEls.forEach(g=>{
+    const m=(g._n.label+" "+g._n.author+" "+g._n.desc).toLowerCase().includes(q);
+    g.classList.toggle("dim",!m); if(m&&!hit)hit=g._n;
+  });
+});
+search.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    const q=search.value.trim().toLowerCase();
+    const hit=NODES.find(n=>(n.label+" "+n.author).toLowerCase().includes(q));
+    if(hit){switchView("map");openPanel(hit.id);
+      tx=W/2-hit.x*scale;ty=H/2-hit.y*scale;applyVP();}
+  }
+});
+
+/* ---- Intro / Como usar ---- */
+const intro=document.getElementById("intro");
+function showIntro(){intro.classList.add("show")}
+function hideIntro(){intro.classList.remove("show")}
+document.getElementById("introClose").onclick=hideIntro;
+document.getElementById("introGo").onclick=hideIntro;
+document.getElementById("helpBtn").onclick=showIntro;
+intro.addEventListener("click",e=>{if(e.target===intro)hideIntro()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")hideIntro()});
+showIntro(); // abre o guia ao carregar
+
+
+/* ---- Apresentação: viewer (slides em HTML) ---- */
+const fs=document.getElementById("fs");
+let apsI=0;
+document.getElementById("apsThumbs").innerHTML=APS.map((s,i)=>`<button class="apsthumb" data-i="${i}" title="${s.t}"><b>${i+1}</b><span>${s.t}</span></button>`).join("");
+function apsRender(){
+  const m=APS[apsI];
+  document.getElementById("apsSlide").innerHTML=m.h;
+  document.getElementById("apsCounter").textContent=(apsI+1)+" / "+APS.length;
+  document.getElementById("apsTitle").textContent=m.t;
+  document.getElementById("apsChips").innerHTML=(m.nodes||[]).map(id=>{const n=nodeById[id];
+    return n?`<span class="apschip" data-go="${id}"><span class="sw" style="background:${CAT[n.cat].color}"></span>${n.label}</span>`:""}).join("");
+  document.querySelectorAll("#apsChips .apschip").forEach(c=>c.onclick=()=>{switchView("map");setTimeout(()=>openPanel(c.dataset.go),60)});
+  document.querySelectorAll("#apsThumbs .apsthumb").forEach((t,i)=>t.classList.toggle("active",i===apsI));
+  const mlTxt=(m.nodes&&m.nodes.length)?"⊕ Explorar no mapa →":"⊕ Abrir o mapa →";
+  document.getElementById("apsMapLink").textContent=mlTxt;
+  document.getElementById("fsMapLink").textContent=mlTxt;
+  document.getElementById("fsSlide").innerHTML=m.h;
+  document.getElementById("fsCounter").textContent=(apsI+1)+" / "+APS.length;
+}
+function apsToMap(){const m=APS[apsI];
+  switchView("map");
+  if(m.nodes&&m.nodes.length){setTimeout(()=>openPanel(m.nodes[0]),60);}}
+function apsGo(i){apsI=(i+APS.length)%APS.length;apsRender();}
+document.querySelectorAll("#apsThumbs .apsthumb").forEach(t=>t.onclick=()=>apsGo(+t.dataset.i));
+document.getElementById("apsPrev").onclick=()=>apsGo(apsI-1);
+document.getElementById("apsNext").onclick=()=>apsGo(apsI+1);
+document.getElementById("apsSlide").onclick=apsToMap;
+document.getElementById("apsMapLink").onclick=apsToMap;
+document.querySelectorAll("#view-diagrama [data-go]").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+document.querySelectorAll("#view-agenda [data-go]").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+document.getElementById("apsFull").onclick=()=>{fs.classList.add("show");apsRender();
+  try{const p=fs.requestFullscreen&&fs.requestFullscreen(); if(p&&p.catch)p.catch(()=>{});}catch(e){}};
+function fsClose(){fs.classList.remove("show");try{if(document.fullscreenElement)document.exitFullscreen();}catch(e){}}
+document.getElementById("fsClose").onclick=fsClose;
+document.getElementById("fsMapLink").onclick=()=>{fsClose();apsToMap();};
+document.getElementById("fsPrev").onclick=()=>apsGo(apsI-1);
+document.getElementById("fsNext").onclick=()=>apsGo(apsI+1);
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement)fs.classList.remove("show")});
+document.addEventListener("keydown",e=>{
+  if(fs.classList.contains("show")){
+    if(e.key==="ArrowRight")apsGo(apsI+1); else if(e.key==="ArrowLeft")apsGo(apsI-1); else if(e.key==="Escape")fsClose();
+    return;
+  }
+  if(document.getElementById("view-apresentacao").classList.contains("active")){
+    if(e.key==="ArrowRight")apsGo(apsI+1); else if(e.key==="ArrowLeft")apsGo(apsI-1);
+  }
+});
+apsRender();
+
+window.addEventListener("resize",()=>{W=innerWidth;H=innerHeight-document.querySelector("header").offsetHeight;});
+applyVP(); render(); reheat(1);
+</script>
+<script id="mobile-patch-js">
+(function(){
+  var h=document.querySelector('header');
+  function set(){document.documentElement.style.setProperty('--hh',h.offsetHeight+'px');}
+  set(); addEventListener('resize',set); addEventListener('orientationchange',set);
+  var lg=document.querySelector('.legend h4');
+  if(lg) lg.addEventListener('click',function(){lg.parentElement.classList.toggle('open');});
+  if(innerWidth>760 && lg) lg.parentElement.classList.add('open');
+})();
+</script>
+</body>
+</html>

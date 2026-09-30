@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Compras Estratégicas · Mapa da Sessão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: app de tela cheia com barra fixa, mapa de forças e vistas de leitura; tema escuro único, alto contraste para projetor */
+  :root{
+    --bg:#0a1020; --bg2:#0e1629; --panel:#121c33; --panel2:#1a2744;
+    --ink:#f4f7fc; --body:#e3e9f4; --muted:#b6c2d6; --line:#2c3a5c;
+    --core:#facc15; --teoria:#c4b5fd; --autor:#fdba74; --pratica:#4ade80;
+    --tec:#67e8f9; --barreira:#f87171; --lacuna:#f0abfc;
+    --accent:#facc15; --onaccent:#1a1400;
+    --f-ui:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --f-data:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:var(--f-ui);
+    background:var(--bg) radial-gradient(1200px 800px at 70% -10%,#1b2748 0%,var(--bg) 55%);
+    color:var(--ink);overflow:hidden;
+  }
+  /* ---------- Top bar ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;height:62px;z-index:30;
+    display:flex;align-items:center;gap:18px;padding:0 22px;
+    background:linear-gradient(180deg,rgba(10,16,32,.95),rgba(10,16,32,.78));
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.3px;flex:none}
+  .brand>div{white-space:nowrap;line-height:1.18}
+  .brand .dot{width:13px;height:13px;border-radius:50%;background:var(--core);flex:none;
+    box-shadow:0 0 0 4px rgba(250,204,21,.18),0 0 18px rgba(250,204,21,.6)}
+  .brand small{display:block;font-weight:500;font-size:11px;color:var(--muted);letter-spacing:1.4px;text-transform:uppercase}
+  nav{display:flex;gap:6px;margin-left:6px;overflow-x:auto;min-width:0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  nav::-webkit-scrollbar{display:none}
+  nav button{
+    background:transparent;border:1px solid transparent;color:var(--muted);flex:none;white-space:nowrap;
+    padding:8px 15px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;
+    transition:.15s;font-family:inherit;letter-spacing:.2px;
+  }
+  nav button:hover{color:var(--ink);background:rgba(255,255,255,.04)}
+  nav button.active{color:var(--onaccent);background:var(--core);border-color:var(--core)}
+  .vbadge{background:var(--core);color:var(--onaccent);font-weight:700;font-size:11px;letter-spacing:.4px;
+    padding:4px 9px;border-radius:20px;white-space:nowrap}
+  .spacer{flex:1}
+  .searchbox{position:relative}
+  .searchbox input{
+    background:var(--panel);border:1px solid var(--line);color:var(--ink);
+    padding:8px 12px 8px 32px;border-radius:9px;font-size:13px;width:200px;font-family:inherit;outline:none;
+  }
+  .searchbox input:focus{border-color:var(--core)}
+  .searchbox svg{position:absolute;left:10px;top:9px;opacity:.5}
+  /* ---------- Views ---------- */
+  .view{position:fixed;inset:62px 0 0 0;display:none}
+  .view.active{display:block}
+  /* ---------- Map ---------- */
+  #stage{width:100%;height:100%;cursor:grab;display:block;touch-action:none}
+  #stage.grabbing{cursor:grabbing}
+  .legend{
+    position:absolute;left:18px;top:16px;z-index:10;background:rgba(18,28,51,.82);
+    border:1px solid var(--line);border-radius:13px;padding:13px 15px;backdrop-filter:blur(6px);max-width:230px;
+  }
+  .legend h4{margin:0 0 9px;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .legend .item{display:flex;align-items:center;gap:9px;font-size:13px;padding:4px 6px;border-radius:7px;cursor:pointer;transition:.12s;user-select:none}
+  .legend .item:hover{background:rgba(255,255,255,.05)}
+  .legend .item.off{opacity:.32}
+  .legend .swatch{width:12px;height:12px;border-radius:50%;flex:none}
+  .hint{position:absolute;left:18px;bottom:16px;z-index:10;font-size:12px;color:var(--muted);
+    background:rgba(18,28,51,.7);border:1px solid var(--line);border-radius:9px;padding:8px 12px;max-width:260px;line-height:1.5}
+  .ctrls{position:absolute;right:calc(18px + var(--panelw,0px));bottom:16px;z-index:10;display:flex;gap:8px;transition:right .25s}
+  .ctrls button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgba(18,28,51,.85);
+    color:var(--ink);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
+  .ctrls button:hover{border-color:var(--core);color:var(--core)}
+  /* nodes */
+  .link{stroke:var(--line);stroke-width:1.4;transition:stroke .2s,stroke-width .2s,opacity .2s}
+  .link.hot{stroke:var(--core);stroke-width:2.4;opacity:1}
+  .node{cursor:pointer}
+  .node circle{stroke:var(--bg);stroke-width:2.5;transition:r .15s}
+  .node text{fill:var(--ink);font-size:11.5px;font-weight:600;pointer-events:none;paint-order:stroke;
+    stroke:var(--bg);stroke-width:3px;stroke-linejoin:round}
+  .node.dim{opacity:.16}
+  .link.dim{opacity:.06}
+  .node.sel circle{stroke:#fff;stroke-width:3.5}
+  /* ---------- Detail panel ---------- */
+  #panel{
+    position:fixed;top:62px;right:0;bottom:0;width:380px;z-index:25;
+    background:linear-gradient(180deg,var(--panel),var(--bg2));border-left:1px solid var(--line);
+    transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+    display:flex;flex-direction:column;
+  }
+  #panel.open{transform:translateX(0)}
+  .pclose{position:absolute;top:13px;right:14px;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
+    background:transparent;color:var(--muted);cursor:pointer;font-size:17px}
+  .pclose:hover{color:var(--ink);border-color:var(--core)}
+  .pbody{padding:26px 26px 30px;overflow-y:auto}
+  .ptag{display:inline-block;font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
+    padding:5px 11px;border-radius:30px;margin-bottom:14px}
+  #panel h2{margin:0 0 4px;font-size:23px;line-height:1.2}
+  .pauthor{color:var(--core);font-size:13.5px;font-weight:600;margin-bottom:18px}
+  .pdesc{font-size:14.5px;line-height:1.62;color:var(--body);margin-bottom:20px}
+  .pblock{margin-bottom:18px}
+  .pblock h5{margin:0 0 8px;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .pblock ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--body)}
+  .pblock li{margin-bottom:5px}
+  .chip{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:20px;
+    padding:5px 12px;font-size:12px;margin:0 6px 7px 0;color:var(--body)}
+  .relnode{display:inline-flex;align-items:center;gap:7px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:9px;padding:7px 11px;font-size:12.5px;margin:0 7px 7px 0;cursor:pointer;transition:.12s}
+  .relnode:hover{border-color:var(--core);transform:translateY(-1px)}
+  .relnode .sw{width:9px;height:9px;border-radius:50%;flex:none}
+  /* ---------- Content views (timeline/table/synth) ---------- */
+  .scroller{height:100%;overflow-y:auto;padding:46px 8vw 80px}
+  .scroller h1{font-size:30px;margin:0 0 6px;font-weight:800;letter-spacing:-.5px}
+  .scroller .sub{color:var(--muted);font-size:15px;margin-bottom:40px;max-width:680px;line-height:1.6}
+  /* timeline */
+  .tl{position:relative;max-width:880px}
+  .tl::before{content:"";position:absolute;left:88px;top:8px;bottom:8px;width:2px;background:var(--line)}
+  .tlitem{position:relative;padding:0 0 30px 130px;cursor:pointer}
+  .tlitem .yr{position:absolute;left:0;top:-2px;width:72px;text-align:right;font-weight:600;font-size:18px;color:var(--autor);font-family:var(--f-data);font-variant-numeric:tabular-nums}
+  .tlitem .nub{position:absolute;left:81px;top:4px;width:16px;height:16px;border-radius:50%;background:var(--autor);
+    border:3px solid var(--bg);box-shadow:0 0 0 3px rgba(253,186,116,.18)}
+  .tlcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 19px;transition:.15s}
+  .tlitem:hover .tlcard{border-color:var(--autor);transform:translateX(3px)}
+  .tlcard h3{margin:0 0 3px;font-size:17px}
+  .tlcard .who{color:var(--core);font-size:13px;font-weight:600;margin-bottom:8px}
+  .tlcard p{margin:0;font-size:13.5px;line-height:1.55;color:var(--body)}
+  /* table */
+  .ctable{width:100%;max-width:980px;border-collapse:separate;border-spacing:0;font-size:14px}
+  .ctable th,.ctable td{text-align:left;padding:15px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+  .ctable thead th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .ctable tbody tr{transition:.12s}
+  .ctable tbody tr:hover{background:rgba(250,204,21,.05)}
+  .ctable .nm{font-weight:700;font-size:15px}
+  .ctable .nm small{display:block;font-weight:500;color:var(--muted);font-size:11.5px;margin-top:3px;letter-spacing:.3px}
+  .scopebar{height:7px;border-radius:5px;background:linear-gradient(90deg,var(--core),var(--pratica));margin-top:9px}
+  /* synth */
+  .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;max-width:920px;margin-bottom:46px}
+  .scard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;position:relative;overflow:hidden}
+  .scard .n{font-size:34px;font-weight:800;color:var(--core);opacity:.32;position:absolute;top:12px;right:18px}
+  .scard h3{margin:0 0 9px;font-size:16px;color:var(--core)}
+  .scard p{margin:0;font-size:14px;line-height:1.6;color:var(--body)}
+  .qbox{max-width:920px}
+  .qbox h2{font-size:21px;margin:0 0 18px}
+  .q{display:flex;gap:16px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:18px 20px;margin-bottom:13px}
+  .q .qn{font-size:24px;font-weight:800;color:var(--lacuna);line-height:1;flex:none}
+  .q p{margin:0;font-size:15px;line-height:1.55}
+  .pullquote{max-width:820px;margin:8px 0 40px;font-size:21px;line-height:1.5;font-weight:600;
+    color:var(--ink);border-left:3px solid var(--lacuna);padding-left:22px;font-style:italic}
+  .pullquote cite{display:block;font-style:normal;font-size:13px;color:var(--muted);margin-top:12px;font-weight:500}
+  /* cases */
+  .cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(390px,1fr));gap:20px;max-width:1120px}
+  .case{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;display:flex;flex-direction:column}
+  .case .ch{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:3px}
+  .case h3{margin:0;font-size:18px}
+  .case .loc{font-size:11px;color:var(--muted);letter-spacing:.5px;white-space:nowrap;text-transform:uppercase;flex:none}
+  .case .tag{font-size:14.5px;font-style:italic;color:var(--pratica);font-weight:600;margin:7px 0 13px}
+  .case p.cd{margin:0 0 16px;font-size:13.5px;line-height:1.58;color:var(--body)}
+  .case .row{display:flex;gap:12px;font-size:12.5px;padding:9px 0;border-top:1px solid var(--line)}
+  .case .row .k{flex:none;width:62px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:10px;padding-top:2px}
+  .case .row .v{color:var(--body);line-height:1.5}
+  .case .row .v b{color:var(--autor);font-weight:700}
+  .loop-chip{display:inline-block;font:700 11px/1 ui-monospace,monospace;color:#4ade80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.34);border-radius:20px;padding:5px 11px;letter-spacing:.04em;text-transform:uppercase;margin:2px 0 4px}
+  .case .gomap{margin-top:16px;align-self:flex-start;background:transparent;border:1px solid var(--line);color:var(--core);
+    border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.13s}
+  .case .gomap:hover{border-color:var(--core);background:rgba(250,204,21,.08);transform:translateY(-1px)}
+  /* refs */
+  .refgroup{font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--core);font-weight:700;margin:36px 0 6px;max-width:1000px}
+  .refrow{max-width:1000px;padding:13px 0 13px 30px;text-indent:-30px;border-bottom:1px solid var(--line);
+    font-size:14px;line-height:1.6;color:var(--body)}
+  .refrow i{color:var(--ink)}
+  .refrow a{color:var(--core);text-decoration:none;font-size:13px;word-break:break-all}
+  .refrow a:hover{text-decoration:underline}
+  .refrow.hide{display:none}
+  .reffilter{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:7px 12px;border-radius:9px;
+    font-size:13px;font-family:inherit;outline:none;margin-left:10px;width:240px}
+  .reffilter:focus{border-color:var(--core)}
+  /* shared "ver no mapa" button */
+  .gomap{margin-top:16px;align-self:flex-start;background:transparent;border:1px solid var(--line);color:var(--core);
+    border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.13s}
+  .gomap:hover{border-color:var(--core);background:rgba(250,204,21,.08);transform:translateY(-1px)}
+  /* quadro teórico */
+  .qtable{display:flex;flex-direction:column;gap:16px;max-width:1080px}
+  .qrow{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 24px;transition:.13s}
+  .qrow:hover{border-color:var(--line)}
+  .qhead{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:6px}
+  .qdotwrap{position:relative;display:inline-flex;flex:none}
+  .qdot{width:15px;height:15px;border-radius:50%;cursor:help;flex:none;box-shadow:0 0 0 3px rgba(255,255,255,.05)}
+  .qtip{position:absolute;left:24px;top:50%;transform:translateY(-50%);z-index:25;width:330px;max-width:72vw;
+    background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:13px 15px;
+    box-shadow:0 14px 34px rgba(0,0,0,.55);display:none;font-size:12.5px;line-height:1.5;color:var(--body)}
+  .qdotwrap:hover .qtip{display:block}
+  .qtip .c{display:block;font-weight:700;margin-bottom:7px;font-size:13.5px}
+  .qtip h6{margin:0 0 5px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .qconcept{font-weight:700;font-size:14.5px;padding:5px 13px;border-radius:30px;flex:none}
+  .qauthor{font-weight:700;font-size:15.5px}
+  .qpaper{font-style:italic;color:var(--muted);font-size:12.5px;margin-bottom:4px}
+  .qbody{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:14px}
+  .qcol h6{margin:0 0 6px;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .qcol p{margin:0;font-size:13.5px;line-height:1.56;color:var(--body)}
+  /* intro / how-to-use modal */
+  .helpbtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--core);
+    font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;flex:none}
+  .helpbtn:hover{border-color:var(--core)}
+  .introwrap{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:20px;
+    background:rgba(4,8,18,.74);backdrop-filter:blur(7px)}
+  .introwrap.show{display:flex}
+  .introcard{position:relative;background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);
+    border-radius:20px;max-width:580px;width:100%;padding:34px 36px;box-shadow:0 30px 80px rgba(0,0,0,.55);
+    max-height:88vh;overflow-y:auto}
+  .introcard .ptag{display:inline-block;font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
+    padding:5px 11px;border-radius:30px;margin-bottom:14px;background:rgba(250,204,21,.16);color:var(--core)}
+  .introcredit{font-size:12.5px;color:var(--core);font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:12px}
+  .introcard h2{margin:0 0 12px;font-size:25px;line-height:1.2}
+  .introcard .lead{font-size:15px;line-height:1.62;color:var(--body);margin:0 0 22px}
+  .introsteps{display:flex;flex-direction:column;gap:12px;margin-bottom:26px}
+  .introsteps .s{display:flex;gap:12px;font-size:13.5px;line-height:1.5;color:var(--body)}
+  .introsteps .s .sw{width:10px;height:10px;border-radius:50%;flex:none;margin-top:5px}
+  .introsteps .s b{color:var(--ink)}
+  .introgo{background:var(--core);color:var(--onaccent);border:none;border-radius:11px;padding:12px 24px;font-size:14.5px;
+    font-weight:700;cursor:pointer;font-family:inherit}
+  .introgo:hover{filter:brightness(1.08)}
+  .introx{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
+    background:transparent;color:var(--muted);cursor:pointer;font-size:16px}
+  .introx:hover{color:var(--ink);border-color:var(--core)}
+  /* apresentação / viewer */
+  .apswrap{height:100%;display:flex;flex-direction:column;padding:22px 4vw 16px}
+  .apstop{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:13px;gap:14px;flex-wrap:wrap}
+  .apstop h1{font-size:22px;margin:0}
+  .apssub{color:var(--muted);font-size:12.5px;margin-top:3px}
+  .apsactions{display:flex;gap:8px}
+  .apsbtn{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:8px 14px;
+    font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .apsbtn:hover{border-color:var(--core);color:var(--core)}
+  .apsstage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
+    background:#070b17;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .apsstage img{max-width:100%;max-height:100%;object-fit:contain;display:block;cursor:pointer}
+  .apsmaplink{position:absolute;top:12px;right:12px;background:var(--core);color:var(--onaccent);border:none;
+    border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;
+    box-shadow:0 4px 14px rgba(0,0,0,.35)}
+  .apsmaplink:hover{filter:brightness(1.08)}
+  .apsnav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(18,28,51,.82);color:#fff;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .apsnav:hover{border-color:var(--core);color:var(--core)}
+  .apsprev{left:14px}.apsnext{right:14px}
+  .apscounter{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(10,16,32,.82);
+    border:1px solid var(--line);border-radius:20px;padding:5px 14px;font-size:12.5px;color:var(--muted)}
+  .apsmeta{margin:13px 0 9px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+  .apsmeta .t{font-weight:700;font-size:15px}
+  .apschips{display:flex;flex-wrap:wrap;gap:7px}
+  .apschip{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;transition:.12s}
+  .apschip:hover{border-color:var(--core);transform:translateY(-1px)}
+  .apschip .sw{width:8px;height:8px;border-radius:50%;flex:none}
+  .apsthumbs{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 2px}
+  .apsthumb{flex:none;width:104px;height:58px;border-radius:7px;border:2px solid transparent;overflow:hidden;cursor:pointer;opacity:.5;background:#000;transition:.12s}
+  .apsthumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .apsthumb.active{opacity:1;border-color:var(--core)}
+  .apsthumb:hover{opacity:1}
+  /* tela cheia */
+  .fswrap{position:fixed;inset:0;z-index:80;display:none;background:#000;align-items:center;justify-content:center}
+  .fswrap.show{display:flex}
+  .fswrap img{max-width:100vw;max-height:100vh;object-fit:contain}
+  .fsx{position:absolute;top:16px;right:18px;width:40px;height:40px;border-radius:9px;border:1px solid #333;
+    background:rgba(0,0,0,.5);color:#fff;font-size:17px;cursor:pointer}
+  .fsx:hover{border-color:var(--core);color:var(--core)}
+  .fsnav{position:absolute;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;border:1px solid #444;
+    background:rgba(0,0,0,.4);color:#fff;font-size:26px;line-height:1;cursor:pointer}
+  .fsnav:hover{border-color:var(--core);color:var(--core)}
+  .fsprev{left:20px}.fsnext{right:20px}
+  .fscounter{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:#bbb;font-size:13px}
+  .fsmaplink{position:absolute;bottom:14px;right:20px;background:var(--core);color:var(--onaccent);border:none;
+    border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+    box-shadow:0 4px 14px rgba(0,0,0,.4)}
+  .fsmaplink:hover{filter:brightness(1.08)}
+  .bfybox{max-width:1040px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .bfybox svg{width:100%;height:auto;display:block}
+  .bfyacts{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .bfyacts .gomap{margin-top:0;text-decoration:none}
+  .agh{font-size:13px;letter-spacing:1.2px;text-transform:uppercase;color:var(--core);font-weight:700;margin:36px 0 14px}
+  #view-agenda .scard .gomap{margin-top:14px}
+  @media(max-width:760px){.qbody{grid-template-columns:1fr;gap:14px}.introcard{padding:26px 22px}
+    .apswrap{padding:16px 14px}.apsnav{width:36px;height:36px;font-size:18px}}
+  @media(max-width:760px){
+    .grid4{grid-template-columns:1fr}.scroller{padding:34px 22px 80px}
+    header{gap:10px;padding:0 12px}
+    nav{flex:1;margin-left:0}
+    nav button{padding:8px 11px;font-size:12.5px}
+    .searchbox{display:none}.vbadge{display:none}.spacer{display:none}
+    #panel{width:100%}.brand small{display:none}
+  }
+
+  body{height:100%}
+  header{padding-top:env(safe-area-inset-top,0px)}
+  button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--core);outline-offset:2px}
+  .scroller .sub b{color:var(--ink)}
+  .vbadge,.tlcard .who,.pauthor{font-variant-numeric:tabular-nums}
+  /* fases da linha do tempo */
+  .tlphase{position:relative;padding:6px 0 22px 130px;max-width:880px}
+  .tlphase h2{margin:10px 0 4px;font-size:13px;letter-spacing:1.4px;text-transform:uppercase;color:var(--core);font-weight:700}
+  .tlphase p{margin:0;font-size:14px;line-height:1.55;color:var(--muted);max-width:640px}
+  .tlphase::before{content:"";position:absolute;left:83px;top:12px;width:12px;height:12px;background:var(--core);transform:rotate(45deg)}
+  /* slides em HTML */
+  .slide{container-type:inline-size;aspect-ratio:16/9;width:min(100%, calc((100vh - 330px) * 16 / 9));max-width:100%;
+    background:#0b1224;border:1px solid var(--line);border-radius:10px;padding:5.5cqw 7cqw;color:var(--ink);cursor:pointer;
+    display:flex;flex-direction:column;justify-content:center;gap:2.2cqw;overflow:hidden;text-align:left}
+  .apsstage .slide{min-width:0}
+  .slide .eyebrow{font-family:var(--f-data);font-size:1.7cqw;letter-spacing:.14em;text-transform:uppercase;color:var(--core)}
+  .slide h2{margin:0;font-size:5cqw;line-height:1.08;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+  .slide p,.slide li{font-size:2.35cqw;line-height:1.45;color:var(--body)}
+  .slide ul,.slide ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:.9cqw}
+  .slide b{color:var(--core);font-weight:600}
+  .slide .big{font-size:3cqw;line-height:1.35;color:var(--ink);max-width:80%;margin:0}
+  .slide .note{font-size:1.9cqw;color:var(--muted);margin:0}
+  .slide .formula{font-family:var(--f-data);font-size:3.4cqw;color:var(--core);border:2px solid var(--core);border-radius:8px;padding:1.2cqw 2.2cqw;align-self:flex-start}
+  .slide .cols2,.slide .cols3{display:grid;gap:2.2cqw}
+  .slide .cols2{grid-template-columns:1fr 1fr}.slide .cols3{grid-template-columns:repeat(3,1fr)}
+  .slide .cols2>div,.slide .cols3>div{border-top:3px solid var(--core);padding-top:1.4cqw}
+  .slide h3{margin:0 0 .8cqw;font-size:2.6cqw;color:var(--ink)}
+  .slide .cols2 p,.slide .cols3 p{margin:0;font-size:2.1cqw}
+  .slide .phases{display:grid;grid-template-columns:repeat(5,1fr);gap:1.4cqw}
+  .slide .phases div{border-left:3px solid var(--core);padding:.6cqw 0 .6cqw 1.4cqw;display:flex;flex-direction:column;gap:.5cqw}
+  .slide .phases b{font-family:var(--f-data);font-size:3.6cqw;color:var(--core)}
+  .slide .phases span{font-size:2.1cqw;font-weight:600}
+  .slide .phases em{font-style:normal;font-family:var(--f-data);font-size:1.7cqw;color:var(--muted)}
+  .slide .sl-cover{display:flex;flex-direction:column;gap:2.4cqw}
+  .slide .sl-cover h2{font-size:7.4cqw;color:var(--core)}
+  .slide .sl-foot{font-family:var(--f-data);font-size:1.8cqw;color:var(--muted)}
+  .fswrap .fsslide{width:min(94vw, calc(94vh * 16 / 9));border-radius:0;cursor:default}
+  .apsthumb{display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:150px;height:auto;min-height:58px;padding:7px 9px;
+    background:var(--panel);color:var(--body);font:500 11.5px/1.3 var(--f-ui);text-align:left;border:2px solid var(--line)}
+  .apsthumb b{font-family:var(--f-data);color:var(--core);font-size:12px}
+  .apsthumb span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .apsthumb.active{border-color:var(--core)}
+  .refrow a{color:var(--core)}
+  .bfybox{overflow-x:auto}
+  .bfybox svg{min-width:680px}
+  @media(max-width:760px){.slide{width:100%}.slide .cols3,.slide .phases{grid-template-columns:1fr 1fr}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style id="disc-back-css">
+.disc-back{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-right:12px;padding:6px 11px;border-radius:6px;
+background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui,sans-serif;text-decoration:none!important;white-space:nowrap;letter-spacing:0;text-transform:none}
+.disc-back:hover{background:#fff}.disc-back:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.disc-back .bk{font-weight:500;opacity:.85}
+@media(max-width:560px){.disc-back .bk{display:none}header .header-meta{display:none}header .header-title{font-size:.95rem;line-height:1.2}}
+@media print{.disc-back{display:none}}
+</style>
+<style id="mobile-patch">
+@media (max-width:700px){
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+  th{font-size:12px!important} td{font-size:14px!important;line-height:1.5}
+  .tab-btn{font-size:14px!important;min-height:44px}
+}
+@media (max-width:760px){
+  header{height:auto!important;flex-wrap:wrap;padding:8px 10px 0!important;gap:8px 10px!important}
+  header .brand{flex:1;min-width:0}
+  header nav{order:10;flex:1 0 100%!important;margin:0 -10px!important;padding:0 10px 8px;border-top:1px solid var(--line);padding-top:8px}
+  header nav button{padding:9px 12px!important;font-size:13.5px!important;min-height:40px}
+  .helpbtn{min-width:40px;min-height:40px}
+  .view{inset:var(--hh,108px) 0 0 0!important}
+  #panel{top:var(--hh,108px)!important}
+  .legend{top:10px!important;left:10px!important;padding:8px 12px!important;max-width:72vw!important}
+  .legend h4{cursor:pointer;margin:0!important;font-size:12px!important}
+  .legend h4::after{content:" ▾";text-transform:none}
+  .legend.open h4{margin-bottom:8px!important}
+  .legend.open h4::after{content:" ▴"}
+  .legend:not(.open) #legendItems{display:none}
+  .legend .item{font-size:14px!important;padding:7px 6px!important}
+  .hint{display:none!important}
+  .pdesc,.pblock li{font-size:15.5px!important}
+  .pbody{padding:22px 18px 40px!important}
+  .pclose{width:40px!important;height:40px!important}
+}
+
+@media (max-width:760px){
+  .apsstage{padding-bottom:52px!important}
+  .apsnav{top:auto!important;bottom:8px!important;transform:none!important}
+  .apsprev{left:calc(50% - 88px)!important}
+  .apsnext{right:calc(50% - 88px)!important}
+  .apscounter{bottom:14px!important}
+}
+</style>
+</head>
+<body>
+<header>
+<a class="disc-back" href="../index.html" title="Voltar à página da disciplina">‹ Disciplina<span class="bk"> · Sessão 7</span></a>
+  <div class="brand"><span class="dot"></span><div>Compras Estratégicas<small>Sessão 7 · Poder, portfólio e alavancas</small></div></div>
+  <span class="vbadge">v1 · out 2026</span>
+  <nav id="nav">
+    <button data-view="apresentacao" class="active">Apresentação</button>
+    <button data-view="map">Mapa Conceitual</button>
+    <button data-view="diagrama">Diagrama</button>
+    <button data-view="timeline">Linha do Tempo</button>
+    <button data-view="cases">Casos Práticos</button>
+    <button data-view="quadro">Quadro Teórico</button>
+    <button data-view="agenda">Agenda</button>
+    <button data-view="refs">Referências</button>
+  </nav>
+  <div class="spacer"></div>
+  <button id="helpBtn" class="helpbtn" title="Como usar / comece aqui">?</button>
+  <div class="searchbox">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search" placeholder="Buscar conceito ou autor…" autocomplete="off">
+  </div>
+</header>
+
+<!-- ============ MAP ============ -->
+<section class="view" id="view-map">
+  <svg id="stage"></svg>
+  <div class="legend">
+    <h4>Categorias <span style="font-weight:500;text-transform:none;letter-spacing:0">(clique p/ filtrar)</span></h4>
+    <div id="legendItems"></div>
+  </div>
+  <div class="hint">Clique num nó para detalhes · arraste para reorganizar · roda do mouse para zoom</div>
+  <div class="ctrls" id="ctrls">
+    <button id="zin" title="Aproximar">+</button>
+    <button id="zout" title="Afastar">−</button>
+    <button id="zfit" title="Centralizar" style="font-size:14px">⤢</button>
+  </div>
+</section>
+
+<!-- ============ APRESENTAÇÃO ============ -->
+<section class="view active" id="view-apresentacao">
+  <div class="apswrap">
+    <div class="apstop">
+      <div><h1>Apresentação da Aula</h1><div class="apssub">Compras estratégicas: onde está o poder na relação com o fornecedor, e o que fazer com ele · Prof. Dr. Thiago Lima</div></div>
+      <div class="apsactions">
+        <button class="apsbtn" id="apsFull">⛶ Tela cheia</button>
+      </div>
+    </div>
+    <div class="apsstage">
+      <button class="apsnav apsprev" id="apsPrev" aria-label="anterior">‹</button>
+      <div class="slide" id="apsSlide"></div>
+      <button class="apsnav apsnext" id="apsNext" aria-label="próximo">›</button>
+      <div class="apscounter" id="apsCounter"></div>
+      <button class="apsmaplink" id="apsMapLink">⊕ Explorar no mapa →</button>
+    </div>
+    <div class="apsmeta">
+      <span class="t" id="apsTitle"></span>
+      <span class="apschips" id="apsChips"></span>
+    </div>
+    <div class="apsthumbs" id="apsThumbs"></div>
+  </div>
+</section>
+
+<!-- ============ DIAGRAMA ============ -->
+<section class="view" id="view-diagrama">
+  <div class="scroller">
+<h1>Kraljic e o Purchasing Chessboard</h1>
+    <p class="sub">A imagem-síntese de compras estratégicas. À esquerda, a <b>matriz de Kraljic</b> posiciona a categoria pelo impacto no resultado e pelo risco de suprimento; cada quadrante tem um objetivo e uma alavanca principal. À direita, o <b>Purchasing Chessboard</b> diagnostica o poder de demanda do comprador e o poder de oferta do fornecedor e aponta uma de quatro estratégias. A mesma categoria passa pelas duas leituras: o que ela exige e o que o poder permite. A cor indica a correspondência aproximada entre quadrante e estratégia.</p>
+    <div class="bfybox">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 700" font-family="'IBM Plex Sans',Arial,Helvetica,sans-serif" role="img" aria-label="Matriz de Kraljic ao lado dos eixos do Purchasing Chessboard">
+        <rect width="1180" height="700" fill="#0a1020"/>
+        <defs><marker id="compras-arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e8eef8"/></marker></defs>
+        <text x="110" y="42" fill="#facc15" font-size="20" font-weight="700">MATRIZ DE KRALJIC<tspan fill="#e8eef8" font-size="15" font-weight="400">  ·  o que a categoria exige</tspan></text>
+        <text x="690" y="42" fill="#facc15" font-size="20" font-weight="700">PURCHASING CHESSBOARD<tspan fill="#e8eef8" font-size="15" font-weight="400">  ·  o que o poder permite</tspan></text>
+        <rect x="114" y="74" width="217" height="202" rx="10" fill="#121c33" stroke="#4ade80" stroke-width="2.5"/>
+        <text x="222.5" y="110" text-anchor="middle" fill="#4ade80" font-size="18" font-weight="700">ALAVANCAGEM</text>
+        <text x="222.5" y="150" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="700" letter-spacing="1">OBJETIVO</text>
+        <text x="222.5" y="172" text-anchor="middle" fill="#e8eef8" font-size="14.5">reduzir o custo total</text>
+        <text x="222.5" y="207" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="700" letter-spacing="1">ALAVANCA</text>
+        <text x="222.5" y="229" text-anchor="middle" fill="#e8eef8" font-size="14.5">concorrência, licitação,</text>
+        <text x="222.5" y="250" text-anchor="middle" fill="#e8eef8" font-size="14.5">agregação de volume</text>
+        <rect x="339" y="74" width="217" height="202" rx="10" fill="#121c33" stroke="#facc15" stroke-width="2.5"/>
+        <text x="447.5" y="110" text-anchor="middle" fill="#facc15" font-size="18" font-weight="700">ESTRATÉGICO</text>
+        <text x="447.5" y="150" text-anchor="middle" fill="#facc15" font-size="13" font-weight="700" letter-spacing="1">OBJETIVO</text>
+        <text x="447.5" y="172" text-anchor="middle" fill="#e8eef8" font-size="14.5">valor e continuidade</text>
+        <text x="447.5" y="207" text-anchor="middle" fill="#facc15" font-size="13" font-weight="700" letter-spacing="1">ALAVANCA</text>
+        <text x="447.5" y="229" text-anchor="middle" fill="#e8eef8" font-size="14.5">parceria, desenvolvimento</text>
+        <text x="447.5" y="250" text-anchor="middle" fill="#e8eef8" font-size="14.5">conjunto, contrato longo</text>
+        <rect x="114" y="284" width="217" height="202" rx="10" fill="#121c33" stroke="#67e8f9" stroke-width="2.5"/>
+        <text x="222.5" y="320" text-anchor="middle" fill="#67e8f9" font-size="18" font-weight="700">NÃO CRÍTICO</text>
+        <text x="222.5" y="360" text-anchor="middle" fill="#67e8f9" font-size="13" font-weight="700" letter-spacing="1">OBJETIVO</text>
+        <text x="222.5" y="382" text-anchor="middle" fill="#e8eef8" font-size="14.5">eficiência do processo</text>
+        <text x="222.5" y="417" text-anchor="middle" fill="#67e8f9" font-size="13" font-weight="700" letter-spacing="1">ALAVANCA</text>
+        <text x="222.5" y="439" text-anchor="middle" fill="#e8eef8" font-size="14.5">padronizar, consolidar,</text>
+        <text x="222.5" y="460" text-anchor="middle" fill="#e8eef8" font-size="14.5">automatizar o pedido</text>
+        <rect x="339" y="284" width="217" height="202" rx="10" fill="#121c33" stroke="#f87171" stroke-width="2.5"/>
+        <text x="447.5" y="320" text-anchor="middle" fill="#f87171" font-size="18" font-weight="700">GARGALO</text>
+        <text x="447.5" y="360" text-anchor="middle" fill="#f87171" font-size="13" font-weight="700" letter-spacing="1">OBJETIVO</text>
+        <text x="447.5" y="382" text-anchor="middle" fill="#e8eef8" font-size="14.5">garantir o suprimento</text>
+        <text x="447.5" y="417" text-anchor="middle" fill="#f87171" font-size="13" font-weight="700" letter-spacing="1">ALAVANCA</text>
+        <text x="447.5" y="439" text-anchor="middle" fill="#e8eef8" font-size="14.5">estoque, fonte alternativa,</text>
+        <text x="447.5" y="460" text-anchor="middle" fill="#e8eef8" font-size="14.5">reespecificar</text>
+        <rect x="694" y="74" width="217" height="202" rx="10" fill="#121c33" stroke="#f87171" stroke-width="2.5"/>
+        <text x="802.5" y="110" text-anchor="middle" fill="#f87171" font-size="18" font-weight="700">MUDAR A NATUREZA</text>
+        <text x="802.5" y="132" text-anchor="middle" fill="#f87171" font-size="18" font-weight="700">DA DEMANDA</text>
+        <text x="802.5" y="162" text-anchor="middle" fill="#f87171" font-size="13" font-weight="700" letter-spacing="1">ALAVANCAS</text>
+        <text x="802.5" y="184" text-anchor="middle" fill="#e8eef8" font-size="14.5">reespecificação, inovação,</text>
+        <text x="802.5" y="205" text-anchor="middle" fill="#e8eef8" font-size="14.5">data mining técnico,</text>
+        <text x="802.5" y="226" text-anchor="middle" fill="#e8eef8" font-size="14.5">gestão de risco</text>
+        <rect x="919" y="74" width="217" height="202" rx="10" fill="#121c33" stroke="#facc15" stroke-width="2.5"/>
+        <text x="1027.5" y="110" text-anchor="middle" fill="#facc15" font-size="18" font-weight="700">BUSCAR VANTAGEM</text>
+        <text x="1027.5" y="132" text-anchor="middle" fill="#facc15" font-size="18" font-weight="700">CONJUNTA</text>
+        <text x="1027.5" y="162" text-anchor="middle" fill="#facc15" font-size="13" font-weight="700" letter-spacing="1">ALAVANCAS</text>
+        <text x="1027.5" y="184" text-anchor="middle" fill="#e8eef8" font-size="14.5">parcerias de custo e valor,</text>
+        <text x="1027.5" y="205" text-anchor="middle" fill="#e8eef8" font-size="14.5">planejamento integrado,</text>
+        <text x="1027.5" y="226" text-anchor="middle" fill="#e8eef8" font-size="14.5">cadeia de valor</text>
+        <rect x="694" y="284" width="217" height="202" rx="10" fill="#121c33" stroke="#67e8f9" stroke-width="2.5"/>
+        <text x="802.5" y="320" text-anchor="middle" fill="#67e8f9" font-size="18" font-weight="700">GERIR O GASTO</text>
+        <text x="802.5" y="360" text-anchor="middle" fill="#67e8f9" font-size="13" font-weight="700" letter-spacing="1">ALAVANCAS</text>
+        <text x="802.5" y="382" text-anchor="middle" fill="#e8eef8" font-size="14.5">gestão da demanda,</text>
+        <text x="802.5" y="403" text-anchor="middle" fill="#e8eef8" font-size="14.5">co-sourcing, agregação</text>
+        <text x="802.5" y="424" text-anchor="middle" fill="#e8eef8" font-size="14.5">de volume, data mining</text>
+        <text x="802.5" y="445" text-anchor="middle" fill="#e8eef8" font-size="14.5">comercial</text>
+        <rect x="919" y="284" width="217" height="202" rx="10" fill="#121c33" stroke="#4ade80" stroke-width="2.5"/>
+        <text x="1027.5" y="320" text-anchor="middle" fill="#4ade80" font-size="18" font-weight="700">EXPLORAR A</text>
+        <text x="1027.5" y="342" text-anchor="middle" fill="#4ade80" font-size="18" font-weight="700">CONCORRÊNCIA</text>
+        <text x="1027.5" y="372" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="700" letter-spacing="1">ALAVANCAS</text>
+        <text x="1027.5" y="394" text-anchor="middle" fill="#e8eef8" font-size="14.5">licitação, globalização,</text>
+        <text x="1027.5" y="415" text-anchor="middle" fill="#e8eef8" font-size="14.5">target pricing, revisão</text>
+        <text x="1027.5" y="436" text-anchor="middle" fill="#e8eef8" font-size="14.5">de preço do fornecedor</text>
+        <line x1="95" y1="492" x2="95" y2="74" stroke="#e8eef8" stroke-width="2.4" marker-end="url(#compras-arw)"/>
+        <text x="76" y="281" text-anchor="middle" transform="rotate(-90 76 281)" fill="#e8eef8" font-size="14" font-weight="700" letter-spacing="1">IMPACTO NO RESULTADO</text>
+        <line x1="675" y1="492" x2="675" y2="74" stroke="#e8eef8" stroke-width="2.4" marker-end="url(#compras-arw)"/>
+        <text x="656" y="281" text-anchor="middle" transform="rotate(-90 656 281)" fill="#e8eef8" font-size="14" font-weight="700" letter-spacing="1">PODER DE OFERTA (FORNECEDOR)</text>
+        <line x1="98" y1="502" x2="556" y2="502" stroke="#e8eef8" stroke-width="2.4" marker-end="url(#compras-arw)"/>
+        <text x="335" y="528" text-anchor="middle" fill="#e8eef8" font-size="14" font-weight="700" letter-spacing="1">RISCO E COMPLEXIDADE DE SUPRIMENTO</text>
+        <text x="114" y="528" fill="#e8eef8" font-size="13">baixo</text>
+        <text x="556" y="528" text-anchor="end" fill="#e8eef8" font-size="13">alto</text>
+        <line x1="678" y1="502" x2="1136" y2="502" stroke="#e8eef8" stroke-width="2.4" marker-end="url(#compras-arw)"/>
+        <text x="915" y="528" text-anchor="middle" fill="#e8eef8" font-size="14" font-weight="700" letter-spacing="1">PODER DE DEMANDA (COMPRADOR)</text>
+        <text x="694" y="528" fill="#e8eef8" font-size="13">baixo</text>
+        <text x="1136" y="528" text-anchor="end" fill="#e8eef8" font-size="13">alto</text>
+        <line x1="60" y1="552" x2="1120" y2="552" stroke="#3a4a70" stroke-width="1.5"/>
+        <text x="60" y="584" fill="#e8eef8" font-size="17" font-weight="700">A cor liga as duas leituras da mesma categoria <tspan font-weight="400" font-size="14">(correspondência aproximada)</tspan></text>
+        <rect x="60" y="601" width="16" height="16" rx="3" fill="#67e8f9"/>
+        <text x="86" y="614" fill="#67e8f9" font-size="15" font-weight="700">Não crítico<tspan fill="#e8eef8" font-weight="400">  →  gerir o gasto</tspan></text>
+        <rect x="600" y="601" width="16" height="16" rx="3" fill="#4ade80"/>
+        <text x="626" y="614" fill="#4ade80" font-size="15" font-weight="700">Alavancagem<tspan fill="#e8eef8" font-weight="400">  →  explorar a concorrência</tspan></text>
+        <rect x="60" y="631" width="16" height="16" rx="3" fill="#f87171"/>
+        <text x="86" y="644" fill="#f87171" font-size="15" font-weight="700">Gargalo<tspan fill="#e8eef8" font-weight="400">  →  mudar a natureza da demanda</tspan></text>
+        <rect x="600" y="631" width="16" height="16" rx="3" fill="#facc15"/>
+        <text x="626" y="644" fill="#facc15" font-size="15" font-weight="700">Estratégico<tspan fill="#e8eef8" font-weight="400">  →  vantagem conjunta, se houver interdependência</tspan></text>
+        <text x="60" y="682" fill="#e8eef8" font-size="14">Kraljic diz o que a categoria exige; o Chessboard, o que o poder permite. Se divergem, revise a estratégia.</text>
+      </svg>
+    </div>
+    <div class="bfyacts">
+      <button class="gomap" data-go="kraljicM">Ver a Matriz de Kraljic no mapa →</button>
+      <button class="gomap" data-go="chess">Ver o Purchasing Chessboard no mapa →</button>
+      <button class="gomap" data-go="poder">Ver Poder e dependência no mapa →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AGENDA ============ -->
+<section class="view" id="view-agenda">
+  <div class="scroller">
+<h1>Agenda de Pesquisa</h1>
+    <p class="sub">A matriz de Kraljic e seus sucessores são muito usados na prática, mas a pesquisa segue discutindo como medir os eixos, como tratar a rede de fornecedores e como ligar poder, risco e desempenho. <em>Dubois &amp; Pedersen (2002); Gelderman &amp; van Weele (2003); Caniëls &amp; Gelderman (2005, 2007); Manuj &amp; Mentzer (2008).</em></p>
+    <h3 class="agh">Cinco lacunas da literatura</h3>
+    <div class="grid4">
+      <div class="scard"><h3>Portfólio além da díade</h3><p><b>Evidência:</b> os portfólios avaliam cada categoria e cada fornecedor isoladamente. <b>Oportunidade:</b> incorporar efeitos de rede e interdependência entre categorias sem perder a simplicidade da matriz.</p></div>
+      <div class="scard"><h3>Medição e dinâmica dos quadrantes</h3><p><b>Evidência:</b> os eixos de Kraljic são medidos de formas diferentes entre empresas e estudos. <b>Oportunidade:</b> escalas comparáveis e estudo de como e por que as categorias mudam de quadrante.</p></div>
+      <div class="scard"><h3>Poder e desempenho</h3><p><b>Evidência:</b> a literatura descreve configurações de poder, mas liga menos cada uma a resultados. <b>Oportunidade:</b> testar quando usar o poder gera ganho duradouro e quando destrói valor da relação.</p></div>
+      <div class="scard"><h3>Risco integrado à seleção</h3><p><b>Evidência:</b> seleção de fornecedores e gestão de risco costumam ser tratadas em separado. <b>Oportunidade:</b> modelos que tratem lead time e continuidade como restrições, e não só como pesos.</p></div>
+      <div class="scard"><h3>Dados e decisão em compras</h3><p><b>Evidência:</b> plataformas registram categorias, riscos e estratégias, mas o uso desses dados para decidir ainda é pouco estudado. <b>Oportunidade:</b> analisar a qualidade das decisões apoiadas por plataformas e por inteligência artificial.</p></div>
+    </div>
+    <h3 class="agh">Três debates de fronteira</h3>
+    <div class="grid4">
+      <div class="scard"><h3 style="color:var(--lacuna)">Kraljic ainda serve?</h3><p>A matriz é simples e ensinável, mas trata relações como díades isoladas. Os críticos pedem uma leitura de rede; os defensores respondem que a simplicidade é o valor da ferramenta.</p><button class="gomap" data-go="rede">Ver no mapa →</button></div>
+      <div class="scard"><h3 style="color:var(--lacuna)">Pressão ou parceria?</h3><p>A GM do início dos anos 1990 e a Toyota e a Honda descritas por Liker e Choi usaram o poder de formas opostas. O que cada escolha custou e rendeu no longo prazo?</p><button class="gomap" data-go="pressaopreco">Ver no mapa →</button></div>
+      <div class="scard"><h3 style="color:var(--lacuna)">Fonte única ou múltipla?</h3><p>A fonte única concentra volume e aprofunda a relação; também concentra o risco. Aisin, Ericsson e a escassez de chips de 2021 mostram desfechos diferentes para a mesma escolha.</p><button class="gomap" data-go="fonteunica">Ver no mapa →</button></div>
+    </div>
+    <h3 class="agh">Direções de tese · perguntas em aberto</h3>
+    <div class="qbox">
+      <div class="q"><span class="qn">?</span><p>Em que condições a estratégia recomendada pelo quadrante de Kraljic falha porque o poder real da empresa não a sustenta?</p></div>
+      <div class="q"><span class="qn">?</span><p>Como incorporar restrições de lead time e continuidade aos modelos multicritério de seleção sem que a pontuação esconda o risco?</p></div>
+      <div class="q"><span class="qn">?</span><p>O desenvolvimento de fornecedores gera retorno mensurável para o comprador em cadeias brasileiras, e em quais categorias?</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TIMELINE ============ -->
+<section class="view" id="view-timeline">
+  <div class="scroller">
+    <h1>Encadeamento Teórico do Campo</h1>
+    <p class="sub">De Emerson (1962) às plataformas de análise de categorias (2026). O campo atravessa cinco fases: teorias de base, entrada de compras na estratégia, revisão do portfólio pela lente do poder, risco global e alavancas, e resiliência. Cada fase responde a um problema deixado pela anterior.</p>
+    <div class="tl" id="tl"></div>
+  </div>
+</section>
+
+<!-- ============ QUADRO TEÓRICO ============ -->
+<section class="view" id="view-quadro">
+  <div class="scroller">
+    <h1>Quadro Teórico · do autor à prática</h1>
+    <p class="sub">Os trabalhos que sustentam compras estratégicas, lidos da teoria à prática. Cada linha conecta o autor ao conceito-chave, à sua principal contribuição e à prática que dela deriva. A cor do conceito segue a legenda do mapa; use “ver no mapa” para localizá-lo na rede.</p>
+    <div class="qtable" id="quadroRows"></div>
+  </div>
+</section>
+
+<!-- ============ CASES ============ -->
+<section class="view" id="view-cases">
+  <div class="scroller">
+    <h1>Casos Práticos · da teoria à prática</h1>
+    <p class="sub">Cada caso real conecta uma decisão de compras à lente teórica que a explica. O caso da sessão, Whirlpool China, abre a lista; os casos de ruptura (Ericsson, semicondutores) são tão instrutivos quanto os de parceria. Use “ver no mapa” para abrir o nó relacionado.</p>
+    <div class="cases" id="caseList"></div>
+  </div>
+</section>
+
+<!-- ============ REFERENCES ============ -->
+<section class="view" id="view-refs">
+  <div class="scroller">
+    <h1>Referências Citadas</h1>
+    <p class="sub"><span id="refCount"></span> obras citadas ou recomendadas para a aula, em APA 7. Quando disponível, clique no link para abrir a fonte original.
+      <input class="reffilter" id="refFilter" placeholder="filtrar por autor, título…" autocomplete="off"></p>
+    <div id="refGroups"></div>
+  </div>
+</section>
+
+<!-- ============ INTRO / COMO USAR ============ -->
+<div class="introwrap" id="intro">
+  <div class="introcard">
+    <button class="introx" id="introClose">✕</button>
+    <div class="introcredit">Material produzido por Prof. Dr. Thiago Lima</div>
+    <div class="ptag">Comece por aqui · como usar</div>
+    <h2>O que são compras estratégicas?</h2>
+    <p class="lead">Boa parte do custo e do risco de uma empresa está fora dela, nos fornecedores. <b>Compras estratégicas</b> é a gestão desse suprimento: classificar as categorias pelo que pesam e pelo risco que trazem, diagnosticar quem tem poder na relação e escolher a alavanca certa para cada caso, da licitação à parceria. Este app organiza o tema nas seguintes áreas:</p>
+    <div class="introsteps">
+      <div class="s"><span class="sw" style="background:var(--core)"></span><div><b>Mapa Conceitual</b> · clique nas bolinhas para abrir cada conceito com sua explicação, o autor de referência e as conexões. Cada conceito leva ao slide correspondente.</div></div>
+      <div class="s"><span class="sw" style="background:var(--pratica)"></span><div><b>Apresentação</b> · os slides da aula, navegáveis e em tela cheia; clique no slide para saltar ao conceito no mapa.</div></div>
+      <div class="s"><span class="sw" style="background:var(--tec)"></span><div><b>Diagrama</b> · a matriz de Kraljic e o Purchasing Chessboard, lado a lado.</div></div>
+      <div class="s"><span class="sw" style="background:var(--autor)"></span><div><b>Linha do Tempo</b> · como o campo se formou em cinco fases, de Emerson (1962) às plataformas de 2026.</div></div>
+      <div class="s"><span class="sw" style="background:var(--teoria)"></span><div><b>Quadro Teórico</b> · autor → paper → conceito-chave → contribuição → prática.</div></div>
+      <div class="s"><span class="sw" style="background:var(--barreira)"></span><div><b>Casos Práticos</b> · Whirlpool China, Toyota e Honda, Aisin, Ericsson, GM, semicondutores e Apple, ligados de volta à teoria.</div></div>
+      <div class="s"><span class="sw" style="background:var(--lacuna)"></span><div><b>Agenda</b> · lacunas, debates de fronteira e direções de tese.</div></div>
+      <div class="s"><span class="sw" style="background:var(--muted)"></span><div><b>Referências</b> · todas as obras citadas em APA 7, com DOI clicável.</div></div>
+    </div>
+    <button class="introgo" id="introGo">Começar a explorar →</button>
+  </div>
+</div>
+
+<!-- ============ TELA CHEIA ============ -->
+<div class="fswrap" id="fs">
+  <button class="fsx" id="fsClose" aria-label="fechar">✕</button>
+  <button class="fsnav fsprev" id="fsPrev" aria-label="anterior">‹</button>
+  <div class="slide fsslide" id="fsSlide"></div>
+  <button class="fsnav fsnext" id="fsNext" aria-label="próximo">›</button>
+  <div class="fscounter" id="fsCounter"></div>
+  <button class="fsmaplink" id="fsMapLink">⊕ Explorar no mapa →</button>
+</div>
+
+<!-- ============ DETAIL PANEL ============ -->
+<aside id="panel">
+  <button class="pclose" id="pclose">✕</button>
+  <div class="pbody" id="pbody"></div>
+</aside>
+
+<script>
+/* ====================== DATA ====================== */
+const CAT = {
+  core:    {name:"Núcleo conceitual",      color:"#facc15"},
+  teoria:  {name:"Lentes teóricas",        color:"#c4b5fd"},
+  autor:   {name:"Autores principais",     color:"#fdba74"},
+  pratica: {name:"Estratégias & práticas", color:"#4ade80"},
+  tec:     {name:"Plataforma & dados",     color:"#67e8f9"},
+  barreira:{name:"Riscos & tensões",       color:"#f87171"},
+  lacuna:  {name:"Lacunas & agenda",       color:"#f0abfc"},
+};
+const SHORT = {
+  "Poder e dependência na díade":"Poder e dependência",
+  "Custo total de propriedade (TCO)":"Custo total (TCO)",
+  "Modelo VCAP · V = C × (A + P)":"Modelo VCAP",
+  "Economia dos custos de transação":"Custos de transação",
+  "Cinco forças · poder de barganha":"Cinco forças",
+  "Gestão de riscos da cadeia global":"Riscos da cadeia",
+  "Seleção e avaliação de fornecedores":"Seleção e avaliação",
+  "Desenvolvimento de fornecedores":"Desenv. fornecedores",
+  "Explorar a concorrência entre fornecedores":"Concorrência",
+  "Mudar a natureza da demanda":"Mudar a demanda",
+  "Buscar vantagem conjunta":"Vantagem conjunta",
+  "Gestão do relacionamento com fornecedores (SRM)":"SRM",
+  "Plataforma Gestão e Contratação de Fornecedores Estratégicos":"Plataforma do curso",
+  "Matriz probabilidade × impacto":"Prob. × impacto",
+  "Análise de gastos e gestão da demanda":"Análise de gastos",
+  "Fonte única e itens-gargalo":"Fonte única",
+  "Pressão por preço e relação adversarial":"Pressão por preço",
+  "Pontuação × restrição de lead time":"Pontuação × lead time",
+  "Portfólio além da díade":"Além da díade",
+  "Gelderman & van Weele · 2003":"Gelderman · 2003",
+  "Caniëls & Gelderman · 2005":"Caniëls · 2005",
+  "Dubois & Pedersen · 2002":"Dubois · 2002",
+  "Manuj & Mentzer · 2008":"Manuj · 2008",
+  "Krause & Ellram · 1997":"Krause · 1997",
+  "Carr & Pearson · 1999":"Carr · 1999",
+};
+
+const NODES = [
+  // ---- núcleo
+  {id:"comp", label:"Compras Estratégicas", cat:"core", r:34, author:"Kraljic, 1983 · van Weele & Rozemeijer, 2022 · Monczka et al., 2021",
+   desc:"Compras deixa de ser a área que emite pedidos e passa a gerir o suprimento: decide o que comprar, de quem, sob que relação e com que alavanca. A pergunta que organiza a aula é onde está o poder na relação com o fornecedor e o que fazer com ele.",
+   bullets:["Unidade de análise: a categoria de compra e a díade comprador–fornecedor","Três diagnósticos: peso da categoria no resultado, risco do mercado fornecedor e poder relativo","Da escolha do diagnóstico sai a estratégia: concorrência, parceria, mudança da demanda ou gestão do gasto"]},
+  {id:"kraljicM", label:"Matriz de Kraljic", cat:"core", r:26, author:"Kraljic, 1983 · Gelderman & van Weele, 2003",
+   desc:"Portfólio de compras com dois eixos: impacto da categoria no resultado e risco ou complexidade do mercado fornecedor. Os quatro quadrantes pedem objetivos e alavancas diferentes, e o erro clássico é tratar tudo como alavancagem.",
+   bullets:["Alavancagem (impacto alto, risco baixo): explorar o poder de compra","Estratégico (impacto e risco altos): relação de longo prazo, equilibrar ou diversificar","Gargalo (risco alto, impacto baixo): garantir o suprimento","Não crítico (impacto e risco baixos): eficiência do processo"]},
+  {id:"poder", label:"Poder e dependência na díade", cat:"core", r:24, author:"Emerson, 1962 · Cox, 2001 · Caniëls & Gelderman, 2005",
+   desc:"O poder do comprador sobre o fornecedor é a dependência do fornecedor em relação ao comprador, e vice-versa. Poder é uma propriedade da relação, não da empresa: a mesma montadora pode dominar um fornecedor de peças simples e depender de um fabricante de chips.",
+   bullets:["Dominância do comprador · interdependência · independência · dominância do fornecedor (Cox, 2001)","Poder relativo e interdependência total variam por quadrante de Kraljic","Diagnosticar o poder antes de escolher a alavanca"]},
+  {id:"chess", label:"Purchasing Chessboard", cat:"core", r:24, author:"Schuh et al., 2009 (A.T. Kearney)",
+   desc:"Ferramenta que cruza poder de demanda (do comprador) e poder de oferta (do fornecedor) para chegar a quatro estratégias básicas, desdobradas em 16 alavancas e 64 métodos de redução de custo e aumento de valor.",
+   bullets:["Poder de demanda e de oferta baixos: gerir o gasto","Demanda alta, oferta baixa: explorar a concorrência entre fornecedores","Demanda baixa, oferta alta: mudar a natureza da demanda","Ambos altos: buscar vantagem conjunta com o fornecedor"]},
+  {id:"tco", label:"Custo total de propriedade (TCO)", cat:"core", r:20, author:"Ellram, 1995",
+   desc:"O preço é só uma parte do custo. O TCO soma os custos antes da transação (qualificação, desenvolvimento), durante (preço, pedido, frete) e depois (qualidade, falhas, manutenção, descarte). É a métrica que impede a alavancagem de virar economia aparente.",bullets:[]},
+  {id:"vcap", label:"Modelo VCAP · V = C × (A + P)", cat:"core", r:20, author:"Lima, 2026",
+   desc:"Valor = Capacidades × (Ativos + Processos). Fornecedores são fonte externa dos três termos: trazem ativos que a empresa não tem, processos que ela não domina e capacidades que multiplicam o resultado. Compras estratégicas decide quais desses recursos a empresa acessa e em que condições.",
+   bullets:["Fornecedor estratégico amplia A e P sem investimento próprio","C multiplica: sem capacidade de gerir fornecedores, ativo e processo externos não viram valor","Desenvolver fornecedores é investir em C na cadeia"]},
+  // ---- teoria
+  {id:"tct", label:"Economia dos custos de transação", cat:"teoria", r:21, author:"Williamson, 1979 · Williamson, 1985",
+   desc:"Comprar no mercado, fazer internamente ou criar uma forma híbrida? A resposta depende da especificidade dos ativos, da incerteza e da frequência das transações. Quanto mais específico o investimento, maior o risco de oportunismo e de hold-up.",
+   bullets:["Ativo específico prende as partes à relação","Contratos incompletos abrem espaço para renegociação oportunista","Governança híbrida: contratos de longo prazo, parcerias, participação acionária"]},
+  {id:"rdt", label:"Dependência de recursos", cat:"teoria", r:19, author:"Pfeffer & Salancik, 1978 · Emerson, 1962",
+   desc:"Organizações dependem de recursos que outras controlam e agem para reduzir ou administrar essa dependência: diversificam fontes, integram, fazem alianças. É a base teórica da leitura de poder na matriz de Kraljic.",bullets:[]},
+  {id:"cincoforcas", label:"Cinco forças · poder de barganha", cat:"teoria", r:19, author:"Porter, 1979 · Porter, 2008",
+   desc:"O poder de barganha dos fornecedores é uma das cinco forças que determinam a rentabilidade de um setor. Fornecedores são mais fortes quando são mais concentrados que os clientes, quando o custo de troca é alto, quando o insumo é diferenciado e quando podem integrar para frente.",bullets:[]},
+  {id:"relacional", label:"Visão relacional", cat:"teoria", r:21, author:"Dyer & Singh, 1998",
+   desc:"Vantagem competitiva também nasce entre empresas. Rendas relacionais vêm de ativos específicos da relação, rotinas de troca de conhecimento, recursos complementares e governança eficaz. O que para os custos de transação é risco de hold-up, aqui é fonte de valor.",
+   bullets:["Ativos específicos da relação","Rotinas de compartilhamento de conhecimento","Recursos e capacidades complementares","Governança que reduz custo de transação"]},
+  {id:"riscoglobal", label:"Gestão de riscos da cadeia global", cat:"teoria", r:21, author:"Manuj & Mentzer, 2008 · Tang, 2006",
+   desc:"Cadeias globais ampliam o risco de suprimento. Manuj e Mentzer (2008) organizam os riscos em tipos (suprimento, operação, demanda, segurança e riscos macro, de política, competitivos e de recursos) e propõem estratégias como postergação, especulação, hedge, controle ou compartilhamento, segurança e evitação.",bullets:[]},
+  // ---- autores
+  {id:"emerson", label:"Emerson · 1962", cat:"autor", r:16, author:"Relações de poder e dependência",
+   desc:"Define poder como função da dependência: o poder de A sobre B é igual à dependência de B em relação a A. Base de toda leitura de poder na díade comprador–fornecedor.",bullets:[]},
+  {id:"dickson", label:"Dickson · 1966", cat:"autor", r:16, author:"Critérios de seleção",
+   desc:"Pesquisa com compradores que identifica 23 critérios de seleção de fornecedores. Qualidade, entrega e histórico de desempenho aparecem à frente do preço.",bullets:[]},
+  {id:"williamson", label:"Williamson · 1979", cat:"autor", r:16, author:"Custos de transação",
+   desc:"Formula a governança das relações contratuais a partir da especificidade dos ativos, da incerteza e da frequência. Desenvolvido em The Economic Institutions of Capitalism (1985).",bullets:[]},
+  {id:"porter", label:"Porter · 1979", cat:"autor", r:16, author:"Cinco forças",
+   desc:"Apresenta as forças competitivas que moldam a estratégia, entre elas o poder de barganha de fornecedores. Revisitado pelo autor em 2008.",bullets:[]},
+  {id:"kraljic", label:"Kraljic · 1983", cat:"autor", r:18, author:"Purchasing must become supply management",
+   desc:"No artigo da Harvard Business Review, propõe que compras vire gestão de suprimentos em quatro etapas: classificar os itens, analisar o mercado fornecedor, posicionar a empresa em termos de poder e planejar ações (explorar, equilibrar ou diversificar).",bullets:[]},
+  {id:"ellram", label:"Ellram · 1995", cat:"autor", r:16, author:"Custo total de propriedade",
+   desc:"Sistematiza o TCO como abordagem de análise para compras e discute como as empresas o aplicam na seleção e avaliação de fornecedores.",bullets:[]},
+  {id:"krause", label:"Krause & Ellram · 1997", cat:"autor", r:16, author:"Desenvolvimento de fornecedores",
+   desc:"Estudam os fatores de sucesso do desenvolvimento de fornecedores: esforço do comprador, comunicação e envolvimento de equipes na melhoria do fornecedor.",bullets:[]},
+  {id:"dyer", label:"Dyer & Singh · 1998", cat:"autor", r:17, author:"Visão relacional",
+   desc:"Propõem a visão relacional: as fontes de vantagem competitiva podem estar nas rotinas e nos ativos compartilhados entre empresas, e não só dentro de cada uma.",bullets:[]},
+  {id:"bensaou", label:"Bensaou · 1999", cat:"autor", r:16, author:"Portfólio de relações",
+   desc:"Classifica relações comprador–fornecedor pelos investimentos específicos de cada lado: troca de mercado, comprador cativo, fornecedor cativo e parceria estratégica.",bullets:[]},
+  {id:"carr", label:"Carr & Pearson · 1999", cat:"autor", r:16, author:"Compras estratégicas e desempenho",
+   desc:"Mostram que compras gerida estrategicamente favorece relações de longo prazo com fornecedores, associadas a melhor desempenho financeiro do comprador.",bullets:[]},
+  {id:"cox", label:"Cox · 2001", cat:"autor", r:17, author:"Matriz de poder",
+   desc:"Propõe quatro configurações de poder na relação: dominância do comprador, interdependência, independência e dominância do fornecedor. Cada uma pede uma competência de compras diferente.",bullets:[]},
+  {id:"dubois", label:"Dubois & Pedersen · 2002", cat:"autor", r:16, author:"Crítica aos portfólios",
+   desc:"Argumentam que modelos de portfólio tratam cada relação isoladamente e ignoram as interdependências da rede de fornecedores.",bullets:[]},
+  {id:"gelderman", label:"Gelderman & van Weele · 2003", cat:"autor", r:16, author:"Medição e movimentos na matriz",
+   desc:"Discutem problemas de medição da matriz de Kraljic e as direções estratégicas possíveis: manter a posição ou mover a categoria para outro quadrante.",bullets:[]},
+  {id:"liker", label:"Liker & Choi · 2004", cat:"autor", r:17, author:"Relações profundas com fornecedores",
+   desc:"Descrevem como Toyota e Honda constroem relações exigentes e colaborativas com fornecedores norte-americanos, organizadas numa hierarquia de seis práticas.",bullets:[]},
+  {id:"chen", label:"Chen et al. · 2004", cat:"autor", r:16, author:"Compras estratégicas e vantagem",
+   desc:"Chen, Paulraj e Lado relacionam compras estratégicas, gestão da base de fornecedores e desempenho da empresa.",bullets:[]},
+  {id:"caniels", label:"Caniëls & Gelderman · 2005", cat:"autor", r:17, author:"Poder na matriz de Kraljic",
+   desc:"Associam cada quadrante de Kraljic a uma configuração de poder e dependência. Em 2007 ampliam a análise com poder relativo e interdependência total.",bullets:[]},
+  {id:"manuj", label:"Manuj & Mentzer · 2008", cat:"autor", r:17, author:"Riscos da cadeia global",
+   desc:"Dois artigos de 2008 sobre a gestão de riscos em cadeias globais: tipologia de riscos, processo de gestão e estratégias de mitigação.",bullets:[]},
+  {id:"schuh", label:"Schuh et al. · 2009", cat:"autor", r:17, author:"Purchasing Chessboard",
+   desc:"Schuh, Kromoser, Strohmer, Romero Pérez e Triplat, consultores da A.T. Kearney, publicam o Purchasing Chessboard: 4 estratégias, 16 alavancas e 64 métodos.",bullets:[]},
+  // ---- estratégias & práticas
+  {id:"selecao", label:"Seleção e avaliação de fornecedores", cat:"pratica", r:21, author:"Dickson, 1966 · Ellram, 1995",
+   desc:"Decidir de quem comprar com critérios múltiplos: qualidade, entrega, capacidade, custo total, risco. A escolha de pesos e de critérios eliminatórios define o resultado tanto quanto os dados.",
+   bullets:["Critério eliminatório (restrição) ≠ critério ponderado (nota)","Custo total, e não só preço","Revisar a avaliação ao longo do contrato"]},
+  {id:"desenv", label:"Desenvolvimento de fornecedores", cat:"pratica", r:21, author:"Krause & Ellram, 1997 · Liker & Choi, 2004 · Krause, Handfield & Tyler, 2007",
+   desc:"Investir na capacidade do fornecedor em vez de trocá-lo: treinamento, visitas técnicas, melhoria conjunta, metas compartilhadas. Faz sentido quando a relação é estratégica e a troca seria cara ou lenta.",
+   bullets:["Entender como o fornecedor trabalha","Transformar rivalidade entre fornecedores em oportunidade","Supervisionar e dar feedback","Desenvolver capacidade técnica compatível","Compartilhar informação de forma intensa e seletiva","Melhoria conjunta"]},
+  {id:"concorrencia", label:"Explorar a concorrência entre fornecedores", cat:"pratica", r:20, author:"Schuh et al., 2009 · Kraljic, 1983",
+   desc:"Estratégia para comprador com poder de demanda diante de mercado fornecedor competitivo: licitação, globalização da base, target pricing e revisão da formação de preço do fornecedor. Corresponde ao quadrante de alavancagem.",bullets:[]},
+  {id:"respec", label:"Mudar a natureza da demanda", cat:"pratica", r:20, author:"Schuh et al., 2009",
+   desc:"Quando o fornecedor tem o poder, negociar não resolve: é preciso mudar o que se compra. Reespecificação, inovação, análise técnica e gestão de risco reduzem a dependência de um fornecedor dominante.",bullets:[]},
+  {id:"parceria", label:"Buscar vantagem conjunta", cat:"pratica", r:21, author:"Schuh et al., 2009 · Dyer & Singh, 1998",
+   desc:"Com poder alto dos dois lados, o ganho vem de trabalhar junto: planejamento integrado de operações, gestão da cadeia de valor e parcerias de custo e de valor. É a leitura operacional do quadrante estratégico.",bullets:[]},
+  {id:"srm", label:"Gestão do relacionamento com fornecedores (SRM)", cat:"pratica", r:20, author:"Carr & Pearson, 1999 · Chen et al., 2004",
+   desc:"Processo contínuo de segmentar fornecedores, definir o tipo de relação por segmento, medir desempenho e revisar a relação. Dá continuidade ao que a matriz de Kraljic decide.",bullets:[]},
+  // ---- plataforma & dados
+  {id:"plataforma", label:"Plataforma Gestão e Contratação de Fornecedores Estratégicos", cat:"tec", r:22, author:"Lima, 2026",
+   desc:"Plataforma do professor usada na atividade da sessão. O grupo cadastra uma categoria real, avalia os riscos, posiciona a categoria na matriz de Kraljic, diagnostica o poder no Chessboard, escolhe estratégias e alavancas e gera o relatório.",
+   bullets:["1 · Cadastro da categoria","2 · Riscos: probabilidade × impacto, tipologia de Manuj & Mentzer","3 · Matriz de Kraljic","4 · Diagnóstico de poder no Chessboard","5 · Estratégias, alavancas e relatório"]},
+  {id:"matrizrisco", label:"Matriz probabilidade × impacto", cat:"tec", r:19, author:"Manuj & Mentzer, 2008",
+   desc:"Cada risco da categoria recebe uma estimativa de probabilidade e de impacto. O produto ordena as prioridades e alimenta o eixo de risco de suprimento da matriz de Kraljic.",bullets:[]},
+  {id:"spend", label:"Análise de gastos e gestão da demanda", cat:"tec", r:18, author:"Schuh et al., 2009",
+   desc:"Antes de negociar, saber quanto se gasta, com quem e em quê. Data mining comercial, agregação de volume e gestão da demanda formam a estratégia de gerir o gasto, para quando nenhum dos lados tem poder.",bullets:[]},
+  // ---- riscos & tensões
+  {id:"fonteunica", label:"Fonte única e itens-gargalo", cat:"barreira", r:21, author:"Kraljic, 1983 · Norrman & Jansson, 2004 · Sheffi, 2005",
+   desc:"Um item de baixo valor pode parar a operação se vier de uma única fonte. O quadrante gargalo exige garantir o suprimento: estoque de segurança, fonte alternativa, contratos de longo prazo ou reespecificação.",bullets:[]},
+  {id:"pressaopreco", label:"Pressão por preço e relação adversarial", cat:"barreira", r:20, author:"Cox, 2001 · Liker & Choi, 2004",
+   desc:"Usar o poder para extrair redução de preço rende no curto prazo, mas pode reduzir o investimento do fornecedor, a qualidade e a disposição de colaborar. O poder existe; a questão é o que se faz com ele.",bullets:[]},
+  {id:"scorelead", label:"Pontuação × restrição de lead time", cat:"barreira", r:20, author:"Caso Whirlpool China · Dickson, 1966",
+   desc:"A tensão do caso da sessão: o fornecedor com a melhor pontuação pode não atender ao lead time que a operação exige. Lead time é peso na nota ou restrição eliminatória? A resposta muda a escolha.",bullets:[]},
+  // ---- lacunas
+  {id:"lacunas", label:"Cinco Lacunas", cat:"lacuna", r:22, author:"Dubois & Pedersen, 2002 · Gelderman & van Weele, 2003 · Caniëls & Gelderman, 2007",
+   desc:"Os modelos de portfólio e de poder são muito usados na prática, mas a pesquisa ainda discute como medi-los, como tratar redes e como integrar risco e desempenho.",
+   bullets:["Portfólio além da díade","Medição e dinâmica dos quadrantes","Evidência sobre poder e desempenho","Risco integrado à seleção","Dados e decisão em compras"]},
+  {id:"rede", label:"Portfólio além da díade", cat:"lacuna", r:19, author:"Dubois & Pedersen, 2002",
+   desc:"A matriz trata cada categoria e cada fornecedor isoladamente. Na prática, fornecedores se conectam entre si e uma decisão numa categoria afeta outras. Como incorporar a rede sem perder a simplicidade da ferramenta?",bullets:[]},
+];
+
+const LINKS = [
+  ["comp","kraljicM","classifica por"],["comp","poder","decide com base em"],["comp","chess","escolhe alavanca com"],
+  ["comp","tco","mede por"],["comp","vcap","alimenta"],["comp","srm","gerencia por"],
+  ["comp","tct","sustentado por"],["comp","relacional","sustentado por"],["comp","riscoglobal","sustentado por"],["comp","selecao","opera por"],
+  ["kraljicM","kraljic","proposta por"],["kraljicM","poder","lida pela lente do"],["kraljicM","chess","complementada por"],
+  ["kraljicM","fonteunica","identifica"],["kraljicM","concorrencia","alavancagem pede"],["kraljicM","parceria","estratégico pede"],
+  ["kraljicM","gelderman","medida por"],["kraljicM","rede","criticada por"],
+  ["poder","emerson","fundado por"],["poder","rdt","sustentado por"],["poder","cincoforcas","sustentado por"],
+  ["poder","cox","tipificado por"],["poder","caniels","ligado a Kraljic por"],["poder","pressaopreco","mal usado gera"],
+  ["chess","schuh","proposto por"],["chess","concorrencia","estratégia"],["chess","respec","estratégia"],
+  ["chess","parceria","estratégia"],["chess","spend","estratégia"],
+  ["tco","ellram","formalizado por"],["tco","selecao","orienta"],
+  ["vcap","relacional","ecoa"],["vcap","desenv","amplia C por"],
+  ["tct","williamson","fundada por"],["tct","parceria","governança híbrida"],["tct","relacional","contraposta à"],
+  ["relacional","dyer","fundada por"],["relacional","bensaou","tipificada por"],["relacional","parceria","explica"],
+  ["cincoforcas","porter","fundada por"],
+  ["riscoglobal","manuj","tipificado por"],["riscoglobal","matrizrisco","operacionalizado em"],["riscoglobal","fonteunica","expõe"],
+  ["selecao","dickson","critérios de"],["selecao","scorelead","gera tensão"],
+  ["desenv","krause","estudado por"],["desenv","liker","hierarquia de"],["desenv","srm","parte de"],
+  ["srm","carr","desempenho por"],["srm","chen","sustentado por"],
+  ["plataforma","spend","etapa 1"],["plataforma","matrizrisco","etapa 2"],["plataforma","kraljicM","etapa 3"],
+  ["plataforma","chess","etapa 4"],["plataforma","selecao","registra"],
+  ["fonteunica","respec","mitigada por"],["pressaopreco","concorrencia","excesso de"],
+  ["pressaopreco","liker","contrastada por"],["scorelead","tco","resolvida por"],["scorelead","matrizrisco","pondera"],
+  ["comp","lacunas","limitado por"],["lacunas","rede","frente de"],["lacunas","scorelead","frente de"],
+  ["lacunas","pressaopreco","frente de"],["rede","dubois","proposta por"],["parceria","desenv","exige"],
+];
+
+/* timeline: fases e marcos */
+const TIMELINE = [
+  {phase:"Fase I · Teorias de base (1962–1983)", sub:"Sociologia, economia e estratégia explicam poder, dependência e governança. Kraljic leva tudo para a mesa do comprador."},
+  {yr:"1962",node:"emerson",t:"Relações de poder e dependência",who:"Emerson, R. M.",d:"Poder de A sobre B é a dependência de B em relação a A: a base para ler qualquer díade comprador–fornecedor."},
+  {yr:"1966",node:"dickson",t:"Critérios de seleção de fornecedores",who:"Dickson, G. W.",d:"23 critérios; qualidade, entrega e histórico de desempenho vêm antes do preço."},
+  {yr:"1978",node:"rdt",t:"O controle externo das organizações",who:"Pfeffer, J. & Salancik, G. R.",d:"Empresas agem para administrar a dependência de recursos que outras controlam."},
+  {yr:"1979",node:"williamson",t:"Economia dos custos de transação",who:"Williamson, O. E.",d:"Especificidade de ativos, incerteza e frequência definem se a transação vai ao mercado, à hierarquia ou a uma forma híbrida."},
+  {yr:"1979",node:"porter",t:"As forças competitivas",who:"Porter, M. E.",d:"O poder de barganha dos fornecedores entra na análise da rentabilidade do setor."},
+  {yr:"1983",node:"kraljic",t:"Compras deve virar gestão de suprimentos",who:"Kraljic, P.",d:"Matriz de impacto no resultado × risco de suprimento e planejamento das ações pelo poder relativo."},
+  {phase:"Fase II · Compras entra na estratégia (1995–1999)", sub:"Custo total, desenvolvimento de fornecedores e relações de longo prazo passam a ser vistos como fonte de vantagem."},
+  {yr:"1995",node:"ellram",t:"Custo total de propriedade",who:"Ellram, L. M.",d:"O preço é só uma parte do custo: TCO como método de análise para compras."},
+  {yr:"1997",node:"krause",t:"Fatores de sucesso no desenvolvimento de fornecedores",who:"Krause, D. R. & Ellram, L. M.",d:"O comprador investe na capacidade do fornecedor em vez de apenas trocá-lo."},
+  {yr:"1998",node:"dyer",t:"A visão relacional",who:"Dyer, J. H. & Singh, H.",d:"Rendas relacionais: a vantagem pode estar entre as empresas."},
+  {yr:"1998",node:"relacional",t:"O grupo Toyota e o incêndio da Aisin",who:"Nishiguchi, T. & Beaudet, A.",d:"A rede de fornecedores se auto-organiza e recupera a produção de uma peça de fonte praticamente única."},
+  {yr:"1999",node:"carr",t:"Compras estratégicas e desempenho",who:"Carr, A. S. & Pearson, J. N.",d:"Compras gerida estrategicamente favorece relações de longo prazo associadas a melhor desempenho."},
+  {yr:"1999",node:"bensaou",t:"Portfólio de relações",who:"Bensaou, M.",d:"Investimentos específicos de cada lado definem quatro tipos de relação."},
+  {phase:"Fase III · Poder e portfólio revisitados (2001–2007)", sub:"A academia testa, critica e refina Kraljic à luz do poder, da interdependência e das redes."},
+  {yr:"2001",node:"cox",t:"Matriz de poder comprador–fornecedor",who:"Cox, A.",d:"Dominância do comprador, interdependência, independência e dominância do fornecedor."},
+  {yr:"2002",node:"dubois",t:"Relações não cabem em portfólios",who:"Dubois, A. & Pedersen, A.-C.",d:"Crítica aos modelos de portfólio por ignorarem a rede de fornecedores."},
+  {yr:"2003",node:"gelderman",t:"Medição e direções estratégicas na matriz",who:"Gelderman, C. J. & van Weele, A. J.",d:"Como medir os eixos e quando mover uma categoria de quadrante."},
+  {yr:"2004",node:"liker",t:"Relações profundas com fornecedores",who:"Liker, J. K. & Choi, T. Y.",d:"Toyota e Honda: exigência alta e colaboração, numa hierarquia de seis práticas."},
+  {yr:"2004",node:"fonteunica",t:"Ericsson após o incêndio no fornecedor",who:"Norrman, A. & Jansson, U.",d:"A dependência de um subfornecedor leva a um processo proativo de gestão de risco."},
+  {yr:"2005",node:"caniels",t:"Poder e dependência na matriz de Kraljic",who:"Caniëls, M. C. J. & Gelderman, C. J.",d:"Cada quadrante tem uma configuração típica de poder; estendido em 2007 com interdependência total."},
+  {yr:"2007",node:"desenv",t:"Desenvolvimento, comprometimento e capital social",who:"Krause, D. R., Handfield, R. B. & Tyler, B. B.",d:"Desenvolvimento de fornecedores acumula capital social e melhora o desempenho do comprador."},
+  {phase:"Fase IV · Risco global e alavancas (2006–2009)", sub:"A globalização expõe o risco de suprimento e consultorias sistematizam as alavancas de negociação."},
+  {yr:"2006",node:"riscoglobal",t:"Perspectivas em gestão de risco da cadeia",who:"Tang, C. S.",d:"Revisão que organiza o campo de risco na cadeia de suprimentos."},
+  {yr:"2008",node:"manuj",t:"Gestão de riscos da cadeia global",who:"Manuj, I. & Mentzer, J. T.",d:"Tipologia de riscos e estratégias de mitigação para cadeias globais."},
+  {yr:"2009",node:"schuh",t:"The Purchasing Chessboard",who:"Schuh, C. et al.",d:"Poder de demanda × poder de oferta: 4 estratégias, 16 alavancas, 64 métodos."},
+  {phase:"Fase V · Resiliência e plataformas (2021–2026)", sub:"Rupturas globais revelam gargalos ocultos e a análise de categorias passa a ser apoiada por plataformas."},
+  {yr:"2021",node:"kraljicM",t:"Escassez de semicondutores",who:"Indústria automotiva global",d:"Um componente de baixo valor unitário se revela gargalo e para linhas de montagem."},
+  {yr:"2022",node:"comp",t:"Procurement and supply chain management, 8ª ed.",who:"van Weele, A. J. & Rozemeijer, F.",d:"Livro-texto de referência consolida compras como gestão de suprimentos."},
+  {yr:"2026",node:"plataforma",t:"Contratação e gestão de fornecedores estratégicos",who:"Lima, T. F.",d:"Livro e plataforma do professor levam o método à análise de categorias reais."},
+];
+
+const CASES = [
+  {title:"Whirlpool China", loc:"Eletrodomésticos · China · caso da sessão", loop:"Pontuação × lead time",
+   tag:"A melhor nota nem sempre entrega no prazo.",
+   desc:"A operação chinesa da Whirlpool precisa selecionar e desenvolver fornecedores. O sistema de pontuação aponta um candidato, mas a restrição de lead time põe a escolha em xeque. O caso obriga a decidir se o prazo é um peso na nota ou um critério eliminatório, e o que desenvolver no fornecedor escolhido.",
+   practice:"Seleção multicritério e desenvolvimento de fornecedores",
+   theory:"<b>Seleção e TCO</b> · critério ponderado × restrição; custo total em vez de preço",
+   author:"Dickson, 1966 · Ellram, 1995 · Krause & Ellram, 1997", node:"scorelead"},
+  {title:"Toyota e Honda", loc:"Automotivo · EUA · anos 1990–2000", loop:"Parceria exigente",
+   tag:"Exigir muito e ajudar a entregar.",
+   desc:"Liker e Choi (2004) relatam que, em pesquisa com fornecedores norte-americanos de montadoras, Toyota e Honda lideravam os indicadores de relacionamento, à frente da Nissan, com Chrysler, Ford e GM atrás. As duas eram exigentes e, ao mesmo tempo, investiam em conhecer, supervisionar e melhorar junto com os fornecedores.",
+   practice:"Hierarquia de parceria com fornecedores e melhoria conjunta",
+   theory:"<b>Desenvolvimento de fornecedores</b> + <b>visão relacional</b>",
+   author:"Liker & Choi, 2004", node:"desenv"},
+  {title:"Aisin Seiki", loc:"Automotivo · Japão · 1997", loop:"Rede que se reorganiza",
+   tag:"Fonte única, mas não sozinha.",
+   desc:"Em fevereiro de 1997, um incêndio destruiu a fábrica da Aisin que produzia praticamente todas as válvulas de freio (P-valves) usadas pela Toyota. Empresas do grupo e de fora dele improvisaram a produção com as especificações compartilhadas, e as montadoras retomaram a operação em poucos dias.",
+   practice:"Rede de fornecedores keiretsu com troca intensa de conhecimento",
+   theory:"<b>Visão relacional</b> · rotinas de compartilhamento e confiança como capacidade de recuperação",
+   author:"Nishiguchi & Beaudet, 1998 · Dyer & Singh, 1998", node:"relacional"},
+  {title:"Philips · Nokia × Ericsson", loc:"Telecom · 2000", loop:"Fonte única",
+   tag:"Mesmo incêndio, dois desfechos.",
+   desc:"Em março de 2000, um incêndio atingiu a fábrica de chips da Philips em Albuquerque (EUA). A Nokia detectou o problema cedo e garantiu capacidade alternativa. A Ericsson, que dependia dessa fonte, sofreu atrasos prolongados e depois montou um processo proativo de gestão de risco de fornecedores.",
+   practice:"Mapeamento de risco de fornecedores e planos de continuidade",
+   theory:"<b>Itens-gargalo</b> e <b>gestão de riscos</b> · probabilidade × impacto",
+   author:"Norrman & Jansson, 2004 · Sheffi, 2005", node:"fonteunica"},
+  {title:"GM e López", loc:"Automotivo · EUA · 1992–1993", loop:"Poder usado contra",
+   tag:"Economia no pedido, custo na relação.",
+   desc:"Como chefe de compras da GM no início dos anos 1990, José Ignacio López de Arriortúa reabriu contratos e exigiu reduções de preço dos fornecedores. A empresa reportou economias, mas a relação com a base de fornecedores se deteriorou. Em 1993 López foi para a Volkswagen, o que abriu uma disputa judicial encerrada em acordo em 1997.",
+   practice:"Renegociação agressiva de preços com a base instalada",
+   theory:"<b>Dominância do comprador</b> · o poder existe; a questão é o uso",
+   author:"Cox, 2001 · Liker & Choi, 2004", node:"pressaopreco"},
+  {title:"Escassez de semicondutores", loc:"Automotivo · global · 2021", loop:"Gargalo oculto",
+   tag:"Um item barato parou a linha.",
+   desc:"Em 2021, a falta de chips obrigou montadoras no mundo inteiro a reduzir ou interromper a produção. Componentes de baixo valor unitário, comprados por meio de fornecedores de primeiro nível e com pouca visibilidade dos níveis mais profundos, mostraram-se itens-gargalo.",
+   practice:"Reclassificação de categorias e contratos diretos com fabricantes de chips",
+   theory:"<b>Matriz de Kraljic</b> · o eixo de risco pesa tanto quanto o de impacto",
+   author:"Kraljic, 1983 · Manuj & Mentzer, 2008", node:"kraljicM"},
+  {title:"Apple e GT Advanced", loc:"Eletrônicos · EUA · 2013–2014", loop:"Dependência do fornecedor",
+   tag:"O fornecedor que dependia demais.",
+   desc:"Em 2013 a Apple contratou a GT Advanced Technologies para produzir safira numa fábrica no Arizona, com pagamentos antecipados. Em outubro de 2014 a GTAT pediu proteção judicial contra credores (Chapter 11). O fornecedor, com investimento específico dedicado a um único cliente, estava no lado dependente da díade.",
+   practice:"Contrato de capacidade dedicada com pagamento antecipado",
+   theory:"<b>Poder e dependência</b> + <b>custos de transação</b> · ativo específico e assimetria",
+   author:"Williamson, 1979 · Caniëls & Gelderman, 2007", node:"poder"},
+];
+
+/* ---- Apresentação: slides em HTML ---- */
+const APS = [
+  {t:"Abertura · Compras Estratégicas", nodes:["comp"], h:`<div class="sl-cover"><div class="eyebrow">Aula · Prof. Dr. Thiago Lima</div><h2>Compras Estratégicas</h2><p class="big">Sessão 7 · Compras na cadeia de suprimentos: portfólio, poder e alavancas</p><div class="sl-foot">Caso Whirlpool China · Atividade na plataforma</div></div>`},
+  {t:"A pergunta que organiza a aula", nodes:["poder","emerson"], h:`<div class="eyebrow">A pergunta</div><h2>Onde está o poder na relação com o fornecedor, e o que fazer com ele?</h2><div class="formula">Poder(A→B) = Dependência(B→A)</div><ul><li><b>Emerson (1962):</b> poder é da relação, não da empresa</li><li>Quem depende mais negocia pior</li><li>Diagnosticar o poder antes de escolher a alavanca</li></ul>`},
+  {t:"Cinco fases do campo", nodes:["comp"], h:`<div class="eyebrow">Linha do tempo</div><h2>Cinco fases, um problema cada</h2><div class="phases"><div><b>I</b><span>Teorias de base</span><em>1962–1983</em></div><div><b>II</b><span>Compras na estratégia</span><em>1995–1999</em></div><div><b>III</b><span>Poder e portfólio</span><em>2001–2007</em></div><div><b>IV</b><span>Risco e alavancas</span><em>2006–2009</em></div><div><b>V</b><span>Resiliência</span><em>2021–2026</em></div></div>`},
+  {t:"Matriz de Kraljic", nodes:["kraljicM","kraljic"], h:`<div class="eyebrow">Kraljic (1983) · HBR</div><h2>Compras deve virar gestão de suprimentos</h2><div class="cols2"><div><h3>Alavancagem</h3><p>Impacto alto, risco baixo: explorar o poder de compra</p></div><div><h3>Estratégico</h3><p>Impacto e risco altos: relação de longo prazo</p></div><div><h3>Não crítico</h3><p>Impacto e risco baixos: eficiência do processo</p></div><div><h3>Gargalo</h3><p>Risco alto, impacto baixo: garantir o suprimento</p></div></div>`},
+  {t:"Poder e dependência", nodes:["poder","cox","caniels"], h:`<div class="eyebrow">Fase III · 2001–2007</div><h2>Quem depende mais?</h2><ul><li><b>Porter (1979; 2008):</b> concentração, custo de troca e diferenciação dão poder ao fornecedor</li><li><b>Cox (2001):</b> dominância do comprador, interdependência, independência, dominância do fornecedor</li><li><b>Caniëls &amp; Gelderman (2005; 2007):</b> cada quadrante de Kraljic tem um padrão de poder</li></ul>`},
+  {t:"Purchasing Chessboard", nodes:["chess","schuh"], h:`<div class="eyebrow">Schuh et al. (2009) · A.T. Kearney</div><h2>Poder de demanda × poder de oferta</h2><div class="cols2"><div><h3>Gerir o gasto</h3><p>Agregação de volume, gestão da demanda</p></div><div><h3>Explorar a concorrência</h3><p>Licitação, globalização, target pricing</p></div><div><h3>Mudar a demanda</h3><p>Reespecificação, inovação, gestão de risco</p></div><div><h3>Vantagem conjunta</h3><p>Parcerias de custo e de valor</p></div></div>`},
+  {t:"Custos de transação × visão relacional", nodes:["tct","relacional"], h:`<div class="eyebrow">Duas lentes</div><h2>Ativo específico: risco ou vantagem?</h2><div class="cols2"><div><h3>Custos de transação</h3><p>Williamson (1979): especificidade, incerteza e frequência definem a governança. Risco de hold-up.</p></div><div><h3>Visão relacional</h3><p>Dyer &amp; Singh (1998): ativos específicos, troca de conhecimento e recursos complementares geram rendas.</p></div></div><p class="note">A escolha da lente muda o contrato que você desenha.</p>`},
+  {t:"Seleção e custo total", nodes:["selecao","tco","scorelead"], h:`<div class="eyebrow">Caso Whirlpool China</div><h2>Além do preço</h2><ul><li><b>Dickson (1966):</b> 23 critérios; qualidade e entrega antes do preço</li><li><b>Ellram (1995):</b> TCO soma custos antes, durante e depois da compra</li><li>A melhor nota pode não cumprir o lead time</li><li>Lead time é <b>peso</b> na nota ou <b>restrição</b> eliminatória?</li></ul>`},
+  {t:"Risco de suprimento", nodes:["riscoglobal","manuj","fonteunica"], h:`<div class="eyebrow">Manuj &amp; Mentzer (2008)</div><h2>Probabilidade × impacto</h2><ul><li>Riscos de suprimento, operação, demanda, segurança, macro, política</li><li>Mitigar: postergar, especular, hedge, controlar, evitar</li><li><b>Philips, 2000:</b> Nokia reage cedo; Ericsson depende da fonte única</li><li><b>Aisin, 1997:</b> a rede da Toyota recupera a produção em dias</li></ul>`},
+  {t:"Desenvolvimento de fornecedores", nodes:["desenv","liker","krause"], h:`<div class="eyebrow">Liker &amp; Choi (2004)</div><h2>Desenvolver em vez de trocar</h2><ol><li>Entender como o fornecedor trabalha</li><li>Transformar rivalidade em oportunidade</li><li>Supervisionar</li><li>Desenvolver capacidade técnica compatível</li><li>Compartilhar informação de forma seletiva</li><li>Melhorar junto</li></ol>`},
+  {t:"Atividade na plataforma", nodes:["plataforma","matrizrisco"], h:`<div class="eyebrow">Atividade · plataforma do professor</div><h2>Da categoria ao relatório</h2><div class="phases"><div><b>1</b><span>Cadastro</span><em>categoria real</em></div><div><b>2</b><span>Riscos</span><em>prob. × impacto</em></div><div><b>3</b><span>Kraljic</span><em>quadrante</em></div><div><b>4</b><span>Chessboard</span><em>poder</em></div><div><b>5</b><span>Estratégia</span><em>alavancas</em></div></div><p class="note">Tipologia de riscos de Manuj &amp; Mentzer (2008).</p>`},
+  {t:"E daí para a segunda-feira?", nodes:["vcap","srm"], h:`<div class="eyebrow">E daí para a segunda-feira?</div><h2>Fornecedor é capacidade externa</h2><div class="formula">V = C × (A + P)</div><ul><li>Qual categoria tira o seu sono, e em que quadrante está?</li><li>Quem depende mais: você ou o fornecedor?</li><li>Você compra por preço ou por custo total?</li><li>Que alavanca do Chessboard ninguém testou?</li></ul>`},
+  {t:"Três debates", nodes:["lacunas","rede","pressaopreco"], h:`<div class="eyebrow">Agenda e debates</div><h2>Três debates para a turma</h2><div class="cols3"><div><h3>Kraljic ainda serve?</h3><p>Dubois &amp; Pedersen (2002): a matriz ignora a rede</p></div><div><h3>Pressão ou parceria?</h3><p>GM nos anos 1990 × Toyota e Honda</p></div><div><h3>Fonte única ou múltipla?</h3><p>Ericsson, Aisin e os chips de 2021</p></div></div>`},
+  {t:"Explore o mapa conceitual", nodes:[], h:`<div class="sl-cover"><div class="eyebrow">Ferramenta interativa</div><h2>Explore o mapa</h2><p class="big">Conceitos, autores, estratégias, casos e referências conectados. Clique em qualquer slide para saltar ao conceito correspondente.</p></div>`},
+];
+const NODE2SLIDE = {comp:1, poder:2, emerson:2, rdt:5, kraljicM:4, kraljic:4, cincoforcas:5, porter:5, cox:5, caniels:5, gelderman:4, chess:6, schuh:6, concorrencia:6, respec:6, parceria:6, spend:6, tct:7, williamson:7, relacional:7, dyer:7, bensaou:7, selecao:8, tco:8, ellram:8, dickson:8, scorelead:8, riscoglobal:9, manuj:9, matrizrisco:11, fonteunica:9, desenv:10, liker:10, krause:10, plataforma:11, vcap:12, srm:12, carr:12, chen:12, lacunas:13, rede:13, dubois:13, pressaopreco:13};
+
+const QUADRO = [
+  {concept:"Poder e dependência", cat:"core", author:"Emerson, R. M. (1962)",
+   paper:"Power-dependence relations. (American Sociological Review)",
+   contribution:"Define o poder de um ator sobre outro como a dependência deste em relação ao primeiro.",
+   practice:"Mapear quem depende de quem antes de negociar: alternativas, custo de troca, peso no faturamento do fornecedor.", node:"poder"},
+  {concept:"Critérios de seleção", cat:"pratica", author:"Dickson, G. W. (1966)",
+   paper:"An analysis of vendor selection systems and decisions. (Journal of Purchasing)",
+   contribution:"Identifica 23 critérios usados por compradores e mostra qualidade e entrega à frente do preço.",
+   practice:"Montar a matriz de seleção com critérios múltiplos e distinguir pesos de restrições.", node:"selecao"},
+  {concept:"Custos de transação", cat:"teoria", author:"Williamson, O. E. (1979)",
+   paper:"Transaction-cost economics: The governance of contractual relations. (Journal of Law and Economics)",
+   contribution:"Especificidade dos ativos, incerteza e frequência determinam a forma de governança da transação.",
+   practice:"Decidir entre mercado, contrato de longo prazo ou integração conforme o investimento específico envolvido.", node:"tct"},
+  {concept:"Poder de barganha", cat:"teoria", author:"Porter, M. E. (1979; 2008)",
+   paper:"How competitive forces shape strategy · The five competitive forces that shape strategy. (Harvard Business Review)",
+   contribution:"O poder de barganha dos fornecedores é uma das forças que definem a rentabilidade do setor.",
+   practice:"Analisar concentração, custo de troca e diferenciação do mercado fornecedor da categoria.", node:"cincoforcas"},
+  {concept:"Portfólio de compras", cat:"core", author:"Kraljic, P. (1983)",
+   paper:"Purchasing must become supply management. (Harvard Business Review)",
+   contribution:"Classifica itens por impacto no resultado e risco de suprimento e liga cada quadrante a uma estratégia.",
+   practice:"Segmentar o gasto em quatro quadrantes e atribuir objetivo e alavanca a cada categoria.", node:"kraljicM"},
+  {concept:"Custo total de propriedade", cat:"core", author:"Ellram, L. M. (1995)",
+   paper:"Total cost of ownership: An analysis approach for purchasing. (IJPDLM)",
+   contribution:"Estrutura o TCO em custos anteriores, simultâneos e posteriores à transação.",
+   practice:"Comparar propostas pelo custo total e não pelo preço unitário.", node:"tco"},
+  {concept:"Desenvolvimento de fornecedores", cat:"pratica", author:"Krause, D. R. & Ellram, L. M. (1997)",
+   paper:"Success factors in supplier development. (IJPDLM)",
+   contribution:"Identifica fatores que distinguem programas de desenvolvimento bem-sucedidos.",
+   practice:"Planejar o desenvolvimento com metas, comunicação e equipes de ambos os lados.", node:"desenv"},
+  {concept:"Visão relacional", cat:"teoria", author:"Dyer, J. H. & Singh, H. (1998)",
+   paper:"The relational view: Cooperative strategy and sources of interorganizational competitive advantage. (Academy of Management Review)",
+   contribution:"Rendas relacionais vêm de ativos específicos, troca de conhecimento, recursos complementares e governança eficaz.",
+   practice:"Desenhar parcerias com investimento e governança que sustentem ganhos conjuntos.", node:"relacional"},
+  {concept:"Matriz de poder", cat:"core", author:"Cox, A. (2001)",
+   paper:"Understanding buyer and supplier power: A framework for procurement and supply competence. (Journal of Supply Chain Management)",
+   contribution:"Quatro configurações de poder na relação e as competências de compras que cada uma exige.",
+   practice:"Ajustar o estilo de relação à configuração de poder, em vez de aplicar um modelo único.", node:"poder"},
+  {concept:"Medição da matriz", cat:"core", author:"Gelderman, C. J. & van Weele, A. J. (2003)",
+   paper:"Handling measurement issues and strategic directions in Kraljic's purchasing portfolio model. (Journal of Purchasing and Supply Management)",
+   contribution:"Discute como medir os eixos e as estratégias de manter ou mover categorias entre quadrantes.",
+   practice:"Tornar explícitos os critérios de cada eixo e rever a posição da categoria periodicamente.", node:"kraljicM"},
+  {concept:"Relações profundas", cat:"pratica", author:"Liker, J. K. & Choi, T. Y. (2004)",
+   paper:"Building deep supplier relationships. (Harvard Business Review)",
+   contribution:"Hierarquia de seis práticas de parceria de Toyota e Honda com fornecedores norte-americanos.",
+   practice:"Combinar exigência alta com apoio técnico e melhoria conjunta em fornecedores estratégicos.", node:"desenv"},
+  {concept:"Poder na matriz de Kraljic", cat:"core", author:"Caniëls, M. C. J. & Gelderman, C. J. (2005)",
+   paper:"Purchasing strategies in the Kraljic matrix: A power and dependence perspective. (Journal of Purchasing and Supply Management)",
+   contribution:"Liga cada quadrante de Kraljic a uma configuração de poder e dependência.",
+   practice:"Checar se a estratégia escolhida para o quadrante é viável dado o poder real da empresa.", node:"caniels"},
+  {concept:"Riscos da cadeia global", cat:"teoria", author:"Manuj, I. & Mentzer, J. T. (2008)",
+   paper:"Global supply chain risk management · Global supply chain risk management strategies. (Journal of Business Logistics · IJPDLM)",
+   contribution:"Tipologia de riscos, processo de gestão e estratégias de mitigação em cadeias globais.",
+   practice:"Avaliar os riscos da categoria por probabilidade e impacto e escolher a estratégia de mitigação.", node:"riscoglobal"},
+  {concept:"Purchasing Chessboard", cat:"core", author:"Schuh, C., Kromoser, R., Strohmer, M. F., Romero Pérez, R. & Triplat, A. (2009)",
+   paper:"The purchasing chessboard: 64 methods to reduce cost and increase value with suppliers. (Springer)",
+   contribution:"Poder de demanda × poder de oferta: 4 estratégias, 16 alavancas e 64 métodos.",
+   practice:"Escolher alavancas de negociação coerentes com o poder diagnosticado na categoria.", node:"chess"},
+  {concept:"Crítica aos portfólios", cat:"lacuna", author:"Dubois, A. & Pedersen, A.-C. (2002)",
+   paper:"Why relationships do not fit into purchasing portfolio models. (European Journal of Purchasing & Supply Management)",
+   contribution:"Mostra que portfólios tratam relações como díades isoladas e ignoram a rede.",
+   practice:"Checar efeitos cruzados entre categorias e fornecedores antes de fechar a estratégia.", node:"rede"},
+  {concept:"VCAP e fornecedores", cat:"core", author:"Lima, T. F. (2026)",
+   paper:"Excelência operacional: da estratégia à execução (Atena, Cap. 1) · Contratação e gestão de fornecedores estratégicos (Atena)",
+   contribution:"V = C × (A + P): o valor depende da capacidade que multiplica ativos e processos, inclusive os externos.",
+   practice:"Tratar fornecedores estratégicos como extensão de ativos, processos e capacidades da empresa.", node:"vcap"},
+];
+
+const REF_GROUPS = [
+ {title:"Portfólio de compras e poder", refs:[
+  {apa:"Bensaou, M. (1999). Portfolios of buyer–supplier relationships. <i>Sloan Management Review, 40</i>(4), 35–44.", doi:""},
+  {apa:"Caniëls, M. C. J., & Gelderman, C. J. (2005). Purchasing strategies in the Kraljic matrix—A power and dependence perspective. <i>Journal of Purchasing and Supply Management, 11</i>(2–3), 141–155.", doi:"https://doi.org/10.1016/j.pursup.2005.10.004"},
+  {apa:"Caniëls, M. C. J., & Gelderman, C. J. (2007). Power and interdependence in buyer supplier relationships: A purchasing portfolio approach. <i>Industrial Marketing Management, 36</i>(2), 219–229.", doi:"https://doi.org/10.1016/j.indmarman.2005.08.012"},
+  {apa:"Cox, A. (2001). Understanding buyer and supplier power: A framework for procurement and supply competence. <i>Journal of Supply Chain Management, 37</i>(2), 8–15.", doi:"https://doi.org/10.1111/j.1745-493X.2001.tb00094.x"},
+  {apa:"Dubois, A., & Pedersen, A.-C. (2002). Why relationships do not fit into purchasing portfolio models—A comparison between the portfolio and industrial network approaches. <i>European Journal of Purchasing &amp; Supply Management, 8</i>(1), 35–42.", doi:""},
+  {apa:"Gelderman, C. J., & van Weele, A. J. (2003). Handling measurement issues and strategic directions in Kraljic's purchasing portfolio model. <i>Journal of Purchasing and Supply Management, 9</i>(5–6), 207–216.", doi:"https://doi.org/10.1016/j.pursup.2003.07.001"},
+  {apa:"Kraljic, P. (1983). Purchasing must become supply management. <i>Harvard Business Review, 61</i>(5), 109–117.", doi:""},
+  {apa:"Schuh, C., Kromoser, R., Strohmer, M. F., Romero Pérez, R., & Triplat, A. (2009). <i>The purchasing chessboard: 64 methods to reduce cost and increase value with suppliers</i>. Springer.", doi:"https://doi.org/10.1007/978-3-540-88725-6"},
+ ]},
+ {title:"Lentes teóricas: poder, transação e relação", refs:[
+  {apa:"Dyer, J. H., & Singh, H. (1998). The relational view: Cooperative strategy and sources of interorganizational competitive advantage. <i>Academy of Management Review, 23</i>(4), 660–679.", doi:"https://doi.org/10.2307/259056"},
+  {apa:"Emerson, R. M. (1962). Power-dependence relations. <i>American Sociological Review, 27</i>(1), 31–41.", doi:"https://doi.org/10.2307/2089716"},
+  {apa:"Pfeffer, J., & Salancik, G. R. (1978). <i>The external control of organizations: A resource dependence perspective</i>. Harper &amp; Row.", doi:""},
+  {apa:"Porter, M. E. (1979). How competitive forces shape strategy. <i>Harvard Business Review, 57</i>(2), 137–145.", doi:""},
+  {apa:"Porter, M. E. (2008). The five competitive forces that shape strategy. <i>Harvard Business Review, 86</i>(1), 78–93.", doi:""},
+  {apa:"Williamson, O. E. (1979). Transaction-cost economics: The governance of contractual relations. <i>Journal of Law and Economics, 22</i>(2), 233–261.", doi:"https://doi.org/10.1086/466942"},
+  {apa:"Williamson, O. E. (1985). <i>The economic institutions of capitalism</i>. Free Press.", doi:""},
+ ]},
+ {title:"Seleção, custo total e desenvolvimento de fornecedores", refs:[
+  {apa:"Carr, A. S., & Pearson, J. N. (1999). Strategically managed buyer–supplier relationships and performance outcomes. <i>Journal of Operations Management, 17</i>(5), 497–519.", doi:"https://doi.org/10.1016/S0272-6963(99)00007-8"},
+  {apa:"Chen, I. J., Paulraj, A., & Lado, A. A. (2004). Strategic purchasing, supply management, and firm performance. <i>Journal of Operations Management, 22</i>(5), 505–523.", doi:"https://doi.org/10.1016/j.jom.2004.06.002"},
+  {apa:"Dickson, G. W. (1966). An analysis of vendor selection systems and decisions. <i>Journal of Purchasing, 2</i>(1), 5–17.", doi:"https://doi.org/10.1111/j.1745-493X.1966.tb00818.x"},
+  {apa:"Ellram, L. M. (1995). Total cost of ownership: An analysis approach for purchasing. <i>International Journal of Physical Distribution &amp; Logistics Management, 25</i>(8), 4–23.", doi:"https://doi.org/10.1108/09600039510099928"},
+  {apa:"Handfield, R. B., Krause, D. R., Scannell, T. V., & Monczka, R. M. (2000). Avoid the pitfalls in supplier development. <i>Sloan Management Review, 41</i>(2), 37–49.", doi:""},
+  {apa:"Krause, D. R., & Ellram, L. M. (1997). Success factors in supplier development. <i>International Journal of Physical Distribution &amp; Logistics Management, 27</i>(1), 39–52.", doi:"https://doi.org/10.1108/09600039710162277"},
+  {apa:"Krause, D. R., Handfield, R. B., & Tyler, B. B. (2007). The relationships between supplier development, commitment, social capital accumulation and performance improvement. <i>Journal of Operations Management, 25</i>(2), 528–545.", doi:"https://doi.org/10.1016/j.jom.2006.05.007"},
+  {apa:"Liker, J. K., & Choi, T. Y. (2004). Building deep supplier relationships. <i>Harvard Business Review, 82</i>(12), 104–113.", doi:""},
+  {apa:"Nishiguchi, T., & Beaudet, A. (1998). The Toyota group and the Aisin fire. <i>Sloan Management Review, 40</i>(1), 49–59.", doi:""},
+ ]},
+ {title:"Risco de suprimento, livros-texto e obras de apoio", refs:[
+  {apa:"Lima, T. F. (2026). <i>Contratação e gestão de fornecedores estratégicos: teorias, modelos e práticas para a gestão de compras e suprimentos</i>. Atena Editora.", doi:""},
+  {apa:"Lima, T. F. (2026). <i>Excelência operacional: da estratégia à execução — operações, serviços, melhoria contínua e inteligência artificial</i>. Atena Editora. ISBN 978-65-258-4105-2.", doi:""},
+  {apa:"Manuj, I., & Mentzer, J. T. (2008). Global supply chain risk management. <i>Journal of Business Logistics, 29</i>(1), 133–155.", doi:"https://doi.org/10.1002/j.2158-1592.2008.tb00072.x"},
+  {apa:"Manuj, I., & Mentzer, J. T. (2008). Global supply chain risk management strategies. <i>International Journal of Physical Distribution &amp; Logistics Management, 38</i>(3), 192–223.", doi:"https://doi.org/10.1108/09600030810866986"},
+  {apa:"Monczka, R. M., Handfield, R. B., Giunipero, L. C., & Patterson, J. L. (2021). <i>Purchasing and supply chain management</i> (7th ed.). Cengage.", doi:""},
+  {apa:"Norrman, A., & Jansson, U. (2004). Ericsson's proactive supply chain risk management approach after a serious sub-supplier accident. <i>International Journal of Physical Distribution &amp; Logistics Management, 34</i>(5), 434–456.", doi:"https://doi.org/10.1108/09600030410545463"},
+  {apa:"Sheffi, Y. (2005). <i>The resilient enterprise: Overcoming vulnerability for competitive advantage</i>. MIT Press.", doi:""},
+  {apa:"Tang, C. S. (2006). Perspectives in supply chain risk management. <i>International Journal of Production Economics, 103</i>(2), 451–488.", doi:"https://doi.org/10.1016/j.ijpe.2005.12.006"},
+  {apa:"van Weele, A. J., & Rozemeijer, F. (2022). <i>Procurement and supply chain management</i> (8th ed.). Cengage.", doi:""},
+ ]},
+];
+
+const ROOT=NODES[0].id;
+
+/* ====================== MAP RENDER (force layout) ====================== */
+const NS="http://www.w3.org/2000/svg";
+const stage=document.getElementById("stage");
+const nodeById=Object.fromEntries(NODES.map(n=>[n.id,n]));
+const adj={}; NODES.forEach(n=>adj[n.id]=new Set());
+LINKS.forEach(([a,b])=>{adj[a].add(b);adj[b].add(a)});
+
+let W=innerWidth,H=innerHeight-document.querySelector("header").offsetHeight;
+// initial positions: spread on a circle, core in middle
+NODES.forEach((n,i)=>{
+  if(n.id===ROOT){n.x=W/2;n.y=H/2;}
+  else{const a=i/NODES.length*Math.PI*2; n.x=W/2+Math.cos(a)*Math.min(W,H)*0.34; n.y=H/2+Math.sin(a)*Math.min(W,H)*0.34;}
+  n.vx=0;n.vy=0;
+});
+
+const vp=document.createElementNS(NS,"g"); stage.appendChild(vp);
+const linkLayer=document.createElementNS(NS,"g"); vp.appendChild(linkLayer);
+const nodeLayer=document.createElementNS(NS,"g"); vp.appendChild(nodeLayer);
+
+const linkEls=LINKS.map(l=>{
+  const el=document.createElementNS(NS,"line"); el.setAttribute("class","link");
+  el._a=l[0];el._b=l[1]; linkLayer.appendChild(el); return el;
+});
+const nodeEls=NODES.map(n=>{
+  const g=document.createElementNS(NS,"g"); g.setAttribute("class","node"); g._n=n;
+  const c=document.createElementNS(NS,"circle");
+  c.setAttribute("r",n.r); c.setAttribute("fill",CAT[n.cat].color);
+  const t=document.createElementNS(NS,"text");
+  t.setAttribute("text-anchor","middle"); t.setAttribute("dy",n.r+15);
+  t.textContent=SHORT[n.label]||n.label;
+  g.appendChild(c); g.appendChild(t); nodeLayer.appendChild(g);
+  n._g=g;n._c=c;n._t=t; return g;
+});
+
+/* physics */
+let alpha=1;
+function tick(){
+  if(alpha<0.005){return;}
+  alpha*=0.985;
+  const k=alpha;
+  // repulsion
+  for(let i=0;i<NODES.length;i++){
+    const a=NODES[i];
+    for(let j=i+1;j<NODES.length;j++){
+      const b=NODES[j];
+      let dx=a.x-b.x,dy=a.y-b.y; let d2=dx*dx+dy*dy||0.01;
+      let d=Math.sqrt(d2);
+      const minD=a.r+b.r+72;
+      let force=(22000)/d2;
+      if(d<minD) force+= (minD-d)*1.2/d; // collision
+      const fx=dx/d*force*k, fy=dy/d*force*k;
+      if(!a._fix){a.vx+=fx;a.vy+=fy;}
+      if(!b._fix){b.vx-=fx;b.vy-=fy;}
+    }
+  }
+  // springs
+  LINKS.forEach(l=>{
+    const a=nodeById[l[0]],b=nodeById[l[1]];
+    let dx=b.x-a.x,dy=b.y-a.y; let d=Math.sqrt(dx*dx+dy*dy)||0.01;
+    const target=a.id===ROOT||b.id===ROOT?210:185;
+    const f=(d-target)*0.045*k;
+    const fx=dx/d*f,fy=dy/d*f;
+    if(!a._fix){a.vx+=fx;a.vy+=fy;}
+    if(!b._fix){b.vx-=fx;b.vy-=fy;}
+  });
+  // gravity to center
+  NODES.forEach(n=>{
+    if(n._fix)return;
+    n.vx+=(W/2-n.x)*0.0035*k; n.vy+=(H/2-n.y)*0.0035*k;
+    n.vx*=0.86; n.vy*=0.86;
+    n.x+=n.vx; n.y+=n.vy;
+  });
+  render();
+  requestAnimationFrame(tick);
+}
+function render(){
+  linkEls.forEach(el=>{
+    const a=nodeById[el._a],b=nodeById[el._b];
+    el.setAttribute("x1",a.x);el.setAttribute("y1",a.y);
+    el.setAttribute("x2",b.x);el.setAttribute("y2",b.y);
+  });
+  nodeEls.forEach(g=>{const n=g._n; g.setAttribute("transform",`translate(${n.x},${n.y})`)});
+}
+function reheat(v){alpha=Math.max(alpha,v||0.6);requestAnimationFrame(tick);}
+
+/* zoom & pan */
+let tx=0,ty=0,scale=1;
+function applyVP(){vp.setAttribute("transform",`translate(${tx},${ty}) scale(${scale})`)}
+stage.addEventListener("wheel",e=>{
+  e.preventDefault();
+  const r=stage.getBoundingClientRect();
+  const mx=e.clientX-r.left,my=e.clientY-r.top;
+  const ds=e.deltaY<0?1.12:0.893;
+  const ns=Math.min(2.6,Math.max(0.3,scale*ds));
+  tx=mx-(mx-tx)*(ns/scale); ty=my-(my-ty)*(ns/scale); scale=ns; applyVP();
+},{passive:false});
+
+let panning=false,sx,sy,stx,sty,dragNode=null,downNode=null,downX=0,downY=0;
+stage.addEventListener("pointerdown",e=>{
+  downX=e.clientX;downY=e.clientY;
+  const g=e.target.closest(".node");
+  if(g){downNode=g._n;dragNode=g._n;dragNode._fix=true;stage.setPointerCapture(e.pointerId);}
+  else{downNode=null;panning=true;stage.classList.add("grabbing");sx=e.clientX;sy=e.clientY;stx=tx;sty=ty;stage.setPointerCapture(e.pointerId);}
+});
+stage.addEventListener("pointermove",e=>{
+  if(dragNode){
+    const r=stage.getBoundingClientRect();
+    dragNode.x=(e.clientX-r.left-tx)/scale; dragNode.y=(e.clientY-r.top-ty)/scale;
+    reheat(0.25); render();
+  }else if(panning){tx=stx+(e.clientX-sx);ty=sty+(e.clientY-sy);applyVP();}
+});
+stage.addEventListener("pointerup",e=>{
+  const movedDist=Math.hypot(e.clientX-downX,e.clientY-downY);
+  if(dragNode){dragNode._fix=false;}
+  if(movedDist<6){                       // clique (não arraste): abre nó ou fecha painel
+    if(downNode) openPanel(downNode.id);
+    else closePanel();
+  }
+  if(dragNode){dragNode=null;reheat(0.3);}
+  downNode=null;panning=false;stage.classList.remove("grabbing");
+});
+
+/* interactions: hover + click */
+let selected=null;
+function neighbors(id){const s=new Set(adj[id]);s.add(id);return s;}
+function highlight(id){
+  const set=id?neighbors(id):null;
+  nodeEls.forEach(g=>{
+    const on=!set||set.has(g._n.id);
+    g.classList.toggle("dim",!on && !legendOff.has(g._n.cat)?!on:!on);
+  });
+  linkEls.forEach(el=>{
+    const hot=set&&(set.has(el._a)&&set.has(el._b)&&(el._a===id||el._b===id));
+    const on=!set||(set.has(el._a)&&set.has(el._b));
+    el.classList.toggle("hot",!!hot);
+    el.classList.toggle("dim",set&&!on);
+  });
+}
+nodeEls.forEach(g=>{
+  g.addEventListener("pointerenter",()=>{if(!selected)highlight(g._n.id)});
+  g.addEventListener("pointerleave",()=>{if(!selected)highlight(null)});
+});
+
+/* legend filter */
+const legendOff=new Set();
+const li=document.getElementById("legendItems");
+Object.entries(CAT).forEach(([k,v])=>{
+  const d=document.createElement("div"); d.className="item"; d.dataset.cat=k;
+  d.innerHTML=`<span class="swatch" style="background:${v.color}"></span>${v.name}`;
+  d.addEventListener("click",()=>{
+    if(legendOff.has(k)){legendOff.delete(k);d.classList.remove("off");}
+    else{legendOff.add(k);d.classList.add("off");}
+    applyFilter();
+  });
+  li.appendChild(d);
+});
+function applyFilter(){
+  nodeEls.forEach(g=>{g.style.display=legendOff.has(g._n.cat)?"none":""});
+  linkEls.forEach(el=>{
+    const off=legendOff.has(nodeById[el._a].cat)||legendOff.has(nodeById[el._b].cat);
+    el.style.display=off?"none":"";
+  });
+}
+
+/* zoom buttons */
+function zoomBy(f){
+  const ns=Math.min(2.6,Math.max(0.3,scale*f));
+  tx=W/2-(W/2-tx)*(ns/scale);ty=H/2-(H/2-ty)*(ns/scale);scale=ns;applyVP();
+}
+document.getElementById("zin").onclick=()=>zoomBy(1.2);
+document.getElementById("zout").onclick=()=>zoomBy(0.83);
+document.getElementById("zfit").onclick=()=>{tx=0;ty=0;scale=1;applyVP();reheat(0.5)};
+
+/* ====================== DETAIL PANEL ====================== */
+const panel=document.getElementById("panel");
+const pbody=document.getElementById("pbody");
+function openPanel(id){
+  const n=nodeById[id]; selected=id;
+  nodeEls.forEach(g=>g.classList.toggle("sel",g._n.id===id));
+  highlight(id);
+  const col=CAT[n.cat].color;
+  const rels=[...adj[id]].map(rid=>{const m=nodeById[rid];
+    return `<span class="relnode" data-go="${rid}"><span class="sw" style="background:${CAT[m.cat].color}"></span>${m.label}</span>`}).join("");
+  pbody.innerHTML=`
+    <div class="ptag" style="background:${hex2rgba(col,.16)};color:${col}">${CAT[n.cat].name}</div>
+    <h2>${n.label}</h2>
+    <div class="pauthor" style="color:${col}">${n.author||""}</div>
+    <div class="pdesc">${n.desc}</div>
+    ${n.bullets&&n.bullets.length?`<div class="pblock"><h5>Em detalhe</h5><ul>${n.bullets.map(b=>`<li>${b}</li>`).join("")}</ul></div>`:""}
+    <div class="pblock"><h5>Conexões (${adj[id].size})</h5>${rels}</div>
+    ${NODE2SLIDE[id]?`<button class="gomap" data-slide="${NODE2SLIDE[id]}">▣ Ver no slide ${NODE2SLIDE[id]} da apresentação →</button>`:""}
+  `;
+  pbody.querySelectorAll("[data-go]").forEach(el=>el.onclick=()=>openPanel(el.dataset.go));
+  const sb=pbody.querySelector("[data-slide]"); if(sb)sb.onclick=()=>{closePanel();switchView("apresentacao");setTimeout(()=>apsGo(+sb.dataset.slide-1),60)};
+  panel.classList.add("open");
+  document.documentElement.style.setProperty("--panelw","380px");
+}
+function closePanel(){
+  panel.classList.remove("open");selected=null;
+  nodeEls.forEach(g=>g.classList.remove("sel"));highlight(null);
+  document.documentElement.style.setProperty("--panelw","0px");
+}
+document.getElementById("pclose").onclick=closePanel;
+function hex2rgba(h,a){const n=parseInt(h.slice(1),16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`}
+
+/* ====================== TIMELINE / TABLE / SYNTH ====================== */
+document.getElementById("tl").innerHTML=TIMELINE.map(t=>t.phase?`
+  <div class="tlphase"><h2>${t.phase}</h2><p>${t.sub}</p></div>`:`
+  <div class="tlitem" data-go="${t.node}">
+    <div class="yr">${t.yr}</div><div class="nub"></div>
+    <div class="tlcard"><h3>${t.t}</h3><div class="who">${t.who}</div><p>${t.d}</p></div>
+  </div>`).join("");
+document.querySelectorAll("#tl .tlitem").forEach(el=>el.onclick=()=>{switchView("map");setTimeout(()=>openPanel(el.dataset.go),60)});
+
+// ---- Casos práticos
+document.getElementById("caseList").innerHTML=CASES.map(c=>`
+  <div class="case">
+    <div class="ch"><h3>${c.title}</h3><span class="loc">${c.loc}</span></div>
+    ${c.loop?'<span class="loop-chip">'+c.loop+'</span>':''}
+    <div class="tag">${c.tag}</div>
+    <p class="cd">${c.desc}</p>
+    <div class="row"><span class="k">Prática</span><span class="v">${c.practice}</span></div>
+    <div class="row"><span class="k">Teoria</span><span class="v">${c.theory}</span></div>
+    <div class="row"><span class="k">Autor</span><span class="v"><b>${c.author}</b></span></div>
+    <button class="gomap" data-go="${c.node}">Ver no mapa →</button>
+  </div>`).join("");
+document.querySelectorAll("#caseList .gomap").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+
+// ---- Quadro teórico
+document.getElementById("quadroRows").innerHTML=QUADRO.map(q=>{
+  const col=CAT[q.cat].color;
+  return `<div class="qrow">
+    <div class="qhead">
+      <span class="qdotwrap"><span class="qdot" style="background:${col}"></span>
+        <span class="qtip"><span class="c" style="color:${col}">${q.concept}</span><h6>Principal contribuição</h6>${q.contribution}</span>
+      </span>
+      <span class="qconcept" style="background:${hex2rgba(col,.16)};color:${col}">${q.concept}</span>
+      <span class="qauthor">${q.author}</span>
+    </div>
+    <div class="qpaper">${q.paper}</div>
+    <div class="qbody">
+      <div class="qcol"><h6>Principal contribuição</h6><p>${q.contribution}</p></div>
+      <div class="qcol"><h6>Prática associada</h6><p>${q.practice}</p></div>
+    </div>
+    <button class="gomap" data-go="${q.node}">Ver no mapa →</button>
+  </div>`;
+}).join("");
+document.querySelectorAll("#quadroRows .gomap").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+
+// ---- Referências
+function refRow(r){
+  const txt=(r.apa+' '+(r.doi||'')).replace(/<[^>]+>/g,'').replace(/"/g,'').toLowerCase();
+  const link=r.doi?` <a href="${r.doi}" target="_blank" rel="noopener">${r.doi}</a>`:"";
+  return `<div class="refrow" data-txt="${txt}">${r.apa}${link}</div>`;
+}
+document.getElementById("refGroups").innerHTML=REF_GROUPS.map(g=>`<h3 class="refgroup">${g.title}</h3>`+g.refs.map(refRow).join("")).join("");
+document.getElementById("refCount").textContent=REF_GROUPS.reduce((s,g)=>s+g.refs.length,0);
+document.getElementById("refFilter").addEventListener("input",e=>{
+  const q=e.target.value.trim().toLowerCase();
+  document.querySelectorAll(".refrow").forEach(r=>r.classList.toggle("hide",q&&!r.dataset.txt.includes(q)));
+});
+
+/* ====================== NAV / SEARCH ====================== */
+function switchView(v){
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("active",s.id==="view-"+v));
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
+  document.getElementById("ctrls").style.display=v==="map"?"flex":"none";
+  if(v==="map"){W=innerWidth;H=innerHeight-document.querySelector("header").offsetHeight;reheat(0.4);}
+}
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
+
+const search=document.getElementById("search");
+search.addEventListener("input",()=>{
+  const q=search.value.trim().toLowerCase();
+  if(!q){nodeEls.forEach(g=>g.classList.remove("dim"));return;}
+  let hit=null;
+  nodeEls.forEach(g=>{
+    const m=(g._n.label+" "+g._n.author+" "+g._n.desc).toLowerCase().includes(q);
+    g.classList.toggle("dim",!m); if(m&&!hit)hit=g._n;
+  });
+});
+search.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    const q=search.value.trim().toLowerCase();
+    const hit=NODES.find(n=>(n.label+" "+n.author).toLowerCase().includes(q));
+    if(hit){switchView("map");openPanel(hit.id);
+      tx=W/2-hit.x*scale;ty=H/2-hit.y*scale;applyVP();}
+  }
+});
+
+/* ---- Intro / Como usar ---- */
+const intro=document.getElementById("intro");
+function showIntro(){intro.classList.add("show")}
+function hideIntro(){intro.classList.remove("show")}
+document.getElementById("introClose").onclick=hideIntro;
+document.getElementById("introGo").onclick=hideIntro;
+document.getElementById("helpBtn").onclick=showIntro;
+intro.addEventListener("click",e=>{if(e.target===intro)hideIntro()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")hideIntro()});
+showIntro(); // abre o guia ao carregar
+
+
+/* ---- Apresentação: viewer (slides em HTML) ---- */
+const fs=document.getElementById("fs");
+let apsI=0;
+document.getElementById("apsThumbs").innerHTML=APS.map((s,i)=>`<button class="apsthumb" data-i="${i}" title="${s.t}"><b>${i+1}</b><span>${s.t}</span></button>`).join("");
+function apsRender(){
+  const m=APS[apsI];
+  document.getElementById("apsSlide").innerHTML=m.h;
+  document.getElementById("apsCounter").textContent=(apsI+1)+" / "+APS.length;
+  document.getElementById("apsTitle").textContent=m.t;
+  document.getElementById("apsChips").innerHTML=(m.nodes||[]).map(id=>{const n=nodeById[id];
+    return n?`<span class="apschip" data-go="${id}"><span class="sw" style="background:${CAT[n.cat].color}"></span>${n.label}</span>`:""}).join("");
+  document.querySelectorAll("#apsChips .apschip").forEach(c=>c.onclick=()=>{switchView("map");setTimeout(()=>openPanel(c.dataset.go),60)});
+  document.querySelectorAll("#apsThumbs .apsthumb").forEach((t,i)=>t.classList.toggle("active",i===apsI));
+  const mlTxt=(m.nodes&&m.nodes.length)?"⊕ Explorar no mapa →":"⊕ Abrir o mapa →";
+  document.getElementById("apsMapLink").textContent=mlTxt;
+  document.getElementById("fsMapLink").textContent=mlTxt;
+  document.getElementById("fsSlide").innerHTML=m.h;
+  document.getElementById("fsCounter").textContent=(apsI+1)+" / "+APS.length;
+}
+function apsToMap(){const m=APS[apsI];
+  switchView("map");
+  if(m.nodes&&m.nodes.length){setTimeout(()=>openPanel(m.nodes[0]),60);}}
+function apsGo(i){apsI=(i+APS.length)%APS.length;apsRender();}
+document.querySelectorAll("#apsThumbs .apsthumb").forEach(t=>t.onclick=()=>apsGo(+t.dataset.i));
+document.getElementById("apsPrev").onclick=()=>apsGo(apsI-1);
+document.getElementById("apsNext").onclick=()=>apsGo(apsI+1);
+document.getElementById("apsSlide").onclick=apsToMap;
+document.getElementById("apsMapLink").onclick=apsToMap;
+document.querySelectorAll("#view-diagrama [data-go]").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+document.querySelectorAll("#view-agenda [data-go]").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+document.getElementById("apsFull").onclick=()=>{fs.classList.add("show");apsRender();
+  try{const p=fs.requestFullscreen&&fs.requestFullscreen(); if(p&&p.catch)p.catch(()=>{});}catch(e){}};
+function fsClose(){fs.classList.remove("show");try{if(document.fullscreenElement)document.exitFullscreen();}catch(e){}}
+document.getElementById("fsClose").onclick=fsClose;
+document.getElementById("fsMapLink").onclick=()=>{fsClose();apsToMap();};
+document.getElementById("fsPrev").onclick=()=>apsGo(apsI-1);
+document.getElementById("fsNext").onclick=()=>apsGo(apsI+1);
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement)fs.classList.remove("show")});
+document.addEventListener("keydown",e=>{
+  if(fs.classList.contains("show")){
+    if(e.key==="ArrowRight")apsGo(apsI+1); else if(e.key==="ArrowLeft")apsGo(apsI-1); else if(e.key==="Escape")fsClose();
+    return;
+  }
+  if(document.getElementById("view-apresentacao").classList.contains("active")){
+    if(e.key==="ArrowRight")apsGo(apsI+1); else if(e.key==="ArrowLeft")apsGo(apsI-1);
+  }
+});
+apsRender();
+
+window.addEventListener("resize",()=>{W=innerWidth;H=innerHeight-document.querySelector("header").offsetHeight;});
+applyVP(); render(); reheat(1);
+</script>
+<script id="mobile-patch-js">
+(function(){
+  var h=document.querySelector('header');
+  function set(){document.documentElement.style.setProperty('--hh',h.offsetHeight+'px');}
+  set(); addEventListener('resize',set); addEventListener('orientationchange',set);
+  var lg=document.querySelector('.legend h4');
+  if(lg) lg.addEventListener('click',function(){lg.parentElement.classList.toggle('open');});
+  if(innerWidth>760 && lg) lg.parentElement.classList.add('open');
+})();
+</script>
+</body>
+</html>

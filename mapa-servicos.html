@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Gestão de Serviços · Mapa Conceitual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: app de tela cheia com barra fixa, mapa de forças e vistas de leitura; tema escuro único, alto contraste para projetor */
+  :root{
+    --bg:#0a1020; --bg2:#0e1629; --panel:#121c33; --panel2:#1a2744;
+    --ink:#f4f7fc; --body:#e3e9f4; --muted:#b6c2d6; --line:#2c3a5c;
+    --core:#facc15; --teoria:#c4b5fd; --autor:#fdba74; --pratica:#4ade80;
+    --tec:#67e8f9; --barreira:#f87171; --lacuna:#f0abfc;
+    --accent:#facc15; --onaccent:#1a1400;
+    --f-ui:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --f-data:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:var(--f-ui);
+    background:var(--bg) radial-gradient(1200px 800px at 70% -10%,#1b2748 0%,var(--bg) 55%);
+    color:var(--ink);overflow:hidden;
+  }
+  /* ---------- Top bar ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;height:62px;z-index:30;
+    display:flex;align-items:center;gap:18px;padding:0 22px;
+    background:linear-gradient(180deg,rgba(10,16,32,.95),rgba(10,16,32,.78));
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:.3px;flex:none}
+  .brand>div{white-space:nowrap;line-height:1.18}
+  .brand .dot{width:13px;height:13px;border-radius:50%;background:var(--core);flex:none;
+    box-shadow:0 0 0 4px rgba(250,204,21,.18),0 0 18px rgba(250,204,21,.6)}
+  .brand small{display:block;font-weight:500;font-size:11px;color:var(--muted);letter-spacing:1.4px;text-transform:uppercase}
+  nav{display:flex;gap:6px;margin-left:6px;overflow-x:auto;min-width:0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  nav::-webkit-scrollbar{display:none}
+  nav button{
+    background:transparent;border:1px solid transparent;color:var(--muted);flex:none;white-space:nowrap;
+    padding:8px 15px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;
+    transition:.15s;font-family:inherit;letter-spacing:.2px;
+  }
+  nav button:hover{color:var(--ink);background:rgba(255,255,255,.04)}
+  nav button.active{color:var(--onaccent);background:var(--core);border-color:var(--core)}
+  .vbadge{background:var(--core);color:var(--onaccent);font-weight:700;font-size:11px;letter-spacing:.4px;
+    padding:4px 9px;border-radius:20px;white-space:nowrap}
+  .spacer{flex:1}
+  .searchbox{position:relative}
+  .searchbox input{
+    background:var(--panel);border:1px solid var(--line);color:var(--ink);
+    padding:8px 12px 8px 32px;border-radius:9px;font-size:13px;width:200px;font-family:inherit;outline:none;
+  }
+  .searchbox input:focus{border-color:var(--core)}
+  .searchbox svg{position:absolute;left:10px;top:9px;opacity:.5}
+  /* ---------- Views ---------- */
+  .view{position:fixed;inset:62px 0 0 0;display:none}
+  .view.active{display:block}
+  /* ---------- Map ---------- */
+  #stage{width:100%;height:100%;cursor:grab;display:block;touch-action:none}
+  #stage.grabbing{cursor:grabbing}
+  .legend{
+    position:absolute;left:18px;top:16px;z-index:10;background:rgba(18,28,51,.82);
+    border:1px solid var(--line);border-radius:13px;padding:13px 15px;backdrop-filter:blur(6px);max-width:230px;
+  }
+  .legend h4{margin:0 0 9px;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .legend .item{display:flex;align-items:center;gap:9px;font-size:13px;padding:4px 6px;border-radius:7px;cursor:pointer;transition:.12s;user-select:none}
+  .legend .item:hover{background:rgba(255,255,255,.05)}
+  .legend .item.off{opacity:.32}
+  .legend .swatch{width:12px;height:12px;border-radius:50%;flex:none}
+  .hint{position:absolute;left:18px;bottom:16px;z-index:10;font-size:12px;color:var(--muted);
+    background:rgba(18,28,51,.7);border:1px solid var(--line);border-radius:9px;padding:8px 12px;max-width:260px;line-height:1.5}
+  .ctrls{position:absolute;right:calc(18px + var(--panelw,0px));bottom:16px;z-index:10;display:flex;gap:8px;transition:right .25s}
+  .ctrls button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgba(18,28,51,.85);
+    color:var(--ink);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
+  .ctrls button:hover{border-color:var(--core);color:var(--core)}
+  /* nodes */
+  .link{stroke:var(--line);stroke-width:1.4;transition:stroke .2s,stroke-width .2s,opacity .2s}
+  .link.hot{stroke:var(--core);stroke-width:2.4;opacity:1}
+  .node{cursor:pointer}
+  .node circle{stroke:var(--bg);stroke-width:2.5;transition:r .15s}
+  .node text{fill:var(--ink);font-size:11.5px;font-weight:600;pointer-events:none;paint-order:stroke;
+    stroke:var(--bg);stroke-width:3px;stroke-linejoin:round}
+  .node.dim{opacity:.16}
+  .link.dim{opacity:.06}
+  .node.sel circle{stroke:#fff;stroke-width:3.5}
+  /* ---------- Detail panel ---------- */
+  #panel{
+    position:fixed;top:62px;right:0;bottom:0;width:380px;z-index:25;
+    background:linear-gradient(180deg,var(--panel),var(--bg2));border-left:1px solid var(--line);
+    transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+    display:flex;flex-direction:column;
+  }
+  #panel.open{transform:translateX(0)}
+  .pclose{position:absolute;top:13px;right:14px;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
+    background:transparent;color:var(--muted);cursor:pointer;font-size:17px}
+  .pclose:hover{color:var(--ink);border-color:var(--core)}
+  .pbody{padding:26px 26px 30px;overflow-y:auto}
+  .ptag{display:inline-block;font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
+    padding:5px 11px;border-radius:30px;margin-bottom:14px}
+  #panel h2{margin:0 0 4px;font-size:23px;line-height:1.2}
+  .pauthor{color:var(--core);font-size:13.5px;font-weight:600;margin-bottom:18px}
+  .pdesc{font-size:14.5px;line-height:1.62;color:var(--body);margin-bottom:20px}
+  .pblock{margin-bottom:18px}
+  .pblock h5{margin:0 0 8px;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .pblock ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--body)}
+  .pblock li{margin-bottom:5px}
+  .chip{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:20px;
+    padding:5px 12px;font-size:12px;margin:0 6px 7px 0;color:var(--body)}
+  .relnode{display:inline-flex;align-items:center;gap:7px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:9px;padding:7px 11px;font-size:12.5px;margin:0 7px 7px 0;cursor:pointer;transition:.12s}
+  .relnode:hover{border-color:var(--core);transform:translateY(-1px)}
+  .relnode .sw{width:9px;height:9px;border-radius:50%;flex:none}
+  /* ---------- Content views (timeline/table/synth) ---------- */
+  .scroller{height:100%;overflow-y:auto;padding:46px 8vw 80px}
+  .scroller h1{font-size:30px;margin:0 0 6px;font-weight:800;letter-spacing:-.5px}
+  .scroller .sub{color:var(--muted);font-size:15px;margin-bottom:40px;max-width:680px;line-height:1.6}
+  /* timeline */
+  .tl{position:relative;max-width:880px}
+  .tl::before{content:"";position:absolute;left:88px;top:8px;bottom:8px;width:2px;background:var(--line)}
+  .tlitem{position:relative;padding:0 0 30px 130px;cursor:pointer}
+  .tlitem .yr{position:absolute;left:0;top:-2px;width:72px;text-align:right;font-weight:600;font-size:18px;color:var(--autor);font-family:var(--f-data);font-variant-numeric:tabular-nums}
+  .tlitem .nub{position:absolute;left:81px;top:4px;width:16px;height:16px;border-radius:50%;background:var(--autor);
+    border:3px solid var(--bg);box-shadow:0 0 0 3px rgba(253,186,116,.18)}
+  .tlcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 19px;transition:.15s}
+  .tlitem:hover .tlcard{border-color:var(--autor);transform:translateX(3px)}
+  .tlcard h3{margin:0 0 3px;font-size:17px}
+  .tlcard .who{color:var(--core);font-size:13px;font-weight:600;margin-bottom:8px}
+  .tlcard p{margin:0;font-size:13.5px;line-height:1.55;color:var(--body)}
+  /* table */
+  .ctable{width:100%;max-width:980px;border-collapse:separate;border-spacing:0;font-size:14px}
+  .ctable th,.ctable td{text-align:left;padding:15px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+  .ctable thead th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .ctable tbody tr{transition:.12s}
+  .ctable tbody tr:hover{background:rgba(250,204,21,.05)}
+  .ctable .nm{font-weight:700;font-size:15px}
+  .ctable .nm small{display:block;font-weight:500;color:var(--muted);font-size:11.5px;margin-top:3px;letter-spacing:.3px}
+  .scopebar{height:7px;border-radius:5px;background:linear-gradient(90deg,var(--core),var(--pratica));margin-top:9px}
+  /* synth */
+  .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;max-width:920px;margin-bottom:46px}
+  .scard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;position:relative;overflow:hidden}
+  .scard .n{font-size:34px;font-weight:800;color:var(--core);opacity:.32;position:absolute;top:12px;right:18px}
+  .scard h3{margin:0 0 9px;font-size:16px;color:var(--core)}
+  .scard p{margin:0;font-size:14px;line-height:1.6;color:var(--body)}
+  .qbox{max-width:920px}
+  .qbox h2{font-size:21px;margin:0 0 18px}
+  .q{display:flex;gap:16px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:18px 20px;margin-bottom:13px}
+  .q .qn{font-size:24px;font-weight:800;color:var(--lacuna);line-height:1;flex:none}
+  .q p{margin:0;font-size:15px;line-height:1.55}
+  .pullquote{max-width:820px;margin:8px 0 40px;font-size:21px;line-height:1.5;font-weight:600;
+    color:var(--ink);border-left:3px solid var(--lacuna);padding-left:22px;font-style:italic}
+  .pullquote cite{display:block;font-style:normal;font-size:13px;color:var(--muted);margin-top:12px;font-weight:500}
+  /* cases */
+  .cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(390px,1fr));gap:20px;max-width:1120px}
+  .case{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px;display:flex;flex-direction:column}
+  .case .ch{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:3px}
+  .case h3{margin:0;font-size:18px}
+  .case .loc{font-size:11px;color:var(--muted);letter-spacing:.5px;white-space:nowrap;text-transform:uppercase;flex:none}
+  .case .tag{font-size:14.5px;font-style:italic;color:var(--pratica);font-weight:600;margin:7px 0 13px}
+  .case p.cd{margin:0 0 16px;font-size:13.5px;line-height:1.58;color:var(--body)}
+  .case .row{display:flex;gap:12px;font-size:12.5px;padding:9px 0;border-top:1px solid var(--line)}
+  .case .row .k{flex:none;width:62px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:10px;padding-top:2px}
+  .case .row .v{color:var(--body);line-height:1.5}
+  .case .row .v b{color:var(--autor);font-weight:700}
+  .loop-chip{display:inline-block;font:700 11px/1 ui-monospace,monospace;color:#4ade80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.34);border-radius:20px;padding:5px 11px;letter-spacing:.04em;text-transform:uppercase;margin:2px 0 4px}
+  .case .gomap{margin-top:16px;align-self:flex-start;background:transparent;border:1px solid var(--line);color:var(--core);
+    border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.13s}
+  .case .gomap:hover{border-color:var(--core);background:rgba(250,204,21,.08);transform:translateY(-1px)}
+  /* refs */
+  .refgroup{font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--core);font-weight:700;margin:36px 0 6px;max-width:1000px}
+  .refrow{max-width:1000px;padding:13px 0 13px 30px;text-indent:-30px;border-bottom:1px solid var(--line);
+    font-size:14px;line-height:1.6;color:var(--body)}
+  .refrow i{color:var(--ink)}
+  .refrow a{color:var(--core);text-decoration:none;font-size:13px;word-break:break-all}
+  .refrow a:hover{text-decoration:underline}
+  .refrow.hide{display:none}
+  .reffilter{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:7px 12px;border-radius:9px;
+    font-size:13px;font-family:inherit;outline:none;margin-left:10px;width:240px}
+  .reffilter:focus{border-color:var(--core)}
+  /* shared "ver no mapa" button */
+  .gomap{margin-top:16px;align-self:flex-start;background:transparent;border:1px solid var(--line);color:var(--core);
+    border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.13s}
+  .gomap:hover{border-color:var(--core);background:rgba(250,204,21,.08);transform:translateY(-1px)}
+  /* quadro teórico */
+  .qtable{display:flex;flex-direction:column;gap:16px;max-width:1080px}
+  .qrow{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px 24px;transition:.13s}
+  .qrow:hover{border-color:var(--line)}
+  .qhead{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:6px}
+  .qdotwrap{position:relative;display:inline-flex;flex:none}
+  .qdot{width:15px;height:15px;border-radius:50%;cursor:help;flex:none;box-shadow:0 0 0 3px rgba(255,255,255,.05)}
+  .qtip{position:absolute;left:24px;top:50%;transform:translateY(-50%);z-index:25;width:330px;max-width:72vw;
+    background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:13px 15px;
+    box-shadow:0 14px 34px rgba(0,0,0,.55);display:none;font-size:12.5px;line-height:1.5;color:var(--body)}
+  .qdotwrap:hover .qtip{display:block}
+  .qtip .c{display:block;font-weight:700;margin-bottom:7px;font-size:13.5px}
+  .qtip h6{margin:0 0 5px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .qconcept{font-weight:700;font-size:14.5px;padding:5px 13px;border-radius:30px;flex:none}
+  .qauthor{font-weight:700;font-size:15.5px}
+  .qpaper{font-style:italic;color:var(--muted);font-size:12.5px;margin-bottom:4px}
+  .qbody{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:14px}
+  .qcol h6{margin:0 0 6px;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .qcol p{margin:0;font-size:13.5px;line-height:1.56;color:var(--body)}
+  /* intro / how-to-use modal */
+  .helpbtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--core);
+    font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;flex:none}
+  .helpbtn:hover{border-color:var(--core)}
+  .introwrap{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:20px;
+    background:rgba(4,8,18,.74);backdrop-filter:blur(7px)}
+  .introwrap.show{display:flex}
+  .introcard{position:relative;background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);
+    border-radius:20px;max-width:580px;width:100%;padding:34px 36px;box-shadow:0 30px 80px rgba(0,0,0,.55);
+    max-height:88vh;overflow-y:auto}
+  .introcard .ptag{display:inline-block;font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
+    padding:5px 11px;border-radius:30px;margin-bottom:14px;background:rgba(250,204,21,.16);color:var(--core)}
+  .introcredit{font-size:12.5px;color:var(--core);font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:12px}
+  .introcard h2{margin:0 0 12px;font-size:25px;line-height:1.2}
+  .introcard .lead{font-size:15px;line-height:1.62;color:var(--body);margin:0 0 22px}
+  .introsteps{display:flex;flex-direction:column;gap:12px;margin-bottom:26px}
+  .introsteps .s{display:flex;gap:12px;font-size:13.5px;line-height:1.5;color:var(--body)}
+  .introsteps .s .sw{width:10px;height:10px;border-radius:50%;flex:none;margin-top:5px}
+  .introsteps .s b{color:var(--ink)}
+  .introgo{background:var(--core);color:var(--onaccent);border:none;border-radius:11px;padding:12px 24px;font-size:14.5px;
+    font-weight:700;cursor:pointer;font-family:inherit}
+  .introgo:hover{filter:brightness(1.08)}
+  .introx{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);
+    background:transparent;color:var(--muted);cursor:pointer;font-size:16px}
+  .introx:hover{color:var(--ink);border-color:var(--core)}
+  /* apresentação / viewer */
+  .apswrap{height:100%;display:flex;flex-direction:column;padding:22px 4vw 16px}
+  .apstop{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:13px;gap:14px;flex-wrap:wrap}
+  .apstop h1{font-size:22px;margin:0}
+  .apssub{color:var(--muted);font-size:12.5px;margin-top:3px}
+  .apsactions{display:flex;gap:8px}
+  .apsbtn{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:8px 14px;
+    font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .apsbtn:hover{border-color:var(--core);color:var(--core)}
+  .apsstage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
+    background:#070b17;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .apsstage img{max-width:100%;max-height:100%;object-fit:contain;display:block;cursor:pointer}
+  .apsmaplink{position:absolute;top:12px;right:12px;background:var(--core);color:var(--onaccent);border:none;
+    border-radius:10px;padding:8px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;
+    box-shadow:0 4px 14px rgba(0,0,0,.35)}
+  .apsmaplink:hover{filter:brightness(1.08)}
+  .apsnav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(18,28,51,.82);color:#fff;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .apsnav:hover{border-color:var(--core);color:var(--core)}
+  .apsprev{left:14px}.apsnext{right:14px}
+  .apscounter{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(10,16,32,.82);
+    border:1px solid var(--line);border-radius:20px;padding:5px 14px;font-size:12.5px;color:var(--muted)}
+  .apsmeta{margin:13px 0 9px;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+  .apsmeta .t{font-weight:700;font-size:15px}
+  .apschips{display:flex;flex-wrap:wrap;gap:7px}
+  .apschip{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;transition:.12s}
+  .apschip:hover{border-color:var(--core);transform:translateY(-1px)}
+  .apschip .sw{width:8px;height:8px;border-radius:50%;flex:none}
+  .apsthumbs{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 2px}
+  .apsthumb{flex:none;width:104px;height:58px;border-radius:7px;border:2px solid transparent;overflow:hidden;cursor:pointer;opacity:.5;background:#000;transition:.12s}
+  .apsthumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .apsthumb.active{opacity:1;border-color:var(--core)}
+  .apsthumb:hover{opacity:1}
+  /* tela cheia */
+  .fswrap{position:fixed;inset:0;z-index:80;display:none;background:#000;align-items:center;justify-content:center}
+  .fswrap.show{display:flex}
+  .fswrap img{max-width:100vw;max-height:100vh;object-fit:contain}
+  .fsx{position:absolute;top:16px;right:18px;width:40px;height:40px;border-radius:9px;border:1px solid #333;
+    background:rgba(0,0,0,.5);color:#fff;font-size:17px;cursor:pointer}
+  .fsx:hover{border-color:var(--core);color:var(--core)}
+  .fsnav{position:absolute;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;border:1px solid #444;
+    background:rgba(0,0,0,.4);color:#fff;font-size:26px;line-height:1;cursor:pointer}
+  .fsnav:hover{border-color:var(--core);color:var(--core)}
+  .fsprev{left:20px}.fsnext{right:20px}
+  .fscounter{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:#bbb;font-size:13px}
+  .fsmaplink{position:absolute;bottom:14px;right:20px;background:var(--core);color:var(--onaccent);border:none;
+    border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+    box-shadow:0 4px 14px rgba(0,0,0,.4)}
+  .fsmaplink:hover{filter:brightness(1.08)}
+  .bfybox{max-width:1040px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .bfybox svg{width:100%;height:auto;display:block}
+  .bfyacts{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .bfyacts .gomap{margin-top:0;text-decoration:none}
+  .agh{font-size:13px;letter-spacing:1.2px;text-transform:uppercase;color:var(--core);font-weight:700;margin:36px 0 14px}
+  #view-agenda .scard .gomap{margin-top:14px}
+  @media(max-width:760px){.qbody{grid-template-columns:1fr;gap:14px}.introcard{padding:26px 22px}
+    .apswrap{padding:16px 14px}.apsnav{width:36px;height:36px;font-size:18px}}
+  @media(max-width:760px){
+    .grid4{grid-template-columns:1fr}.scroller{padding:34px 22px 80px}
+    header{gap:10px;padding:0 12px}
+    nav{flex:1;margin-left:0}
+    nav button{padding:8px 11px;font-size:12.5px}
+    .searchbox{display:none}.vbadge{display:none}.spacer{display:none}
+    #panel{width:100%}.brand small{display:none}
+  }
+
+  body{height:100%}
+  header{padding-top:env(safe-area-inset-top,0px)}
+  button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--core);outline-offset:2px}
+  .scroller .sub b{color:var(--ink)}
+  .vbadge,.tlcard .who,.pauthor{font-variant-numeric:tabular-nums}
+  /* fases da linha do tempo */
+  .tlphase{position:relative;padding:6px 0 22px 130px;max-width:880px}
+  .tlphase h2{margin:10px 0 4px;font-size:13px;letter-spacing:1.4px;text-transform:uppercase;color:var(--core);font-weight:700}
+  .tlphase p{margin:0;font-size:14px;line-height:1.55;color:var(--muted);max-width:640px}
+  .tlphase::before{content:"";position:absolute;left:83px;top:12px;width:12px;height:12px;background:var(--core);transform:rotate(45deg)}
+  /* slides em HTML */
+  .slide{container-type:inline-size;aspect-ratio:16/9;width:min(100%, calc((100vh - 330px) * 16 / 9));max-width:100%;
+    background:#0b1224;border:1px solid var(--line);border-radius:10px;padding:5.5cqw 7cqw;color:var(--ink);cursor:pointer;
+    display:flex;flex-direction:column;justify-content:center;gap:2.2cqw;overflow:hidden;text-align:left}
+  .apsstage .slide{min-width:0}
+  .slide .eyebrow{font-family:var(--f-data);font-size:1.7cqw;letter-spacing:.14em;text-transform:uppercase;color:var(--core)}
+  .slide h2{margin:0;font-size:5cqw;line-height:1.08;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+  .slide p,.slide li{font-size:2.35cqw;line-height:1.45;color:var(--body)}
+  .slide ul,.slide ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:.9cqw}
+  .slide b{color:var(--core);font-weight:600}
+  .slide .big{font-size:3cqw;line-height:1.35;color:var(--ink);max-width:80%;margin:0}
+  .slide .note{font-size:1.9cqw;color:var(--muted);margin:0}
+  .slide .formula{font-family:var(--f-data);font-size:3.4cqw;color:var(--core);border:2px solid var(--core);border-radius:8px;padding:1.2cqw 2.2cqw;align-self:flex-start}
+  .slide .cols2,.slide .cols3{display:grid;gap:2.2cqw}
+  .slide .cols2{grid-template-columns:1fr 1fr}.slide .cols3{grid-template-columns:repeat(3,1fr)}
+  .slide .cols2>div,.slide .cols3>div{border-top:3px solid var(--core);padding-top:1.4cqw}
+  .slide h3{margin:0 0 .8cqw;font-size:2.6cqw;color:var(--ink)}
+  .slide .cols2 p,.slide .cols3 p{margin:0;font-size:2.1cqw}
+  .slide .phases{display:grid;grid-template-columns:repeat(5,1fr);gap:1.4cqw}
+  .slide .phases div{border-left:3px solid var(--core);padding:.6cqw 0 .6cqw 1.4cqw;display:flex;flex-direction:column;gap:.5cqw}
+  .slide .phases b{font-family:var(--f-data);font-size:3.6cqw;color:var(--core)}
+  .slide .phases span{font-size:2.1cqw;font-weight:600}
+  .slide .phases em{font-style:normal;font-family:var(--f-data);font-size:1.7cqw;color:var(--muted)}
+  .slide .sl-cover{display:flex;flex-direction:column;gap:2.4cqw}
+  .slide .sl-cover h2{font-size:7.4cqw;color:var(--core)}
+  .slide .sl-foot{font-family:var(--f-data);font-size:1.8cqw;color:var(--muted)}
+  .fswrap .fsslide{width:min(94vw, calc(94vh * 16 / 9));border-radius:0;cursor:default}
+  .apsthumb{display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:150px;height:auto;min-height:58px;padding:7px 9px;
+    background:var(--panel);color:var(--body);font:500 11.5px/1.3 var(--f-ui);text-align:left;border:2px solid var(--line)}
+  .apsthumb b{font-family:var(--f-data);color:var(--core);font-size:12px}
+  .apsthumb span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .apsthumb.active{border-color:var(--core)}
+  .refrow a{color:var(--core)}
+  .bfybox{overflow-x:auto}
+  .bfybox svg{min-width:680px}
+  @media(max-width:760px){.slide{width:100%}.slide .cols3,.slide .phases{grid-template-columns:1fr 1fr}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style id="disc-back-css">
+.disc-back{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;margin-right:12px;padding:6px 11px;border-radius:6px;
+background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui,sans-serif;text-decoration:none!important;white-space:nowrap;letter-spacing:0;text-transform:none}
+.disc-back:hover{background:#fff}.disc-back:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.disc-back .bk{font-weight:500;opacity:.85}
+@media(max-width:560px){.disc-back .bk{display:none}header .header-meta{display:none}header .header-title{font-size:.95rem;line-height:1.2}}
+@media print{.disc-back{display:none}}
+</style>
+<style id="mobile-patch">
+@media (max-width:700px){
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+  th{font-size:12px!important} td{font-size:14px!important;line-height:1.5}
+  .tab-btn{font-size:14px!important;min-height:44px}
+}
+@media (max-width:760px){
+  header{height:auto!important;flex-wrap:wrap;padding:8px 10px 0!important;gap:8px 10px!important}
+  header .brand{flex:1;min-width:0}
+  header nav{order:10;flex:1 0 100%!important;margin:0 -10px!important;padding:0 10px 8px;border-top:1px solid var(--line);padding-top:8px}
+  header nav button{padding:9px 12px!important;font-size:13.5px!important;min-height:40px}
+  .helpbtn{min-width:40px;min-height:40px}
+  .view{inset:var(--hh,108px) 0 0 0!important}
+  #panel{top:var(--hh,108px)!important}
+  .legend{top:10px!important;left:10px!important;padding:8px 12px!important;max-width:72vw!important}
+  .legend h4{cursor:pointer;margin:0!important;font-size:12px!important}
+  .legend h4::after{content:" ▾";text-transform:none}
+  .legend.open h4{margin-bottom:8px!important}
+  .legend.open h4::after{content:" ▴"}
+  .legend:not(.open) #legendItems{display:none}
+  .legend .item{font-size:14px!important;padding:7px 6px!important}
+  .hint{display:none!important}
+  .pdesc,.pblock li{font-size:15.5px!important}
+  .pbody{padding:22px 18px 40px!important}
+  .pclose{width:40px!important;height:40px!important}
+}
+
+@media (max-width:760px){
+  .apsstage{padding-bottom:52px!important}
+  .apsnav{top:auto!important;bottom:8px!important;transform:none!important}
+  .apsprev{left:calc(50% - 88px)!important}
+  .apsnext{right:calc(50% - 88px)!important}
+  .apscounter{bottom:14px!important}
+}
+</style>
+</head>
+<body>
+<header>
+<a class="disc-back" href="../index.html" title="Voltar à página da disciplina">‹ Disciplina<span class="bk"> · Livro Cap. 2</span></a>
+  <div class="brand"><span class="dot"></span><div>Gestão de Serviços<small>Sessão 4 · Commerce Bank · 1972–2026</small></div></div>
+  <span class="vbadge">v1 · out 2026</span>
+  <nav id="nav">
+    <button data-view="apresentacao" class="active">Apresentação</button>
+    <button data-view="map">Mapa Conceitual</button>
+    <button data-view="diagrama">Diagrama</button>
+    <button data-view="timeline">Linha do Tempo</button>
+    <button data-view="cases">Casos Práticos</button>
+    <button data-view="quadro">Quadro Teórico</button>
+    <button data-view="agenda">Agenda</button>
+    <button data-view="refs">Referências</button>
+  </nav>
+  <div class="spacer"></div>
+  <button id="helpBtn" class="helpbtn" title="Como usar / comece aqui">?</button>
+  <div class="searchbox">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="search" placeholder="Buscar conceito ou autor…" autocomplete="off">
+  </div>
+</header>
+
+<!-- ============ MAP ============ -->
+<section class="view" id="view-map">
+  <svg id="stage"></svg>
+  <div class="legend">
+    <h4>Categorias <span style="font-weight:500;text-transform:none;letter-spacing:0">(clique p/ filtrar)</span></h4>
+    <div id="legendItems"></div>
+  </div>
+  <div class="hint">Clique num nó para detalhes · arraste para reorganizar · roda do mouse para zoom</div>
+  <div class="ctrls" id="ctrls">
+    <button id="zin" title="Aproximar">+</button>
+    <button id="zout" title="Afastar">−</button>
+    <button id="zfit" title="Centralizar" style="font-size:14px">⤢</button>
+  </div>
+</section>
+
+<!-- ============ APRESENTAÇÃO ============ -->
+<section class="view active" id="view-apresentacao">
+  <div class="apswrap">
+    <div class="apstop">
+      <div><h1>Apresentação da Aula</h1><div class="apssub">Gestão de Serviços: onde o serviço decide ser ruim para poder ser excelente · Prof. Dr. Thiago Lima</div></div>
+      <div class="apsactions">
+        <button class="apsbtn" id="apsFull">⛶ Tela cheia</button>
+      </div>
+    </div>
+    <div class="apsstage">
+      <button class="apsnav apsprev" id="apsPrev" aria-label="anterior">‹</button>
+      <div class="slide" id="apsSlide"></div>
+      <button class="apsnav apsnext" id="apsNext" aria-label="próximo">›</button>
+      <div class="apscounter" id="apsCounter"></div>
+      <button class="apsmaplink" id="apsMapLink">⊕ Explorar no mapa →</button>
+    </div>
+    <div class="apsmeta">
+      <span class="t" id="apsTitle"></span>
+      <span class="apschips" id="apsChips"></span>
+    </div>
+    <div class="apsthumbs" id="apsThumbs"></div>
+  </div>
+</section>
+
+<!-- ============ DIAGRAMA ============ -->
+<section class="view" id="view-diagrama">
+  <div class="scroller">
+<h1>Cadeia de Lucro e os Quatro Elementos</h1>
+    <p class="sub">A imagem-síntese do serviço. Na faixa de cima, a <b>Cadeia de Lucro em Serviços</b>: o que acontece com o funcionário chega ao cliente e depois ao resultado. Embaixo, os <b>quatro elementos de Frei</b>, as decisões que alimentam cada elo. A oferta escolhe onde ser pior, o financiamento define quem paga, e funcionários e clientes precisam conseguir entregar o que foi prometido. No Commerce Bank, o cliente paga a conveniência na taxa.</p>
+    <div class="bfybox">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 700" font-family="'IBM Plex Sans',Arial,Helvetica,sans-serif" role="img" aria-label="Cadeia de Lucro em Serviços e os quatro elementos de Frei">
+        <rect width="1180" height="700" fill="#0a1020"/>
+        <defs>
+        <marker id="sv-aw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e8eef8"/></marker>
+        <marker id="sv-ay" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#facc15"/></marker>
+        <marker id="sv-ap" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c4b5fd"/></marker>
+        </defs>
+        <text x="262" y="92" text-anchor="middle" fill="#4ade80" font-size="14" font-weight="700" letter-spacing="1">DENTRO DA EMPRESA</text>
+        <text x="590" y="92" text-anchor="middle" fill="#facc15" font-size="14" font-weight="700" letter-spacing="1">FRONTEIRA</text>
+        <text x="918" y="92" text-anchor="middle" fill="#67e8f9" font-size="14" font-weight="700" letter-spacing="1">COM O CLIENTE</text>
+        <path d="M 1082 100 C 1082 20, 98 20, 98 100" fill="none" stroke="#fdba74" stroke-width="2.2" stroke-dasharray="7 6" marker-end="url(#sv-aw)"/>
+        <rect x="400" y="24" width="380" height="26" rx="6" fill="#0a1020"/>
+        <text x="590" y="43" text-anchor="middle" fill="#fdba74" font-size="15" font-weight="700">lucro reinvestido na qualidade interna</text>
+        <rect x="29" y="100" width="138" height="124" rx="10" fill="#121c33" stroke="#4ade80" stroke-width="2.5"/>
+        <text x="98" y="132" text-anchor="middle" fill="#4ade80" font-size="16" font-weight="700">Qualidade</text>
+        <text x="98" y="152" text-anchor="middle" fill="#4ade80" font-size="16" font-weight="700">interna</text>
+        <text x="98" y="186" text-anchor="middle" fill="#e8eef8" font-size="13">seleção, treino,</text>
+        <text x="98" y="204" text-anchor="middle" fill="#e8eef8" font-size="13">ferramentas</text>
+        <line x1="169" y1="162" x2="191" y2="162" stroke="#e8eef8" stroke-width="2.4" marker-end="url(#sv-aw)"/>
+        <rect x="193" y="100" width="138" height="124" rx="10" fill="#121c33" stroke="#4ade80" stroke-width="2.5"/>
+        <text x="262" y="132" text-anchor="middle" fill="#4ade80" font-size="16" font-weight="700">Satisfação do</text>
+        <text x="262" y="152" text-anchor="middle" fill="#4ade80" font-size="16" font-weight="700">funcionário</text>
+        <text x="262" y="186" text-anchor="middle" fill="#e8eef8" font-size="13">ambiente e</text>
+        <text x="262" y="204" text-anchor="middle" fill="#e8eef8" font-size="13">autonomia</text>
+        <line x1="333" y1="162" x2="355" y2="162" stroke="#e8eef8" stroke-width="2.4" marker-end="url(#sv-aw)"/>
+        <rect x="357" y="100" width="138" height="124" rx="10" fill="#121c33" stroke="#4ade80" stroke-width="2.5"/>
+        <text x="426" y="132" text-anchor="middle" fill="#4ade80" font-size="16" font-weight="700">Retenção e</text>
+        <text x="426" y="152" text-anchor="middle" fill="#4ade80" font-size="16" font-weight="700">produtividade</text>
+        <text x="426" y="186" text-anchor="middle" fill="#e8eef8" font-size="13">experiência</text>
+        <text x="426" y="204" text-anchor="middle" fill="#e8eef8" font-size="13">acumulada</text>
+        <line x1="497" y1="162" x2="519" y2="162" stroke="#e8eef8" stroke-width="2.4" marker-end="url(#sv-aw)"/>
+        <rect x="521" y="100" width="138" height="124" rx="10" fill="#1b2540" stroke="#facc15" stroke-width="2.5"/>
+        <text x="590" y="132" text-anchor="middle" fill="#facc15" font-size="16" font-weight="700">Valor do</text>
+        <text x="590" y="152" text-anchor="middle" fill="#facc15" font-size="16" font-weight="700">serviço</text>
+        <text x="590" y="186" text-anchor="middle" fill="#e8eef8" font-size="13">resultado + processo</text>
+        <text x="590" y="204" text-anchor="middle" fill="#e8eef8" font-size="13">vs. preço + esforço</text>
+        <line x1="661" y1="162" x2="683" y2="162" stroke="#e8eef8" stroke-width="2.4" marker-end="url(#sv-aw)"/>
+        <rect x="685" y="100" width="138" height="124" rx="10" fill="#121c33" stroke="#67e8f9" stroke-width="2.5"/>
+        <text x="754" y="132" text-anchor="middle" fill="#67e8f9" font-size="16" font-weight="700">Satisfação do</text>
+        <text x="754" y="152" text-anchor="middle" fill="#67e8f9" font-size="16" font-weight="700">cliente</text>
+        <text x="754" y="186" text-anchor="middle" fill="#e8eef8" font-size="13">expectativa</text>
+        <text x="754" y="204" text-anchor="middle" fill="#e8eef8" font-size="13">atendida</text>
+        <line x1="825" y1="162" x2="847" y2="162" stroke="#e8eef8" stroke-width="2.4" marker-end="url(#sv-aw)"/>
+        <rect x="849" y="100" width="138" height="124" rx="10" fill="#121c33" stroke="#67e8f9" stroke-width="2.5"/>
+        <text x="918" y="132" text-anchor="middle" fill="#67e8f9" font-size="16" font-weight="700">Lealdade do</text>
+        <text x="918" y="152" text-anchor="middle" fill="#67e8f9" font-size="16" font-weight="700">cliente</text>
+        <text x="918" y="186" text-anchor="middle" fill="#e8eef8" font-size="13">retenção, recompra,</text>
+        <text x="918" y="204" text-anchor="middle" fill="#e8eef8" font-size="13">indicação</text>
+        <line x1="989" y1="162" x2="1011" y2="162" stroke="#e8eef8" stroke-width="2.4" marker-end="url(#sv-aw)"/>
+        <rect x="1013" y="100" width="138" height="124" rx="10" fill="#121c33" stroke="#67e8f9" stroke-width="2.5"/>
+        <text x="1082" y="132" text-anchor="middle" fill="#67e8f9" font-size="16" font-weight="700">Receita e</text>
+        <text x="1082" y="152" text-anchor="middle" fill="#67e8f9" font-size="16" font-weight="700">lucro</text>
+        <text x="1082" y="186" text-anchor="middle" fill="#e8eef8" font-size="13">crescimento e</text>
+        <text x="1082" y="204" text-anchor="middle" fill="#e8eef8" font-size="13">rentabilidade</text>
+        <text x="31" y="256" fill="#e8eef8" font-size="14" font-weight="700" letter-spacing="1">CADEIA DE LUCRO</text>
+        <text x="31" y="276" fill="#e8eef8" font-size="14">Heskett et al. (1994)</text>
+        <rect x="31" y="350" width="260" height="196" rx="12" fill="#121c33" stroke="#c4b5fd" stroke-width="2.5"/>
+        <text x="161" y="384" text-anchor="middle" fill="#c4b5fd" font-size="19" font-weight="700">Gestão de funcionários</text>
+        <text x="161" y="418" text-anchor="middle" fill="#e8eef8" font-size="14.5">O que esperar do funcionário</text>
+        <text x="161" y="440" text-anchor="middle" fill="#e8eef8" font-size="14.5">médio que conseguimos contratar?</text>
+        <line x1="55" y1="462" x2="267" y2="462" stroke="#2c3a5c" stroke-width="1.5"/>
+        <text x="161" y="492" text-anchor="middle" fill="#facc15" font-size="13.5" font-weight="600">Commerce Bank: quem sustenta</text>
+        <text x="161" y="514" text-anchor="middle" fill="#facc15" font-size="13.5" font-weight="600">agência aberta sete dias?</text>
+        <line x1="262" y1="348" x2="262" y2="230" stroke="#c4b5fd" stroke-width="2.2" marker-end="url(#sv-ap)"/>
+        <rect x="317" y="350" width="260" height="196" rx="12" fill="#121c33" stroke="#c4b5fd" stroke-width="2.5"/>
+        <text x="447" y="384" text-anchor="middle" fill="#c4b5fd" font-size="19" font-weight="700">Oferta</text>
+        <text x="447" y="418" text-anchor="middle" fill="#e8eef8" font-size="14.5">Em que atributos ser excelente</text>
+        <text x="447" y="440" text-anchor="middle" fill="#e8eef8" font-size="14.5">e em quais aceitar ser pior?</text>
+        <line x1="341" y1="462" x2="553" y2="462" stroke="#2c3a5c" stroke-width="1.5"/>
+        <text x="447" y="492" text-anchor="middle" fill="#facc15" font-size="13.5" font-weight="600">Commerce Bank: horário estendido,</text>
+        <text x="447" y="514" text-anchor="middle" fill="#facc15" font-size="13.5" font-weight="600">sete dias; taxa menos atrativa</text>
+        <line x1="447" y1="348" x2="590" y2="230" stroke="#c4b5fd" stroke-width="2.2" marker-end="url(#sv-ap)"/>
+        <rect x="603" y="350" width="260" height="196" rx="12" fill="#121c33" stroke="#c4b5fd" stroke-width="2.5"/>
+        <text x="733" y="384" text-anchor="middle" fill="#c4b5fd" font-size="19" font-weight="700">Gestão de clientes</text>
+        <text x="733" y="418" text-anchor="middle" fill="#e8eef8" font-size="14.5">O que esperar do cliente, e</text>
+        <text x="733" y="440" text-anchor="middle" fill="#e8eef8" font-size="14.5">como gerir sua variabilidade?</text>
+        <line x1="627" y1="462" x2="839" y2="462" stroke="#2c3a5c" stroke-width="1.5"/>
+        <text x="733" y="492" text-anchor="middle" fill="#facc15" font-size="13.5" font-weight="600">Frei (2006): acomodar ou reduzir</text>
+        <text x="733" y="514" text-anchor="middle" fill="#facc15" font-size="13.5" font-weight="600">chegada, pedido, esforço...</text>
+        <line x1="733" y1="348" x2="754" y2="230" stroke="#c4b5fd" stroke-width="2.2" marker-end="url(#sv-ap)"/>
+        <rect x="889" y="350" width="260" height="196" rx="12" fill="#121c33" stroke="#c4b5fd" stroke-width="2.5"/>
+        <text x="1019" y="384" text-anchor="middle" fill="#c4b5fd" font-size="19" font-weight="700">Financiamento</text>
+        <text x="1019" y="418" text-anchor="middle" fill="#e8eef8" font-size="14.5">Quem paga pela excelência:</text>
+        <text x="1019" y="440" text-anchor="middle" fill="#e8eef8" font-size="14.5">preço, custo menor ou o cliente?</text>
+        <line x1="913" y1="462" x2="1125" y2="462" stroke="#2c3a5c" stroke-width="1.5"/>
+        <text x="1019" y="492" text-anchor="middle" fill="#facc15" font-size="13.5" font-weight="600">Commerce Bank: o cliente paga</text>
+        <text x="1019" y="514" text-anchor="middle" fill="#facc15" font-size="13.5" font-weight="600">a conveniência na taxa</text>
+        <line x1="1082" y1="348" x2="1082" y2="230" stroke="#c4b5fd" stroke-width="2.2" marker-end="url(#sv-ap)"/>
+        <text x="31" y="314" fill="#c4b5fd" font-size="14" font-weight="700" letter-spacing="1">QUATRO ELEMENTOS</text>
+        <text x="31" y="334" fill="#c4b5fd" font-size="14">Frei (2008)</text>
+        <rect x="31" y="574" width="1118" height="104" rx="12" fill="#121c33" stroke="#facc15" stroke-width="2"/>
+        <text x="60" y="610" fill="#facc15" font-size="20" font-weight="700">V = C × (A + P)</text>
+        <text x="60" y="640" fill="#e8eef8" font-size="14">VCAP · Lima (2026)</text>
+        <text x="290" y="610" fill="#e8eef8" font-size="15"><tspan fill="#4ade80" font-weight="700">C</tspan> = capacidades da linha de frente   ·   <tspan fill="#c4b5fd" font-weight="700">A + P</tspan> = oferta, ativos e processos com o cliente dentro</text>
+        <text x="290" y="646" fill="#e8eef8" font-size="15"><tspan fill="#facc15" font-weight="700">V</tspan> = valor percebido · ser ruim no que não importa para ser excelente no que importa</text>
+        </svg>
+    </div>
+    <div class="bfyacts">
+      <button class="gomap" data-go="cadeia">Ver a Cadeia de Lucro no mapa →</button>
+      <button class="gomap" data-go="quatro">Ver os quatro elementos no mapa →</button>
+      <button class="gomap" data-go="tradeoff">Ver “ser ruim no que não importa” →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AGENDA ============ -->
+<section class="view" id="view-agenda">
+  <div class="scroller">
+<h1>Agenda de Pesquisa</h1>
+    <p class="sub">A gestão de serviços tem modelos prescritivos fortes e evidência empírica irregular. A cadeia de lucro foi testada elo a elo com resultados que variam por contexto, e o serviço digital muda quem está na linha de frente. <em>Loveman (1998); Kamakura et al. (2002); Vargo &amp; Lusch (2004, 2008); Frei &amp; Morriss (2012).</em></p>
+    <h3 class="agh">Cinco lacunas da literatura</h3>
+    <div class="grid4">
+      <div class="scard"><h3>Causalidade da cadeia</h3><p><b>Evidência:</b> os elos têm suporte em estudos transversais, com força variável entre unidades. <b>Oportunidade:</b> dados longitudinais que separem causa de correlação entre funcionário, cliente e lucro.</p></div>
+      <div class="scard"><h3>Serviço sem funcionário</h3><p><b>Evidência:</b> a cadeia foi formulada para serviço presencial. <b>Oportunidade:</b> reformular os primeiros elos quando o cliente é atendido por aplicativo.</p></div>
+      <div class="scard"><h3>IA na linha de frente</h3><p><b>Evidência:</b> as capacidades da linha de frente passam a combinar pessoas e algoritmos. <b>Oportunidade:</b> medir o efeito sobre o C do VCAP e sobre a variabilidade que a empresa consegue acomodar.</p></div>
+      <div class="scard"><h3>Medir a variabilidade</h3><p><b>Evidência:</b> as cinco variabilidades de Frei são uma tipologia gerencial. <b>Oportunidade:</b> escalas e indicadores operacionais para cada tipo e para o esforço do cliente.</p></div>
+      <div class="scard"><h3>Trade-offs que envelhecem</h3><p><b>Evidência:</b> modelos baseados em trade-offs são revistos quando o mercado muda. <b>Oportunidade:</b> estudar quando e por que uma empresa desfaz as próprias escolhas de ser pior.</p></div>
+    </div>
+    <h3 class="agh">Três debates de fronteira</h3>
+    <div class="grid4">
+      <div class="scard"><h3 style="color:var(--lacuna)">Funcionário feliz, cliente feliz?</h3><p>A cadeia supõe que a satisfação do funcionário vem antes. Também é plausível o contrário: clientes satisfeitos tornam o trabalho melhor. A direção importa para onde investir.</p><button class="gomap" data-go="causal">Ver no mapa →</button></div>
+      <div class="scard"><h3 style="color:var(--lacuna)">Eficiência ou repasse?</h3><p>Autoatendimento reduz variabilidade e custo. Quando o cliente não recebe nada em troca, é apenas trabalho transferido, e a lealdade responde.</p><button class="gomap" data-go="transfer">Ver no mapa →</button></div>
+      <div class="scard"><h3 style="color:var(--lacuna)">Estratégia ou desculpa?</h3><p>“Ser ruim no que não importa” exige saber o que o cliente valoriza. Sem esse diagnóstico, vira justificativa para serviço fraco.</p><button class="gomap" data-go="tradeoff">Ver no mapa →</button></div>
+    </div>
+    <h3 class="agh">Direções de tese · perguntas em aberto</h3>
+    <div class="qbox">
+      <div class="q"><span class="qn">?</span><p>Em bancos de varejo brasileiros, os elos da cadeia de lucro se mantêm quando a maior parte do atendimento migra para canais digitais?</p></div>
+      <div class="q"><span class="qn">?</span><p>Que tipos de variabilidade introduzida pelo cliente a IA consegue acomodar a baixo custo, e quais continuam exigindo redução?</p></div>
+      <div class="q"><span class="qn">?</span><p>Como medir, em uma organização de serviço, se os quatro elementos de Frei são coerentes entre si?</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TIMELINE ============ -->
+<section class="view" id="view-timeline">
+  <div class="scroller">
+    <h1>Encadeamento Teórico do Campo</h1>
+    <p class="sub">Da linha de produção aplicada ao serviço (Levitt, 1972) ao serviço lido pelo modelo VCAP (Lima, 2026). O campo atravessa cinco fases: o serviço entra nas operações, ganha modelos próprios, é ligado ao lucro, é testado e reinterpretado, e passa a ser tratado como escolha deliberada de trade-offs.</p>
+    <div class="tl" id="tl"></div>
+  </div>
+</section>
+
+<!-- ============ QUADRO TEÓRICO ============ -->
+<section class="view" id="view-quadro">
+  <div class="scroller">
+    <h1>Quadro Teórico · do autor à prática</h1>
+    <p class="sub">Os trabalhos que sustentam a gestão de serviços, lidos da teoria à prática. Cada linha conecta o autor ao conceito-chave, à sua principal contribuição e à prática que dela deriva. A cor do conceito segue a legenda do mapa; use “ver no mapa” para localizá-lo na rede.</p>
+    <div class="qtable" id="quadroRows"></div>
+  </div>
+</section>
+
+<!-- ============ CASES ============ -->
+<section class="view" id="view-cases">
+  <div class="scroller">
+    <h1>Casos Práticos · da teoria à prática</h1>
+    <p class="sub">Cada caso real conecta uma escolha de serviço à lente teórica que a explica. Commerce Bank é o caso da sessão; os demais mostram os mesmos elementos em outros setores. Use “ver no mapa” para abrir o nó relacionado.</p>
+    <div class="cases" id="caseList"></div>
+  </div>
+</section>
+
+<!-- ============ REFERENCES ============ -->
+<section class="view" id="view-refs">
+  <div class="scroller">
+    <h1>Referências Citadas</h1>
+    <p class="sub"><span id="refCount"></span> obras citadas ou recomendadas para a aula, em APA 7. Quando disponível, clique no link para abrir a fonte original.
+      <input class="reffilter" id="refFilter" placeholder="filtrar por autor, título…" autocomplete="off"></p>
+    <div id="refGroups"></div>
+  </div>
+</section>
+
+<!-- ============ INTRO / COMO USAR ============ -->
+<div class="introwrap" id="intro">
+  <div class="introcard">
+    <button class="introx" id="introClose">✕</button>
+    <div class="introcredit">Material produzido por Prof. Dr. Thiago Lima</div>
+    <div class="ptag">Comece por aqui · como usar</div>
+    <h2>O que é Gestão de Serviços?</h2>
+    <p class="lead">Em serviços, o cliente entra no processo, a capacidade não se estoca e o funcionário da linha de frente faz parte do produto. <b>Gerir serviços</b> é desenhar um sistema coerente de oferta, financiamento, funcionários e clientes, e escolher em que ser excelente e em que aceitar ser pior. Este app organiza o tema nas seguintes áreas:</p>
+    <div class="introsteps">
+      <div class="s"><span class="sw" style="background:var(--core)"></span><div><b>Mapa Conceitual</b> · clique nas bolinhas para abrir cada conceito com sua explicação, o autor de referência e as conexões. Cada conceito leva ao slide correspondente.</div></div>
+      <div class="s"><span class="sw" style="background:var(--pratica)"></span><div><b>Apresentação</b> · os slides da aula, navegáveis e em tela cheia; clique no slide para saltar ao conceito no mapa.</div></div>
+      <div class="s"><span class="sw" style="background:var(--tec)"></span><div><b>Diagrama</b> · a Cadeia de Lucro em Serviços e os quatro elementos de Frei, lado a lado.</div></div>
+      <div class="s"><span class="sw" style="background:var(--autor)"></span><div><b>Linha do Tempo</b> · como o campo se formou em cinco fases, de Levitt (1972) ao modelo VCAP (2026).</div></div>
+      <div class="s"><span class="sw" style="background:var(--teoria)"></span><div><b>Quadro Teórico</b> · autor → paper → conceito-chave → contribuição → prática.</div></div>
+      <div class="s"><span class="sw" style="background:var(--barreira)"></span><div><b>Casos Práticos</b> · Commerce Bank, Southwest, Shouldice, Progressive, IKEA e outros, ligados de volta à teoria.</div></div>
+      <div class="s"><span class="sw" style="background:var(--lacuna)"></span><div><b>Agenda</b> · lacunas, debates de fronteira e direções de tese.</div></div>
+      <div class="s"><span class="sw" style="background:var(--muted)"></span><div><b>Referências</b> · todas as obras citadas em APA 7, com DOI clicável.</div></div>
+    </div>
+    <button class="introgo" id="introGo">Começar a explorar →</button>
+  </div>
+</div>
+
+<!-- ============ TELA CHEIA ============ -->
+<div class="fswrap" id="fs">
+  <button class="fsx" id="fsClose" aria-label="fechar">✕</button>
+  <button class="fsnav fsprev" id="fsPrev" aria-label="anterior">‹</button>
+  <div class="slide fsslide" id="fsSlide"></div>
+  <button class="fsnav fsnext" id="fsNext" aria-label="próximo">›</button>
+  <div class="fscounter" id="fsCounter"></div>
+  <button class="fsmaplink" id="fsMapLink">⊕ Explorar no mapa →</button>
+</div>
+
+<!-- ============ DETAIL PANEL ============ -->
+<aside id="panel">
+  <button class="pclose" id="pclose">✕</button>
+  <div class="pbody" id="pbody"></div>
+</aside>
+
+<script>
+/* ====================== DATA ====================== */
+const CAT = {
+  core:    {name:"Núcleo conceitual",    color:"#facc15"},
+  teoria:  {name:"Lentes teóricas",      color:"#c4b5fd"},
+  autor:   {name:"Autores principais",   color:"#fdba74"},
+  pratica: {name:"Ferramentas de gestão", color:"#4ade80"},
+  tec:     {name:"Canais & métricas",    color:"#67e8f9"},
+  barreira:{name:"Armadilhas",           color:"#f87171"},
+  lacuna:  {name:"Lacunas & agenda",     color:"#f0abfc"},
+};
+const SHORT = {
+  "Cadeia de Lucro em Serviços":"Cadeia de Lucro",
+  "Os quatro elementos de Frei":"Quatro elementos",
+  "Ser ruim no que não importa":"Ser ruim no que não importa",
+  "Variabilidade introduzida pelo cliente":"Variabilidade do cliente",
+  "Modelo VCAP · V = C × (A + P)":"VCAP",
+  "Características dos serviços (IHIP)":"Características (IHIP)",
+  "Matriz de processos de serviço":"Matriz de Schmenner",
+  "Modelo dos gaps e SERVQUAL":"Gaps e SERVQUAL",
+  "Lógica dominante de serviço":"Lógica de serviço",
+  "Mecanismo de financiamento":"Financiamento",
+  "Sistema de gestão de funcionários":"Gestão de funcionários",
+  "Sistema de gestão de clientes":"Gestão de clientes",
+  "Service blueprint":"Service blueprint",
+  "Gestão de capacidade e demanda":"Capacidade × demanda",
+  "Autoatendimento e canais digitais":"Autoatendimento",
+  "Métricas de lealdade e esforço":"Lealdade e esforço",
+  "Tentar ser bom em tudo":"Ser bom em tudo",
+  "Corte de custo na linha de frente":"Corte na linha de frente",
+  "Autoatendimento como transferência":"Transferência ao cliente",
+  "Evidência causal da cadeia":"Evidência causal",
+  "Serviço digital e IA na linha de frente":"IA na linha de frente",
+  "Heskett, Sasser & Schlesinger · 1997":"Heskett et al. · 1997",
+  "Parasuraman et al. · 1988":"Parasuraman · 1988",
+};
+
+const NODES = [
+  // ---- núcleo
+  {id:"serv", label:"Gestão de Serviços", cat:"core", r:34, author:"Frei, 2008 · Heskett et al., 1994 · Lima, 2026",
+   desc:"Gerir um serviço é desenhar um sistema em que o cliente participa da produção, a capacidade não pode ser estocada e o funcionário da linha de frente é parte do produto. A pergunta estratégica deixa de ser “como fazer tudo bem” e passa a ser “em que ser excelente, em que aceitar ser pior e quem paga por isso”.",
+   bullets:["O cliente entra no processo: traz variabilidade e também trabalho","Capacidade perecível: hora ociosa não vira estoque","Excelência é escolha de atributos, não soma de esforços","Funcionário e cliente são sistemas a gerir, não apenas custos"]},
+  {id:"cadeia", label:"Cadeia de Lucro em Serviços", cat:"core", r:26, author:"Heskett et al., 1994 · Heskett, Sasser & Schlesinger, 1997",
+   desc:"Hipótese encadeada que liga o que acontece dentro da empresa ao resultado financeiro: qualidade do serviço interno gera satisfação do funcionário, que sustenta retenção e produtividade, que produzem valor do serviço, que gera satisfação e lealdade do cliente, que geram crescimento de receita e lucro.",
+   bullets:["Qualidade interna → satisfação do funcionário → retenção e produtividade","→ valor do serviço → satisfação do cliente → lealdade → receita e lucro","Valor = resultados e qualidade do processo, comparados ao preço e ao custo de acesso","Cada elo é uma hipótese a medir, não uma certeza"]},
+  {id:"quatro", label:"Os quatro elementos de Frei", cat:"core", r:24, author:"Frei, 2008",
+   desc:"Um serviço excelente precisa acertar quatro elementos ao mesmo tempo e fazê-los caber no mesmo sistema: a oferta, o mecanismo de financiamento, o sistema de gestão de funcionários e o sistema de gestão de clientes. Acertar três e errar um costuma bastar para o modelo falhar.",
+   bullets:["Oferta: em que atributos ser excelente e em quais ser pior","Financiamento: como pagar pela excelência","Funcionários: o que é razoável esperar da linha de frente","Clientes: o que é razoável esperar do cliente"]},
+  {id:"tradeoff", label:"Ser ruim no que não importa", cat:"core", r:23, author:"Frei & Morriss, 2012 · Porter, 1996",
+   desc:"Não é possível ser o melhor em todos os atributos com recursos finitos. O serviço excelente escolhe os atributos que o seu segmento mais valoriza e aceita desempenho inferior nos outros, de forma deliberada. É a versão de serviço da tese de Porter (1996): estratégia exige trade-offs.",
+   bullets:["Mapa de atributos: ordenar o que o segmento-alvo valoriza","Ser pior em algo é escolha, não descuido","O trade-off só protege se os atributos formam um sistema difícil de copiar"]},
+  {id:"variab", label:"Variabilidade introduzida pelo cliente", cat:"core", r:23, author:"Frei, 2006",
+   desc:"O cliente traz variabilidade ao processo de cinco formas. Diante de cada uma, a empresa pode acomodar (absorver com mais recursos ou flexibilidade) ou reduzir (restringir ou padronizar). A escolha define o equilíbrio entre eficiência e experiência.",
+   bullets:["Chegada · quando o cliente aparece","Pedido · o que ele solicita","Capacidade · o quanto ele sabe fazer a sua parte","Esforço · o quanto ele se dispõe a fazer","Preferência subjetiva · como ele julga o atendimento"]},
+  {id:"vcap", label:"Modelo VCAP · V = C × (A + P)", cat:"core", r:22, author:"Lima, 2026 (Cap. 1 e 2)",
+   desc:"Valor = Capacidades × (Ativos + Processos). Em serviços, V é o valor percebido pelo cliente, C são as capacidades da linha de frente, A são os ativos que sustentam a oferta (rede, horário, tecnologia) e P são os processos com o cliente dentro. C multiplica: sem capacidade da linha de frente, agência e processo não viram valor.",
+   bullets:["V · valor percebido pelo cliente","C · capacidades da linha de frente (gestão de funcionários)","A · ativos que materializam a oferta","P · processos que incorporam o cliente (gestão de clientes)"]},
+  // ---- teoria
+  {id:"ihip", label:"Características dos serviços (IHIP)", cat:"teoria", r:20, author:"Zeithaml, Parasuraman & Berry, 1985 · Lovelock, 1983",
+   desc:"Intangibilidade, heterogeneidade, inseparabilidade entre produção e consumo e perecibilidade. A lista foi a base da primeira geração de estudos de serviços e explica por que qualidade e capacidade são geridas de outra forma.",
+   bullets:["Inseparabilidade: o cliente está na fábrica","Perecibilidade: capacidade não se estoca","Heterogeneidade: cada encontro varia"]},
+  {id:"contato", label:"Contato com o cliente", cat:"teoria", r:21, author:"Chase, 1978 · Chase, 1981",
+   desc:"O potencial de eficiência de um serviço diminui à medida que aumenta o tempo de contato do cliente com o sistema. A resposta é separar a linha de frente, desenhada para o cliente, da retaguarda, desenhada para eficiência.",
+   bullets:["Alto contato: desenhar para a experiência","Baixo contato: desenhar como fábrica","Desacoplar frente e retaguarda"]},
+  {id:"matriz", label:"Matriz de processos de serviço", cat:"teoria", r:20, author:"Schmenner, 1986",
+   desc:"Classifica serviços por intensidade de mão de obra e por grau de interação e customização. Os quadrantes são fábrica de serviço, loja de serviço, serviço de massa e serviço profissional; cada um tem desafios gerenciais diferentes.",
+   bullets:["Fábrica de serviço: baixa intensidade de mão de obra, baixa customização","Serviço profissional: alta intensidade, alta customização","Movimentos na matriz são decisões estratégicas"]},
+  {id:"gaps", label:"Modelo dos gaps e SERVQUAL", cat:"teoria", r:21, author:"Parasuraman, Zeithaml & Berry, 1985, 1988",
+   desc:"Qualidade percebida é a distância entre expectativa e percepção do cliente, e essa distância nasce de quatro falhas internas: entender mal o cliente, especificar mal o padrão, entregar abaixo do padrão e prometer mais do que se entrega.",
+   bullets:["Cinco dimensões: tangíveis, confiabilidade, responsividade, segurança, empatia","O gap do cliente é consequência de gaps internos"]},
+  {id:"sdl", label:"Lógica dominante de serviço", cat:"teoria", r:20, author:"Vargo & Lusch, 2004, 2008",
+   desc:"Serviço é a aplicação de competências em benefício de outro, e o valor é cocriado com o cliente no uso. Bens passam a ser meios de entrega de serviço. A lente dá base teórica para tratar o cliente como recurso do processo.",bullets:[]},
+  {id:"filas", label:"Psicologia das filas", cat:"teoria", r:19, author:"Maister, 1985",
+   desc:"Satisfação é percepção menos expectativa. A espera percebida depende de como ela é vivida: espera ociosa, incerta, sem explicação ou injusta parece mais longa que a espera ocupada, informada e justa.",
+   bullets:["Espera antes do processo parece mais longa que durante","Ansiedade e incerteza alongam a espera","Espera injusta pesa mais que espera longa"]},
+  // ---- autores
+  {id:"levitt72", label:"Levitt · 1972", cat:"autor", r:15, author:"Linha de produção em serviços",
+   desc:"Propõe aplicar ao serviço a lógica de manufatura: padronizar, substituir julgamento por sistema e usar tecnologia. O McDonald's é o exemplo central.",bullets:[]},
+  {id:"sasser76", label:"Sasser · 1976", cat:"autor", r:15, author:"Oferta e demanda em serviços",
+   desc:"Como capacidade não se estoca, é preciso casar oferta e demanda: estratégias de acompanhar a demanda ou de nivelar a capacidade, e alavancas para moldar a própria demanda.",bullets:[]},
+  {id:"chase78", label:"Chase · 1978", cat:"autor", r:16, author:"Contato com o cliente",
+   desc:"Pergunta onde o cliente se encaixa na operação e propõe o grau de contato como variável de desenho do serviço.",bullets:[]},
+  {id:"maister85", label:"Maister · 1985", cat:"autor", r:15, author:"Psicologia das filas",
+   desc:"Proposições sobre a experiência da espera: gerir a percepção da fila é tão importante quanto gerir o tempo real.",bullets:[]},
+  {id:"schmenner86", label:"Schmenner · 1986", cat:"autor", r:15, author:"Matriz de processos de serviço",
+   desc:"Matriz que cruza intensidade de mão de obra e interação/customização para mostrar como serviços de naturezas diferentes sobrevivem e prosperam.",bullets:[]},
+  {id:"pzb", label:"Parasuraman et al. · 1988", cat:"autor", r:15, author:"Gaps e SERVQUAL",
+   desc:"Modelo conceitual dos gaps (1985) e escala SERVQUAL (1988), com cinco dimensões de qualidade percebida.",bullets:[]},
+  {id:"heskett94", label:"Heskett et al. · 1994", cat:"autor", r:17, author:"Cadeia de Lucro em Serviços",
+   desc:"Heskett, Jones, Loveman, Sasser e Schlesinger formulam a cadeia de lucro em serviços na HBR, com exemplos como Southwest e Taco Bell.",bullets:[]},
+  {id:"heskett97", label:"Heskett, Sasser & Schlesinger · 1997", cat:"autor", r:15, author:"The Service Profit Chain (livro)",
+   desc:"Livro que detalha a cadeia, a equação de valor para o cliente e as práticas para gerir cada elo.",bullets:[]},
+  {id:"loveman98", label:"Loveman · 1998", cat:"autor", r:15, author:"Evidência em banco de varejo",
+   desc:"Teste empírico da cadeia de lucro em agências de um banco de varejo, ligando satisfação do funcionário, lealdade do cliente e desempenho financeiro.",bullets:[]},
+  {id:"rucci98", label:"Rucci et al. · 1998", cat:"autor", r:15, author:"Cadeia funcionário–cliente–lucro na Sears",
+   desc:"Rucci, Kirn e Quinn descrevem como a Sears modelou e mediu a cadeia funcionário–cliente–lucro para orientar a gestão das lojas.",bullets:[]},
+  {id:"kamakura02", label:"Kamakura et al. · 2002", cat:"autor", r:15, author:"Avaliação da cadeia de lucro",
+   desc:"Testam a cadeia de lucro com dados de agências bancárias e mostram que eficiência em um elo não garante eficiência no seguinte.",bullets:[]},
+  {id:"vargo04", label:"Vargo & Lusch · 2004", cat:"autor", r:15, author:"Lógica dominante de serviço",
+   desc:"Propõem que o marketing evolua de uma lógica centrada em bens para uma lógica centrada em serviço e cocriação de valor.",bullets:[]},
+  {id:"frei06", label:"Frei · 2006", cat:"autor", r:16, author:"Variabilidade e eficiência",
+   desc:"Mostra que o conflito entre eficiência e serviço vem da variabilidade trazida pelo cliente e propõe estratégias de acomodação e de redução.",bullets:[]},
+  {id:"frei08", label:"Frei · 2008", cat:"autor", r:17, author:"Os quatro elementos",
+   desc:"Oferta, financiamento, gestão de funcionários e gestão de clientes: os quatro elementos que um negócio de serviço precisa acertar em conjunto. Commerce Bank é um dos exemplos.",bullets:[]},
+  {id:"freimorriss", label:"Frei & Morriss · 2012", cat:"autor", r:16, author:"Uncommon Service",
+   desc:"Livro que transforma os quatro elementos em quatro verdades: não dá para ser bom em tudo, alguém tem de pagar, o problema não é o funcionário e é preciso gerir o cliente.",bullets:[]},
+  // ---- ferramentas
+  {id:"oferta", label:"Oferta", cat:"pratica", r:21, author:"Frei, 2008 · Frei & Morriss, 2012",
+   desc:"Definida a partir dos atributos que o segmento-alvo valoriza. O mapa de atributos ordena o que importa e assume onde a empresa será pior que a concorrência para financiar a excelência no que importa.",
+   bullets:["Quem é o cliente-alvo e o que ele valoriza mais","Em que atributos ser o melhor","Em quais aceitar ficar abaixo da média"]},
+  {id:"financ", label:"Mecanismo de financiamento", cat:"pratica", r:20, author:"Frei, 2008",
+   desc:"Excelência custa. Alguém paga: o cliente, por preço maior ou por aceitar pior desempenho em outro atributo; a própria operação, quando o serviço melhor também reduz custo; ou o cliente que faz parte do trabalho.",
+   bullets:["Cobrar do cliente, de forma que ele aceite","Serviço que reduz custo ao mesmo tempo","Cliente que assume parte do trabalho"]},
+  {id:"funcs", label:"Sistema de gestão de funcionários", cat:"pratica", r:20, author:"Frei, 2008 · Heskett et al., 1994",
+   desc:"Seleção, treinamento, desenho do trabalho e incentivos coerentes com a oferta. A pergunta de Frei é o que é razoável esperar do funcionário médio que a empresa consegue contratar, e não do melhor.",bullets:[]},
+  {id:"clientes", label:"Sistema de gestão de clientes", cat:"pratica", r:20, author:"Frei, 2008 · Normann & Ramírez, 1993",
+   desc:"O cliente participa da produção e precisa ser selecionado, informado e treinado para isso. Gerir o cliente é tão importante quanto gerir o funcionário.",bullets:[]},
+  {id:"blueprint", label:"Service blueprint", cat:"pratica", r:18, author:"Shostack, 1984 · Bitner, Ostrom & Morgan, 2008",
+   desc:"Mapa do serviço que separa as ações do cliente, da linha de frente visível, da retaguarda e dos processos de suporte, com a linha de visibilidade e os pontos de falha.",bullets:[]},
+  {id:"capdem", label:"Gestão de capacidade e demanda", cat:"pratica", r:19, author:"Sasser, 1976",
+   desc:"Do lado da demanda: preço diferenciado, reservas, desenvolvimento de horários de vale. Do lado da oferta: turnos, equipes em tempo parcial, participação do cliente e compartilhamento de capacidade.",bullets:[]},
+  {id:"garantia", label:"Garantia de serviço", cat:"pratica", r:17, author:"Hart, 1988",
+   desc:"Garantia incondicional como padrão público de desempenho: obriga a empresa a medir falhas, entender suas causas e desenhar o sistema para não falhar.",bullets:[]},
+  // ---- canais & métricas
+  {id:"autosserv", label:"Autoatendimento e canais digitais", cat:"tec", r:19, author:"Levitt, 1972 · Frei, 2006",
+   desc:"Tecnologia que reduz o contato ou transfere tarefas ao cliente. Pode ser redução de variabilidade com ganho para o cliente ou apenas repasse de trabalho, a depender do desenho.",bullets:[]},
+  {id:"medicao", label:"Métricas de lealdade e esforço", cat:"tec", r:18, author:"Reichheld & Sasser, 1990 · Dixon, Freeman & Toman, 2010",
+   desc:"Medir retenção e deserção de clientes, e não só satisfação declarada. A redução do esforço do cliente aparece como alavanca de lealdade mais forte que o encantamento.",bullets:[]},
+  // ---- armadilhas
+  {id:"tudo", label:"Tentar ser bom em tudo", cat:"barreira", r:19, author:"Frei & Morriss, 2012",
+   desc:"Investir para ficar acima da média em todos os atributos produz um serviço caro e mediano. Sem escolha explícita, a organização sobrecarrega a linha de frente e não se diferencia em nada.",bullets:[]},
+  {id:"cortecusto", label:"Corte de custo na linha de frente", cat:"barreira", r:18, author:"Heskett et al., 1994",
+   desc:"Cortes em seleção, treinamento ou quadro melhoram o custo do trimestre e enfraquecem os primeiros elos da cadeia. O efeito sobre lealdade e receita chega depois e raramente é atribuído à causa.",bullets:[]},
+  {id:"transfer", label:"Autoatendimento como transferência", cat:"barreira", r:17, author:"Frei, 2006",
+   desc:"Reduzir variabilidade empurrando trabalho ao cliente sem dar a ele algo em troca é redução com compromisso. O cliente percebe o esforço e a lealdade cai.",bullets:[]},
+  // ---- lacunas
+  {id:"lacunas", label:"Cinco Lacunas", cat:"lacuna", r:21, author:"Kamakura et al., 2002 · Vargo & Lusch, 2008",
+   desc:"A gestão de serviços tem modelos prescritivos fortes e evidência empírica mais irregular. As lacunas estão na causalidade da cadeia, no serviço digital, na linha de frente com IA, na medição da variabilidade e na duração dos trade-offs.",
+   bullets:["Evidência causal da cadeia de lucro","Serviço sem funcionário: o cliente como coprodutor digital","IA e as capacidades da linha de frente","Medir variabilidade e esforço do cliente","Trade-offs que se desfazem com o tempo"]},
+  {id:"causal", label:"Evidência causal da cadeia", cat:"lacuna", r:18, author:"Loveman, 1998 · Kamakura et al., 2002",
+   desc:"Os elos da cadeia têm suporte empírico em estudos como os de bancos, mas a força e a direção variam por contexto. Falta evidência longitudinal que separe causa de correlação.",bullets:[]},
+  {id:"digital", label:"Serviço digital e IA na linha de frente", cat:"lacuna", r:18, author:"Vargo & Lusch, 2008 · Lima, 2026",
+   desc:"Quando o atendimento passa a ser feito por software, o que vira a “satisfação do funcionário” da cadeia? E o que muda no C do VCAP quando parte da capacidade da linha de frente é algorítmica?",bullets:[]},
+];
+
+const LINKS = [
+  ["serv","cadeia","explica o resultado por"],["serv","quatro","desenha-se por"],["serv","tradeoff","exige"],["serv","variab","enfrenta"],["serv","vcap","lido pelo"],
+  ["quatro","oferta","elemento"],["quatro","financ","elemento"],["quatro","funcs","elemento"],["quatro","clientes","elemento"],
+  ["quatro","frei08","proposto por"],["tradeoff","freimorriss","formulado por"],["variab","frei06","proposta por"],
+  ["cadeia","heskett94","proposta por"],["cadeia","heskett97","desenvolvida por"],["cadeia","loveman98","testada por"],["cadeia","rucci98","aplicada por"],["cadeia","kamakura02","testada por"],
+  ["tradeoff","oferta","define a"],["oferta","financ","precisa de"],["financ","tradeoff","paga-se com"],
+  ["funcs","cadeia","alimenta os primeiros elos da"],["clientes","variab","gere a"],["clientes","sdl","fundamentado por"],
+  ["vcap","funcs","C ="],["vcap","clientes","P ="],["vcap","oferta","A sustenta a"],["vcap","cadeia","dialoga com"],
+  ["serv","ihip","parte de"],["ihip","contato","explica"],["ihip","capdem","exige"],["contato","chase78","proposto por"],["contato","matriz","generalizado na"],["matriz","schmenner86","proposta por"],
+  ["contato","autosserv","justifica"],["levitt72","autosserv","precursor de"],["autosserv","transfer","pode virar"],["variab","autosserv","reduz-se por"],["transfer","frei06","criticada por"],
+  ["capdem","sasser76","proposta por"],["capdem","filas","complementada por"],["filas","maister85","proposta por"],["variab","capdem","chegada exige"],
+  ["serv","gaps","mede-se por"],["gaps","pzb","proposto por"],["gaps","cadeia","mede o elo satisfação"],["garantia","gaps","fecha o"],["blueprint","gaps","reduz o"],
+  ["blueprint","contato","desenha a linha de"],["serv","blueprint","ferramenta"],["serv","garantia","ferramenta"],
+  ["sdl","vargo04","proposta por"],["sdl","variab","reinterpreta"],
+  ["cadeia","medicao","mede-se por"],["medicao","transfer","revela"],
+  ["tradeoff","tudo","evita"],["tudo","freimorriss","criticado por"],["cadeia","cortecusto","rompida por"],["cortecusto","funcs","enfraquece"],
+  ["serv","lacunas","limitado por"],["lacunas","causal","frente de"],["lacunas","digital","frente de"],["causal","kamakura02","motivada por"],["digital","vcap","desafia o C do"],["digital","autosserv","prolonga"],
+];
+
+/* timeline: fases e marcos */
+const TIMELINE = [
+  {phase:"Fase I · O serviço entra nas operações (1972–1978)", sub:"A manufatura empresta sua lógica ao serviço, e logo aparece o que não se transfere: capacidade perecível e cliente dentro do processo."},
+  {yr:"1972",node:"levitt72",t:"Linha de produção aplicada ao serviço",who:"Levitt, T.",d:"Padronizar, substituir julgamento por sistema e usar tecnologia, com o McDonald's como exemplo."},
+  {yr:"1976",node:"sasser76",t:"Casar oferta e demanda em serviços",who:"Sasser, W. E.",d:"Como capacidade não se estoca, é preciso acompanhar a demanda, nivelar a capacidade ou mover a própria demanda."},
+  {yr:"1978",node:"chase78",t:"Onde o cliente se encaixa na operação?",who:"Chase, R. B.",d:"Quanto mais contato, menor o potencial de eficiência; a saída é desacoplar frente e retaguarda."},
+  {phase:"Fase II · A especificidade dos serviços (1983–1988)", sub:"Classificações, qualidade percebida e desenho do serviço ganham modelos próprios."},
+  {yr:"1983",node:"ihip",t:"Classificar serviços para decidir",who:"Lovelock, C. H.",d:"Esquemas de classificação que mostram que serviços diferentes exigem gestão diferente."},
+  {yr:"1984",node:"blueprint",t:"Service blueprint",who:"Shostack, G. L.",d:"O serviço desenhado como processo, com linha de visibilidade e pontos de falha."},
+  {yr:"1985",node:"gaps",t:"Modelo conceitual dos gaps",who:"Parasuraman, A., Zeithaml, V. A. & Berry, L. L.",d:"Qualidade percebida como distância entre expectativa e percepção, originada em falhas internas."},
+  {yr:"1985",node:"maister85",t:"A psicologia das filas",who:"Maister, D. H.",d:"Satisfação é percepção menos expectativa; a espera vivida importa tanto quanto a medida."},
+  {yr:"1986",node:"schmenner86",t:"Matriz de processos de serviço",who:"Schmenner, R. W.",d:"Intensidade de mão de obra × interação e customização: quatro tipos de serviço, quatro agendas de gestão."},
+  {yr:"1988",node:"garantia",t:"Garantia incondicional de serviço",who:"Hart, C. W. L.",d:"A garantia como padrão público que obriga o sistema a não falhar."},
+  {yr:"1988",node:"pzb",t:"SERVQUAL",who:"Parasuraman, A., Zeithaml, V. A. & Berry, L. L.",d:"Escala de múltiplos itens com cinco dimensões de qualidade percebida."},
+  {phase:"Fase III · Do serviço ao lucro (1990–1998)", sub:"A pergunta muda de “como medir qualidade” para “como a qualidade vira lucro” e onde ficam os trade-offs."},
+  {yr:"1990",node:"medicao",t:"Zero deserções",who:"Reichheld, F. F. & Sasser, W. E.",d:"Reter clientes vale mais do que parecia: a deserção vira métrica gerencial."},
+  {yr:"1993",node:"clientes",t:"Da cadeia de valor à constelação de valor",who:"Normann, R. & Ramírez, R.",d:"O cliente como coprodutor, com a IKEA como exemplo central."},
+  {yr:"1994",node:"heskett94",t:"A Cadeia de Lucro em Serviços",who:"Heskett, J. L. et al.",d:"Da qualidade interna ao lucro, em elos que a gestão pode medir."},
+  {yr:"1996",node:"tradeoff",t:"O que é estratégia?",who:"Porter, M. E.",d:"Estratégia exige trade-offs e um sistema de atividades que se reforçam; Southwest é um dos exemplos."},
+  {yr:"1997",node:"heskett97",t:"The Service Profit Chain",who:"Heskett, J. L., Sasser, W. E. & Schlesinger, L. A.",d:"O livro que detalha a cadeia e a equação de valor para o cliente."},
+  {yr:"1998",node:"loveman98",t:"A cadeia testada em banco de varejo",who:"Loveman, G. W.",d:"Evidência de ligação entre satisfação do funcionário, lealdade do cliente e desempenho das agências."},
+  {yr:"1998",node:"rucci98",t:"A cadeia funcionário–cliente–lucro na Sears",who:"Rucci, A. J., Kirn, S. P. & Quinn, R. T.",d:"Um modelo de medição que liga atitude do funcionário, percepção do cliente e receita."},
+  {phase:"Fase IV · Teste e nova lógica (2002–2008)", sub:"A cadeia é testada elo a elo, o valor passa a ser visto como cocriado e Frei transforma trade-offs em arquitetura de serviço."},
+  {yr:"2002",node:"kamakura02",t:"Avaliação da cadeia de lucro",who:"Kamakura, W. A. et al.",d:"Eficiência em um elo não garante eficiência no seguinte."},
+  {yr:"2004",node:"vargo04",t:"Lógica dominante de serviço",who:"Vargo, S. L. & Lusch, R. F.",d:"Serviço como aplicação de competências; valor cocriado com o cliente."},
+  {yr:"2006",node:"frei06",t:"Rompendo o trade-off entre eficiência e serviço",who:"Frei, F. X.",d:"Cinco tipos de variabilidade trazida pelo cliente e a escolha entre acomodar e reduzir."},
+  {yr:"2008",node:"frei08",t:"As quatro coisas que um serviço precisa acertar",who:"Frei, F. X.",d:"Oferta, financiamento, funcionários e clientes, desenhados como um sistema único."},
+  {yr:"2008",node:"blueprint",t:"Blueprint como técnica de inovação",who:"Bitner, M. J., Ostrom, A. L. & Morgan, F. N.",d:"O blueprint atualizado como ferramenta prática de desenho e inovação em serviços."},
+  {phase:"Fase V · Excelência deliberada (2010–2026)", sub:"Menos encantamento, mais escolha: esforço do cliente, trade-offs explícitos e a ligação com o modelo de valor da organização."},
+  {yr:"2010",node:"medicao",t:"Pare de tentar encantar o cliente",who:"Dixon, M., Freeman, K. & Toman, N.",d:"Reduzir o esforço do cliente pesa mais na lealdade do que superar expectativas."},
+  {yr:"2012",node:"freimorriss",t:"Uncommon Service",who:"Frei, F. X. & Morriss, A.",d:"Ser ruim no que não importa para ser excelente no que importa."},
+  {yr:"2026",node:"vcap",t:"Serviços no modelo VCAP",who:"Lima, T. F.",d:"Excelência operacional em serviços lida por V = C × (A + P)."},
+];
+
+const CASES = [
+  {title:"Commerce Bank", loc:"Banco de varejo · EUA", loop:"Caso da sessão",
+   tag:"Conveniência no lugar de taxa.",
+   desc:"Fundado por Vernon Hill em Nova Jersey, o banco se posicionou como “America's Most Convenient Bank”: agências abertas sete dias por semana, horário estendido e um atendimento inspirado no varejo. Em troca, pagava taxas de depósito menos atrativas que as da concorrência. Foi adquirido pelo TD Bank em 2008, que manteve o slogan. Frei (2008) usa o banco para mostrar oferta e financiamento desenhados juntos.",
+   practice:"Mapa de atributos: excelente em conveniência e experiência, pior em taxa",
+   theory:"<b>Ser ruim no que não importa</b> + <b>mecanismo de financiamento</b> · o cliente paga a conveniência na taxa",
+   author:"Frei, 2008 · Frei & Morriss, 2012", node:"financ"},
+  {title:"Southwest Airlines", loc:"Aviação · EUA", loop:"Sistema de trade-offs",
+   tag:"Voar barato e pontual abrindo mão do que o segmento não valoriza.",
+   desc:"Rotas ponto a ponto, frota de um único tipo de aeronave, sem refeição e, historicamente, sem assento marcado. Cada escolha reduz tempo em solo e custo. Porter (1996) usa a empresa para mostrar um sistema de atividades difícil de copiar, e Heskett et al. (1994) a citam pela gestão de funcionários. A decisão recente de adotar assento marcado é boa pergunta para a turma: o trade-off envelheceu?",
+   practice:"Oferta enxuta e processo desenhado para giro rápido da aeronave",
+   theory:"<b>Trade-offs como sistema</b> · coerência entre oferta, operação e gestão de pessoas",
+   author:"Porter, 1996 · Heskett et al., 1994", node:"tradeoff"},
+  {title:"Shouldice Hospital", loc:"Saúde · Canadá", loop:"Foco e gestão do paciente",
+   tag:"Um hospital que só opera hérnia.",
+   desc:"Hospital nos arredores de Toronto dedicado a um único tipo de cirurgia de hérnia. Seleciona pacientes antes da internação, usa anestesia local e estimula o paciente a caminhar logo após a operação. Os pacientes convivem e se ajudam. É um dos casos clássicos de ensino de operações de serviço.",
+   practice:"Seleção de pacientes, padronização do procedimento e paciente como coprodutor",
+   theory:"<b>Sistema de gestão de clientes</b> · reduzir a variabilidade de pedido e de capacidade do cliente",
+   author:"Frei, 2006 · Frei, 2008", node:"clientes"},
+  {title:"Progressive", loc:"Seguro de automóveis · EUA", loop:"Serviço que reduz custo",
+   tag:"Chegar ao acidente antes do conflito.",
+   desc:"A seguradora criou o atendimento Immediate Response, com peritos que vão ao local do sinistro e resolvem o caso rapidamente, e passou a mostrar ao cliente cotações de concorrentes. O serviço melhor também reduz custo de sinistro e de litígio.",
+   practice:"Regulação de sinistro no local e transparência de preço",
+   theory:"<b>Mecanismo de financiamento</b> · o serviço que se paga ao reduzir custo",
+   author:"Frei, 2008", node:"financ"},
+  {title:"Taco Bell", loc:"Fast food · EUA · anos 1990", loop:"Primeiros elos da cadeia",
+   tag:"Tirar a cozinha do restaurante para pôr o funcionário no cliente.",
+   desc:"A rede transferiu parte do preparo para fora das lojas e redesenhou o papel dos gerentes e das equipes. Heskett et al. (1994) usam dados da empresa para mostrar que lojas com menor rotatividade de pessoal tinham melhor desempenho.",
+   practice:"Retaguarda industrializada, linha de frente dedicada ao cliente",
+   theory:"<b>Contato com o cliente</b> + <b>Cadeia de Lucro</b> · retenção de funcionários como elo de resultado",
+   author:"Heskett et al., 1994 · Chase, 1978", node:"funcs"},
+  {title:"Sears", loc:"Varejo · EUA · anos 1990", loop:"Medir a cadeia",
+   tag:"Um lugar atraente para trabalhar, comprar e investir.",
+   desc:"Na reestruturação dos anos 1990, a Sears construiu um modelo que ligava atitude do funcionário, percepção do cliente e receita das lojas, e passou a gerir por esses indicadores. Rucci, Kirn e Quinn (1998) descrevem o modelo na HBR.",
+   practice:"Indicadores de funcionário, cliente e financeiro ligados em um único modelo",
+   theory:"<b>Cadeia de Lucro em Serviços</b> · os elos transformados em métricas de gestão",
+   author:"Rucci et al., 1998", node:"cadeia"},
+  {title:"IKEA", loc:"Varejo de móveis · global", loop:"Cliente como coprodutor",
+   tag:"O cliente escolhe, busca, transporta e monta.",
+   desc:"Móveis em embalagem plana, autosserviço no depósito e montagem pelo cliente. Normann e Ramírez (1993) usam a IKEA para mostrar o cliente como parte do sistema de produção de valor. Preço baixo é financiado por trabalho do cliente.",
+   practice:"Autosserviço desenhado, com informação e ferramentas para o cliente",
+   theory:"<b>Sistema de gestão de clientes</b> + <b>lógica de serviço</b> · valor cocriado",
+   author:"Normann & Ramírez, 1993 · Vargo & Lusch, 2004", node:"sdl"},
+  {title:"Parques da Disney", loc:"Entretenimento · EUA", loop:"Gestão da espera",
+   tag:"A fila faz parte do espetáculo.",
+   desc:"Filas temáticas, com entretenimento durante a espera e tempo previsto exibido na entrada da atração. Em 1999 a empresa lançou o FastPass, que troca espera física por horário marcado. Aplicação direta das proposições de Maister sobre espera ocupada, informada e justa.",
+   practice:"Filas ocupadas, informação de espera e reserva de horário",
+   theory:"<b>Psicologia das filas</b> + <b>capacidade e demanda</b> · gerir percepção e chegada",
+   author:"Maister, 1985 · Sasser, 1976", node:"filas"},
+];
+
+/* ---- Apresentação: slides em HTML ---- */
+const APS = [
+  {t:"Abertura · Gestão de Serviços", nodes:["serv"], h:`<div class="sl-cover"><div class="eyebrow">Aula · Prof. Dr. Thiago Lima</div><h2>Gestão de Serviços</h2><p class="big">Excelência como escolha: em que ser o melhor, em que aceitar ser pior e quem paga a conta</p><div class="sl-foot">Sessão 4 · Caso Commerce Bank</div></div>`},
+  {t:"A pergunta que organiza a aula", nodes:["tradeoff","oferta"], h:`<div class="eyebrow">A pergunta</div><h2>Onde o serviço decide ser ruim para poder ser excelente?</h2><ul><li>Recursos são finitos: ser o melhor em tudo não é opção</li><li>O segmento-alvo valoriza poucos atributos, e não todos</li><li>Commerce Bank: excelente em conveniência, pior em taxa</li></ul>`},
+  {t:"Cinco fases do campo", nodes:["serv"], h:`<div class="eyebrow">Linha do tempo</div><h2>Cinco fases, uma pergunta cada</h2><div class="phases"><div><b>I</b><span>Serviço nas operações</span><em>1972–1978</em></div><div><b>II</b><span>Especificidade</span><em>1983–1988</em></div><div><b>III</b><span>Do serviço ao lucro</span><em>1990–1998</em></div><div><b>IV</b><span>Teste e nova lógica</span><em>2002–2008</em></div><div><b>V</b><span>Excelência deliberada</span><em>2010–2026</em></div></div>`},
+  {t:"O cliente dentro da fábrica", nodes:["contato","matriz","ihip"], h:`<div class="eyebrow">Fases I e II</div><h2>O cliente está dentro da fábrica</h2><div class="cols2"><div><h3>Chase (1978)</h3><p>Mais contato, menos potencial de eficiência. Separe a linha de frente da retaguarda.</p></div><div><h3>Schmenner (1986)</h3><p>Mão de obra × interação: fábrica de serviço, loja de serviço, serviço de massa, serviço profissional.</p></div></div><p class="note">Serviço é intangível, heterogêneo, inseparável do consumo e perecível.</p>`},
+  {t:"Capacidade que não se estoca", nodes:["capdem","filas"], h:`<div class="eyebrow">Fase I e II</div><h2>Capacidade que não se estoca</h2><div class="cols2"><div><h3>Sasser (1976)</h3><p>Acompanhar a demanda ou nivelar a capacidade; mover a demanda com preço e reserva.</p></div><div><h3>Maister (1985)</h3><p>Satisfação = percepção − expectativa. Espera ociosa, incerta ou injusta parece mais longa.</p></div></div>`},
+  {t:"Qualidade percebida", nodes:["gaps","pzb"], h:`<div class="eyebrow">Parasuraman, Zeithaml &amp; Berry (1985; 1988)</div><h2>Qualidade é distância entre expectativa e percepção</h2><ul><li>O gap do cliente nasce de quatro gaps internos</li><li>Entender, especificar, entregar, comunicar</li><li>SERVQUAL: tangíveis, confiabilidade, responsividade, segurança, empatia</li></ul>`},
+  {t:"A Cadeia de Lucro em Serviços", nodes:["cadeia","heskett94"], h:`<div class="eyebrow">Heskett et al. (1994)</div><h2>A Cadeia de Lucro em Serviços</h2><ol><li>Qualidade do serviço interno</li><li>Satisfação, retenção e produtividade do funcionário</li><li>Valor do serviço para o cliente</li><li>Satisfação e lealdade do cliente</li><li>Crescimento de receita e lucro</li></ol><p class="note">Veja a aba Diagrama.</p>`},
+  {t:"A cadeia resiste à evidência?", nodes:["loveman98","rucci98","kamakura02"], h:`<div class="eyebrow">Fases III e IV</div><h2>A cadeia resiste à evidência?</h2><ul><li><b>Loveman (1998):</b> elos confirmados em agências de banco de varejo</li><li><b>Rucci et al. (1998):</b> a Sears transforma a cadeia em painel de gestão</li><li><b>Kamakura et al. (2002):</b> eficiência em um elo não garante o seguinte</li></ul>`},
+  {t:"Os quatro elementos de Frei", nodes:["quatro","frei08"], h:`<div class="eyebrow">Frei (2008)</div><h2>Quatro elementos, um sistema</h2><div class="cols2"><div><h3>Oferta</h3><p>Em que ser excelente e em que ser pior</p></div><div><h3>Financiamento</h3><p>Quem paga pela excelência</p></div><div><h3>Funcionários</h3><p>O que esperar da linha de frente</p></div><div><h3>Clientes</h3><p>O que esperar do cliente</p></div></div>`},
+  {t:"Variabilidade introduzida pelo cliente", nodes:["variab","frei06"], h:`<div class="eyebrow">Frei (2006)</div><h2>Cinco variabilidades, duas respostas</h2><ul><li>Chegada · pedido · capacidade · esforço · preferência subjetiva</li><li><b>Acomodar:</b> absorver a variação com recursos ou flexibilidade</li><li><b>Reduzir:</b> restringir ou padronizar o que o cliente traz</li><li>O melhor desenho acomoda barato ou reduz sem prejudicar a experiência</li></ul>`},
+  {t:"Commerce Bank · ser ruim no que não importa", nodes:["tradeoff","financ"], h:`<div class="eyebrow">Caso da sessão</div><h2>Commerce Bank</h2><div class="cols2"><div><h3>Excelente em</h3><p>Conveniência: sete dias por semana, horário estendido, atendimento inspirado no varejo</p></div><div><h3>Pior em</h3><p>Taxa: remuneração de depósitos abaixo da concorrência</p></div></div><p class="note">Pergunta para o caso: como funcionários e clientes sustentam essa oferta?</p>`},
+  {t:"E daí para a segunda-feira?", nodes:["vcap"], h:`<div class="eyebrow">Aplicação na sua organização</div><h2>E daí para a segunda-feira?</h2><div class="formula">V = C × (A + P)</div><ul><li><b>V:</b> quais três atributos seu cliente-alvo mais valoriza?</li><li><b>A + P:</b> em qual atributo você aceita ser pior, e quem paga?</li><li><b>C:</b> sua linha de frente média consegue entregar a oferta?</li></ul>`},
+  {t:"Agenda e debates", nodes:["lacunas"], h:`<div class="eyebrow">Onde o debate continua</div><h2>Três debates para a turma</h2><ul><li>Satisfação do funcionário causa satisfação do cliente, ou o contrário?</li><li>Autoatendimento: redução de variabilidade ou repasse de trabalho?</li><li>Quando a IA atende, quem é a linha de frente da cadeia?</li></ul>`},
+  {t:"Explore o mapa conceitual", nodes:[], h:`<div class="sl-cover"><div class="eyebrow">Ferramenta interativa</div><h2>Explore o mapa</h2><p class="big">Conceitos, autores, ferramentas, casos e referências conectados. Clique em qualquer slide para saltar ao conceito correspondente.</p></div>`},
+];
+const NODE2SLIDE = {serv:1, tradeoff:2, oferta:2, ihip:4, contato:4, matriz:4, chase78:4, schmenner86:4, levitt72:4, autosserv:4, capdem:5, filas:5, sasser76:5, maister85:5, gaps:6, pzb:6, garantia:6, blueprint:6, cadeia:7, heskett94:7, heskett97:7, funcs:7, cortecusto:7, medicao:7, loveman98:8, rucci98:8, kamakura02:8, causal:8, quatro:9, frei08:9, clientes:9, variab:10, frei06:10, transfer:10, sdl:10, vargo04:10, financ:11, freimorriss:11, tudo:11, vcap:12, lacunas:13, digital:13};
+
+const QUADRO = [
+  {concept:"Linha de produção em serviços", cat:"tec", author:"Levitt, T. (1972)",
+   paper:"Production-line approach to service. (Harvard Business Review)",
+   contribution:"Propõe padronizar o serviço, substituir julgamento por sistema e usar tecnologia, como na manufatura.",
+   practice:"Padronização da retaguarda e autoatendimento nos processos de baixo contato.", node:"autosserv"},
+  {concept:"Capacidade e demanda", cat:"pratica", author:"Sasser, W. E. (1976)",
+   paper:"Match supply and demand in service industries. (Harvard Business Review)",
+   contribution:"Estratégias de acompanhar a demanda ou nivelar a capacidade, e alavancas para mover a demanda.",
+   practice:"Escalas, equipes de pico, preço por horário e reservas.", node:"capdem"},
+  {concept:"Contato com o cliente", cat:"teoria", author:"Chase, R. B. (1978)",
+   paper:"Where does the customer fit in a service operation? (Harvard Business Review)",
+   contribution:"O grau de contato limita a eficiência; frente e retaguarda devem ser desenhadas separadamente.",
+   practice:"Desacoplar atendimento e processamento; decidir o que o cliente precisa ver.", node:"contato"},
+  {concept:"Service blueprint", cat:"pratica", author:"Shostack, G. L. (1984)",
+   paper:"Designing services that deliver. (Harvard Business Review)",
+   contribution:"Mapeia o serviço como processo, com linha de visibilidade e pontos de falha.",
+   practice:"Redesenho de jornada com as falhas e as esperas explícitas.", node:"blueprint"},
+  {concept:"Modelo dos gaps", cat:"teoria", author:"Parasuraman, A., Zeithaml, V. A. & Berry, L. L. (1985)",
+   paper:"A conceptual model of service quality and its implications for future research. (Journal of Marketing)",
+   contribution:"Qualidade percebida como distância entre expectativa e percepção, causada por gaps internos.",
+   practice:"Diagnóstico de qualidade que começa dentro da empresa, não na pesquisa de satisfação.", node:"gaps"},
+  {concept:"Psicologia das filas", cat:"teoria", author:"Maister, D. H. (1985)",
+   paper:"The psychology of waiting lines. (In The service encounter, Lexington Books)",
+   contribution:"Proposições sobre a percepção da espera: ociosa, incerta, sem explicação e injusta parece mais longa.",
+   practice:"Informar tempo de espera, ocupar o cliente e garantir ordem justa.", node:"filas"},
+  {concept:"Matriz de processos de serviço", cat:"teoria", author:"Schmenner, R. W. (1986)",
+   paper:"How can service businesses survive and prosper? (Sloan Management Review)",
+   contribution:"Classifica serviços por intensidade de mão de obra e por interação e customização.",
+   practice:"Posicionar o serviço na matriz e escolher os desafios de gestão correspondentes.", node:"matriz"},
+  {concept:"SERVQUAL", cat:"teoria", author:"Parasuraman, A., Zeithaml, V. A. & Berry, L. L. (1988)",
+   paper:"SERVQUAL: A multiple-item scale for measuring consumer perceptions of service quality. (Journal of Retailing)",
+   contribution:"Escala com cinco dimensões de qualidade percebida.",
+   practice:"Pesquisa de qualidade estruturada por dimensão, e não por nota única.", node:"gaps"},
+  {concept:"Cadeia de Lucro em Serviços", cat:"core", author:"Heskett, J. L. et al. (1994)",
+   paper:"Putting the service-profit chain to work. (Harvard Business Review)",
+   contribution:"Liga qualidade interna, satisfação do funcionário, valor, lealdade do cliente e lucro.",
+   practice:"Painel de gestão que acompanha funcionário, cliente e resultado em conjunto.", node:"cadeia"},
+  {concept:"Trade-offs estratégicos", cat:"core", author:"Porter, M. E. (1996)",
+   paper:"What is strategy? (Harvard Business Review)",
+   contribution:"Estratégia exige escolhas excludentes e um sistema de atividades coerente.",
+   practice:"Declarar o que a empresa não fará e checar a coerência entre atividades.", node:"tradeoff"},
+  {concept:"Cadeia em banco de varejo", cat:"autor", author:"Loveman, G. W. (1998)",
+   paper:"Employee satisfaction, customer loyalty, and financial performance. (Journal of Service Research)",
+   contribution:"Teste empírico dos elos da cadeia em agências bancárias.",
+   practice:"Usar dados de agência para testar a cadeia na própria rede.", node:"loveman98"},
+  {concept:"Avaliação da cadeia", cat:"autor", author:"Kamakura, W. A., Mittal, V., de Rosa, F. & Mazzon, J. A. (2002)",
+   paper:"Assessing the service-profit chain. (Marketing Science)",
+   contribution:"Avalia os elos separadamente e mostra que eficiência em um não garante o seguinte.",
+   practice:"Diagnosticar em qual elo cada unidade perde valor.", node:"kamakura02"},
+  {concept:"Variabilidade introduzida pelo cliente", cat:"core", author:"Frei, F. X. (2006)",
+   paper:"Breaking the trade-off between efficiency and service. (Harvard Business Review)",
+   contribution:"Cinco tipos de variabilidade e estratégias de acomodar ou reduzir.",
+   practice:"Classificar a variabilidade de cada etapa e escolher a resposta com menor custo para a experiência.", node:"variab"},
+  {concept:"Os quatro elementos", cat:"core", author:"Frei, F. X. (2008)",
+   paper:"The four things a service business must get right. (Harvard Business Review)",
+   contribution:"Oferta, financiamento, gestão de funcionários e gestão de clientes como sistema único.",
+   practice:"Checar a coerência dos quatro elementos antes de lançar ou redesenhar um serviço.", node:"quatro"},
+  {concept:"Ser ruim no que não importa", cat:"core", author:"Frei, F. X. & Morriss, A. (2012)",
+   paper:"Uncommon service: How to win by putting customers at the core of your business. (Harvard Business Review Press)",
+   contribution:"Quatro verdades do serviço excelente e o mapa de atributos como ferramenta de escolha.",
+   practice:"Mapa de atributos do segmento-alvo com as escolhas de ser pior explicitadas.", node:"tradeoff"},
+  {concept:"VCAP em serviços", cat:"core", author:"Lima, T. F. (2026)",
+   paper:"Excelência operacional: da estratégia à execução, Cap. 1 e 2. (Atena Editora)",
+   contribution:"Modelo V = C × (A + P) e sua aplicação à gestão de serviços.",
+   practice:"Ler a oferta de serviço pelos ativos, processos e capacidades da linha de frente.", node:"vcap"},
+];
+
+const REF_GROUPS = [
+ {title:"Fundamentos: a especificidade dos serviços", refs:[
+  {apa:"Chase, R. B. (1978). Where does the customer fit in a service operation? <i>Harvard Business Review, 56</i>(6), 137–142.", doi:""},
+  {apa:"Chase, R. B. (1981). The customer contact approach to services: Theoretical bases and practical extensions. <i>Operations Research, 29</i>(4), 698–706.", doi:"https://doi.org/10.1287/opre.29.4.698"},
+  {apa:"Levitt, T. (1972). Production-line approach to service. <i>Harvard Business Review, 50</i>(5), 41–52.", doi:""},
+  {apa:"Lovelock, C. H. (1983). Classifying services to gain strategic marketing insights. <i>Journal of Marketing, 47</i>(3), 9–20.", doi:"https://doi.org/10.1177/002224298304700303"},
+  {apa:"Maister, D. H. (1985). The psychology of waiting lines. In J. A. Czepiel, M. R. Solomon, &amp; C. F. Surprenant (Eds.), <i>The service encounter</i> (pp. 113–123). Lexington Books.", doi:""},
+  {apa:"Sasser, W. E. (1976). Match supply and demand in service industries. <i>Harvard Business Review, 54</i>(6), 133–140.", doi:""},
+  {apa:"Schmenner, R. W. (1986). How can service businesses survive and prosper? <i>Sloan Management Review, 27</i>(3), 21–32.", doi:""},
+  {apa:"Shostack, G. L. (1984). Designing services that deliver. <i>Harvard Business Review, 62</i>(1), 133–139.", doi:""},
+  {apa:"Zeithaml, V. A., Parasuraman, A., &amp; Berry, L. L. (1985). Problems and strategies in services marketing. <i>Journal of Marketing, 49</i>(2), 33–46.", doi:"https://doi.org/10.1177/002224298504900203"},
+ ]},
+ {title:"Qualidade, lealdade e a Cadeia de Lucro em Serviços", refs:[
+  {apa:"Hart, C. W. L. (1988). The power of unconditional service guarantees. <i>Harvard Business Review, 66</i>(4), 54–62.", doi:""},
+  {apa:"Heskett, J. L., Jones, T. O., Loveman, G. W., Sasser, W. E., Jr., &amp; Schlesinger, L. A. (1994). Putting the service-profit chain to work. <i>Harvard Business Review, 72</i>(2), 164–174.", doi:""},
+  {apa:"Heskett, J. L., Sasser, W. E., Jr., &amp; Schlesinger, L. A. (1997). <i>The service profit chain: How leading companies link profit and growth to loyalty, satisfaction, and value</i>. Free Press.", doi:""},
+  {apa:"Kamakura, W. A., Mittal, V., de Rosa, F., &amp; Mazzon, J. A. (2002). Assessing the service-profit chain. <i>Marketing Science, 21</i>(3), 294–317.", doi:"https://doi.org/10.1287/mksc.21.3.294.140"},
+  {apa:"Loveman, G. W. (1998). Employee satisfaction, customer loyalty, and financial performance: An empirical examination of the service profit chain in retail banking. <i>Journal of Service Research, 1</i>(1), 18–31.", doi:"https://doi.org/10.1177/109467059800100103"},
+  {apa:"Parasuraman, A., Zeithaml, V. A., &amp; Berry, L. L. (1985). A conceptual model of service quality and its implications for future research. <i>Journal of Marketing, 49</i>(4), 41–50.", doi:"https://doi.org/10.1177/002224298504900403"},
+  {apa:"Parasuraman, A., Zeithaml, V. A., &amp; Berry, L. L. (1988). SERVQUAL: A multiple-item scale for measuring consumer perceptions of service quality. <i>Journal of Retailing, 64</i>(1), 12–40.", doi:""},
+  {apa:"Reichheld, F. F., &amp; Sasser, W. E., Jr. (1990). Zero defections: Quality comes to services. <i>Harvard Business Review, 68</i>(5), 105–111.", doi:""},
+  {apa:"Rucci, A. J., Kirn, S. P., &amp; Quinn, R. T. (1998). The employee-customer-profit chain at Sears. <i>Harvard Business Review, 76</i>(1), 82–97.", doi:""},
+ ]},
+ {title:"Estratégia de serviço e trade-offs", refs:[
+  {apa:"Dixon, M., Freeman, K., &amp; Toman, N. (2010). Stop trying to delight your customers. <i>Harvard Business Review, 88</i>(7/8), 116–122.", doi:""},
+  {apa:"Frei, F. X. (2006). Breaking the trade-off between efficiency and service. <i>Harvard Business Review, 84</i>(11), 92–101.", doi:""},
+  {apa:"Frei, F. X. (2008). The four things a service business must get right. <i>Harvard Business Review, 86</i>(4), 70–80.", doi:""},
+  {apa:"Frei, F., &amp; Morriss, A. (2012). <i>Uncommon service: How to win by putting customers at the core of your business</i>. Harvard Business Review Press.", doi:""},
+  {apa:"Lima, T. F. (2026). <i>Excelência operacional: da estratégia à execução — operações, serviços, melhoria contínua e inteligência artificial</i>. Atena Editora. ISBN 978-65-258-4105-2.", doi:""},
+  {apa:"Normann, R., &amp; Ramírez, R. (1993). From value chain to value constellation: Designing interactive strategy. <i>Harvard Business Review, 71</i>(4), 65–77.", doi:""},
+  {apa:"Porter, M. E. (1996). What is strategy? <i>Harvard Business Review, 74</i>(6), 61–78.", doi:""},
+ ]},
+ {title:"Lógica de serviço, cocriação e desenho", refs:[
+  {apa:"Bitner, M. J., Ostrom, A. L., &amp; Morgan, F. N. (2008). Service blueprinting: A practical technique for service innovation. <i>California Management Review, 50</i>(3), 66–94.", doi:"https://doi.org/10.2307/41166446"},
+  {apa:"Vargo, S. L., &amp; Lusch, R. F. (2004). Evolving to a new dominant logic for marketing. <i>Journal of Marketing, 68</i>(1), 1–17.", doi:"https://doi.org/10.1509/jmkg.68.1.1.24036"},
+  {apa:"Vargo, S. L., &amp; Lusch, R. F. (2008). Service-dominant logic: Continuing the evolution. <i>Journal of the Academy of Marketing Science, 36</i>(1), 1–10.", doi:"https://doi.org/10.1007/s11747-007-0069-6"},
+ ]},
+];
+
+const ROOT=NODES[0].id;
+
+/* ====================== MAP RENDER (force layout) ====================== */
+const NS="http://www.w3.org/2000/svg";
+const stage=document.getElementById("stage");
+const nodeById=Object.fromEntries(NODES.map(n=>[n.id,n]));
+const adj={}; NODES.forEach(n=>adj[n.id]=new Set());
+LINKS.forEach(([a,b])=>{adj[a].add(b);adj[b].add(a)});
+
+let W=innerWidth,H=innerHeight-document.querySelector("header").offsetHeight;
+// initial positions: spread on a circle, core in middle
+NODES.forEach((n,i)=>{
+  if(n.id===ROOT){n.x=W/2;n.y=H/2;}
+  else{const a=i/NODES.length*Math.PI*2; n.x=W/2+Math.cos(a)*Math.min(W,H)*0.34; n.y=H/2+Math.sin(a)*Math.min(W,H)*0.34;}
+  n.vx=0;n.vy=0;
+});
+
+const vp=document.createElementNS(NS,"g"); stage.appendChild(vp);
+const linkLayer=document.createElementNS(NS,"g"); vp.appendChild(linkLayer);
+const nodeLayer=document.createElementNS(NS,"g"); vp.appendChild(nodeLayer);
+
+const linkEls=LINKS.map(l=>{
+  const el=document.createElementNS(NS,"line"); el.setAttribute("class","link");
+  el._a=l[0];el._b=l[1]; linkLayer.appendChild(el); return el;
+});
+const nodeEls=NODES.map(n=>{
+  const g=document.createElementNS(NS,"g"); g.setAttribute("class","node"); g._n=n;
+  const c=document.createElementNS(NS,"circle");
+  c.setAttribute("r",n.r); c.setAttribute("fill",CAT[n.cat].color);
+  const t=document.createElementNS(NS,"text");
+  t.setAttribute("text-anchor","middle"); t.setAttribute("dy",n.r+15);
+  t.textContent=SHORT[n.label]||n.label;
+  g.appendChild(c); g.appendChild(t); nodeLayer.appendChild(g);
+  n._g=g;n._c=c;n._t=t; return g;
+});
+
+/* physics */
+let alpha=1;
+function tick(){
+  if(alpha<0.005){return;}
+  alpha*=0.985;
+  const k=alpha;
+  // repulsion
+  for(let i=0;i<NODES.length;i++){
+    const a=NODES[i];
+    for(let j=i+1;j<NODES.length;j++){
+      const b=NODES[j];
+      let dx=a.x-b.x,dy=a.y-b.y; let d2=dx*dx+dy*dy||0.01;
+      let d=Math.sqrt(d2);
+      const minD=a.r+b.r+72;
+      let force=(22000)/d2;
+      if(d<minD) force+= (minD-d)*1.2/d; // collision
+      const fx=dx/d*force*k, fy=dy/d*force*k;
+      if(!a._fix){a.vx+=fx;a.vy+=fy;}
+      if(!b._fix){b.vx-=fx;b.vy-=fy;}
+    }
+  }
+  // springs
+  LINKS.forEach(l=>{
+    const a=nodeById[l[0]],b=nodeById[l[1]];
+    let dx=b.x-a.x,dy=b.y-a.y; let d=Math.sqrt(dx*dx+dy*dy)||0.01;
+    const target=a.id===ROOT||b.id===ROOT?210:185;
+    const f=(d-target)*0.045*k;
+    const fx=dx/d*f,fy=dy/d*f;
+    if(!a._fix){a.vx+=fx;a.vy+=fy;}
+    if(!b._fix){b.vx-=fx;b.vy-=fy;}
+  });
+  // gravity to center
+  NODES.forEach(n=>{
+    if(n._fix)return;
+    n.vx+=(W/2-n.x)*0.0035*k; n.vy+=(H/2-n.y)*0.0035*k;
+    n.vx*=0.86; n.vy*=0.86;
+    n.x+=n.vx; n.y+=n.vy;
+  });
+  render();
+  requestAnimationFrame(tick);
+}
+function render(){
+  linkEls.forEach(el=>{
+    const a=nodeById[el._a],b=nodeById[el._b];
+    el.setAttribute("x1",a.x);el.setAttribute("y1",a.y);
+    el.setAttribute("x2",b.x);el.setAttribute("y2",b.y);
+  });
+  nodeEls.forEach(g=>{const n=g._n; g.setAttribute("transform",`translate(${n.x},${n.y})`)});
+}
+function reheat(v){alpha=Math.max(alpha,v||0.6);requestAnimationFrame(tick);}
+
+/* zoom & pan */
+let tx=0,ty=0,scale=1;
+function applyVP(){vp.setAttribute("transform",`translate(${tx},${ty}) scale(${scale})`)}
+stage.addEventListener("wheel",e=>{
+  e.preventDefault();
+  const r=stage.getBoundingClientRect();
+  const mx=e.clientX-r.left,my=e.clientY-r.top;
+  const ds=e.deltaY<0?1.12:0.893;
+  const ns=Math.min(2.6,Math.max(0.3,scale*ds));
+  tx=mx-(mx-tx)*(ns/scale); ty=my-(my-ty)*(ns/scale); scale=ns; applyVP();
+},{passive:false});
+
+let panning=false,sx,sy,stx,sty,dragNode=null,downNode=null,downX=0,downY=0;
+stage.addEventListener("pointerdown",e=>{
+  downX=e.clientX;downY=e.clientY;
+  const g=e.target.closest(".node");
+  if(g){downNode=g._n;dragNode=g._n;dragNode._fix=true;stage.setPointerCapture(e.pointerId);}
+  else{downNode=null;panning=true;stage.classList.add("grabbing");sx=e.clientX;sy=e.clientY;stx=tx;sty=ty;stage.setPointerCapture(e.pointerId);}
+});
+stage.addEventListener("pointermove",e=>{
+  if(dragNode){
+    const r=stage.getBoundingClientRect();
+    dragNode.x=(e.clientX-r.left-tx)/scale; dragNode.y=(e.clientY-r.top-ty)/scale;
+    reheat(0.25); render();
+  }else if(panning){tx=stx+(e.clientX-sx);ty=sty+(e.clientY-sy);applyVP();}
+});
+stage.addEventListener("pointerup",e=>{
+  const movedDist=Math.hypot(e.clientX-downX,e.clientY-downY);
+  if(dragNode){dragNode._fix=false;}
+  if(movedDist<6){                       // clique (não arraste): abre nó ou fecha painel
+    if(downNode) openPanel(downNode.id);
+    else closePanel();
+  }
+  if(dragNode){dragNode=null;reheat(0.3);}
+  downNode=null;panning=false;stage.classList.remove("grabbing");
+});
+
+/* interactions: hover + click */
+let selected=null;
+function neighbors(id){const s=new Set(adj[id]);s.add(id);return s;}
+function highlight(id){
+  const set=id?neighbors(id):null;
+  nodeEls.forEach(g=>{
+    const on=!set||set.has(g._n.id);
+    g.classList.toggle("dim",!on && !legendOff.has(g._n.cat)?!on:!on);
+  });
+  linkEls.forEach(el=>{
+    const hot=set&&(set.has(el._a)&&set.has(el._b)&&(el._a===id||el._b===id));
+    const on=!set||(set.has(el._a)&&set.has(el._b));
+    el.classList.toggle("hot",!!hot);
+    el.classList.toggle("dim",set&&!on);
+  });
+}
+nodeEls.forEach(g=>{
+  g.addEventListener("pointerenter",()=>{if(!selected)highlight(g._n.id)});
+  g.addEventListener("pointerleave",()=>{if(!selected)highlight(null)});
+});
+
+/* legend filter */
+const legendOff=new Set();
+const li=document.getElementById("legendItems");
+Object.entries(CAT).forEach(([k,v])=>{
+  const d=document.createElement("div"); d.className="item"; d.dataset.cat=k;
+  d.innerHTML=`<span class="swatch" style="background:${v.color}"></span>${v.name}`;
+  d.addEventListener("click",()=>{
+    if(legendOff.has(k)){legendOff.delete(k);d.classList.remove("off");}
+    else{legendOff.add(k);d.classList.add("off");}
+    applyFilter();
+  });
+  li.appendChild(d);
+});
+function applyFilter(){
+  nodeEls.forEach(g=>{g.style.display=legendOff.has(g._n.cat)?"none":""});
+  linkEls.forEach(el=>{
+    const off=legendOff.has(nodeById[el._a].cat)||legendOff.has(nodeById[el._b].cat);
+    el.style.display=off?"none":"";
+  });
+}
+
+/* zoom buttons */
+function zoomBy(f){
+  const ns=Math.min(2.6,Math.max(0.3,scale*f));
+  tx=W/2-(W/2-tx)*(ns/scale);ty=H/2-(H/2-ty)*(ns/scale);scale=ns;applyVP();
+}
+document.getElementById("zin").onclick=()=>zoomBy(1.2);
+document.getElementById("zout").onclick=()=>zoomBy(0.83);
+document.getElementById("zfit").onclick=()=>{tx=0;ty=0;scale=1;applyVP();reheat(0.5)};
+
+/* ====================== DETAIL PANEL ====================== */
+const panel=document.getElementById("panel");
+const pbody=document.getElementById("pbody");
+function openPanel(id){
+  const n=nodeById[id]; selected=id;
+  nodeEls.forEach(g=>g.classList.toggle("sel",g._n.id===id));
+  highlight(id);
+  const col=CAT[n.cat].color;
+  const rels=[...adj[id]].map(rid=>{const m=nodeById[rid];
+    return `<span class="relnode" data-go="${rid}"><span class="sw" style="background:${CAT[m.cat].color}"></span>${m.label}</span>`}).join("");
+  pbody.innerHTML=`
+    <div class="ptag" style="background:${hex2rgba(col,.16)};color:${col}">${CAT[n.cat].name}</div>
+    <h2>${n.label}</h2>
+    <div class="pauthor" style="color:${col}">${n.author||""}</div>
+    <div class="pdesc">${n.desc}</div>
+    ${n.bullets&&n.bullets.length?`<div class="pblock"><h5>Em detalhe</h5><ul>${n.bullets.map(b=>`<li>${b}</li>`).join("")}</ul></div>`:""}
+    <div class="pblock"><h5>Conexões (${adj[id].size})</h5>${rels}</div>
+    ${NODE2SLIDE[id]?`<button class="gomap" data-slide="${NODE2SLIDE[id]}">▣ Ver no slide ${NODE2SLIDE[id]} da apresentação →</button>`:""}
+  `;
+  pbody.querySelectorAll("[data-go]").forEach(el=>el.onclick=()=>openPanel(el.dataset.go));
+  const sb=pbody.querySelector("[data-slide]"); if(sb)sb.onclick=()=>{closePanel();switchView("apresentacao");setTimeout(()=>apsGo(+sb.dataset.slide-1),60)};
+  panel.classList.add("open");
+  document.documentElement.style.setProperty("--panelw","380px");
+}
+function closePanel(){
+  panel.classList.remove("open");selected=null;
+  nodeEls.forEach(g=>g.classList.remove("sel"));highlight(null);
+  document.documentElement.style.setProperty("--panelw","0px");
+}
+document.getElementById("pclose").onclick=closePanel;
+function hex2rgba(h,a){const n=parseInt(h.slice(1),16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`}
+
+/* ====================== TIMELINE / TABLE / SYNTH ====================== */
+document.getElementById("tl").innerHTML=TIMELINE.map(t=>t.phase?`
+  <div class="tlphase"><h2>${t.phase}</h2><p>${t.sub}</p></div>`:`
+  <div class="tlitem" data-go="${t.node}">
+    <div class="yr">${t.yr}</div><div class="nub"></div>
+    <div class="tlcard"><h3>${t.t}</h3><div class="who">${t.who}</div><p>${t.d}</p></div>
+  </div>`).join("");
+document.querySelectorAll("#tl .tlitem").forEach(el=>el.onclick=()=>{switchView("map");setTimeout(()=>openPanel(el.dataset.go),60)});
+
+// ---- Casos práticos
+document.getElementById("caseList").innerHTML=CASES.map(c=>`
+  <div class="case">
+    <div class="ch"><h3>${c.title}</h3><span class="loc">${c.loc}</span></div>
+    ${c.loop?'<span class="loop-chip">'+c.loop+'</span>':''}
+    <div class="tag">${c.tag}</div>
+    <p class="cd">${c.desc}</p>
+    <div class="row"><span class="k">Prática</span><span class="v">${c.practice}</span></div>
+    <div class="row"><span class="k">Teoria</span><span class="v">${c.theory}</span></div>
+    <div class="row"><span class="k">Autor</span><span class="v"><b>${c.author}</b></span></div>
+    <button class="gomap" data-go="${c.node}">Ver no mapa →</button>
+  </div>`).join("");
+document.querySelectorAll("#caseList .gomap").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+
+// ---- Quadro teórico
+document.getElementById("quadroRows").innerHTML=QUADRO.map(q=>{
+  const col=CAT[q.cat].color;
+  return `<div class="qrow">
+    <div class="qhead">
+      <span class="qdotwrap"><span class="qdot" style="background:${col}"></span>
+        <span class="qtip"><span class="c" style="color:${col}">${q.concept}</span><h6>Principal contribuição</h6>${q.contribution}</span>
+      </span>
+      <span class="qconcept" style="background:${hex2rgba(col,.16)};color:${col}">${q.concept}</span>
+      <span class="qauthor">${q.author}</span>
+    </div>
+    <div class="qpaper">${q.paper}</div>
+    <div class="qbody">
+      <div class="qcol"><h6>Principal contribuição</h6><p>${q.contribution}</p></div>
+      <div class="qcol"><h6>Prática associada</h6><p>${q.practice}</p></div>
+    </div>
+    <button class="gomap" data-go="${q.node}">Ver no mapa →</button>
+  </div>`;
+}).join("");
+document.querySelectorAll("#quadroRows .gomap").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+
+// ---- Referências
+function refRow(r){
+  const txt=(r.apa+' '+(r.doi||'')).replace(/<[^>]+>/g,'').replace(/"/g,'').toLowerCase();
+  const link=r.doi?` <a href="${r.doi}" target="_blank" rel="noopener">${r.doi}</a>`:"";
+  return `<div class="refrow" data-txt="${txt}">${r.apa}${link}</div>`;
+}
+document.getElementById("refGroups").innerHTML=REF_GROUPS.map(g=>`<h3 class="refgroup">${g.title}</h3>`+g.refs.map(refRow).join("")).join("");
+document.getElementById("refCount").textContent=REF_GROUPS.reduce((s,g)=>s+g.refs.length,0);
+document.getElementById("refFilter").addEventListener("input",e=>{
+  const q=e.target.value.trim().toLowerCase();
+  document.querySelectorAll(".refrow").forEach(r=>r.classList.toggle("hide",q&&!r.dataset.txt.includes(q)));
+});
+
+/* ====================== NAV / SEARCH ====================== */
+function switchView(v){
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("active",s.id==="view-"+v));
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
+  document.getElementById("ctrls").style.display=v==="map"?"flex":"none";
+  if(v==="map"){W=innerWidth;H=innerHeight-document.querySelector("header").offsetHeight;reheat(0.4);}
+}
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
+
+const search=document.getElementById("search");
+search.addEventListener("input",()=>{
+  const q=search.value.trim().toLowerCase();
+  if(!q){nodeEls.forEach(g=>g.classList.remove("dim"));return;}
+  let hit=null;
+  nodeEls.forEach(g=>{
+    const m=(g._n.label+" "+g._n.author+" "+g._n.desc).toLowerCase().includes(q);
+    g.classList.toggle("dim",!m); if(m&&!hit)hit=g._n;
+  });
+});
+search.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    const q=search.value.trim().toLowerCase();
+    const hit=NODES.find(n=>(n.label+" "+n.author).toLowerCase().includes(q));
+    if(hit){switchView("map");openPanel(hit.id);
+      tx=W/2-hit.x*scale;ty=H/2-hit.y*scale;applyVP();}
+  }
+});
+
+/* ---- Intro / Como usar ---- */
+const intro=document.getElementById("intro");
+function showIntro(){intro.classList.add("show")}
+function hideIntro(){intro.classList.remove("show")}
+document.getElementById("introClose").onclick=hideIntro;
+document.getElementById("introGo").onclick=hideIntro;
+document.getElementById("helpBtn").onclick=showIntro;
+intro.addEventListener("click",e=>{if(e.target===intro)hideIntro()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")hideIntro()});
+showIntro(); // abre o guia ao carregar
+
+
+/* ---- Apresentação: viewer (slides em HTML) ---- */
+const fs=document.getElementById("fs");
+let apsI=0;
+document.getElementById("apsThumbs").innerHTML=APS.map((s,i)=>`<button class="apsthumb" data-i="${i}" title="${s.t}"><b>${i+1}</b><span>${s.t}</span></button>`).join("");
+function apsRender(){
+  const m=APS[apsI];
+  document.getElementById("apsSlide").innerHTML=m.h;
+  document.getElementById("apsCounter").textContent=(apsI+1)+" / "+APS.length;
+  document.getElementById("apsTitle").textContent=m.t;
+  document.getElementById("apsChips").innerHTML=(m.nodes||[]).map(id=>{const n=nodeById[id];
+    return n?`<span class="apschip" data-go="${id}"><span class="sw" style="background:${CAT[n.cat].color}"></span>${n.label}</span>`:""}).join("");
+  document.querySelectorAll("#apsChips .apschip").forEach(c=>c.onclick=()=>{switchView("map");setTimeout(()=>openPanel(c.dataset.go),60)});
+  document.querySelectorAll("#apsThumbs .apsthumb").forEach((t,i)=>t.classList.toggle("active",i===apsI));
+  const mlTxt=(m.nodes&&m.nodes.length)?"⊕ Explorar no mapa →":"⊕ Abrir o mapa →";
+  document.getElementById("apsMapLink").textContent=mlTxt;
+  document.getElementById("fsMapLink").textContent=mlTxt;
+  document.getElementById("fsSlide").innerHTML=m.h;
+  document.getElementById("fsCounter").textContent=(apsI+1)+" / "+APS.length;
+}
+function apsToMap(){const m=APS[apsI];
+  switchView("map");
+  if(m.nodes&&m.nodes.length){setTimeout(()=>openPanel(m.nodes[0]),60);}}
+function apsGo(i){apsI=(i+APS.length)%APS.length;apsRender();}
+document.querySelectorAll("#apsThumbs .apsthumb").forEach(t=>t.onclick=()=>apsGo(+t.dataset.i));
+document.getElementById("apsPrev").onclick=()=>apsGo(apsI-1);
+document.getElementById("apsNext").onclick=()=>apsGo(apsI+1);
+document.getElementById("apsSlide").onclick=apsToMap;
+document.getElementById("apsMapLink").onclick=apsToMap;
+document.querySelectorAll("#view-diagrama [data-go]").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+document.querySelectorAll("#view-agenda [data-go]").forEach(b=>b.onclick=()=>{switchView("map");setTimeout(()=>openPanel(b.dataset.go),60)});
+document.getElementById("apsFull").onclick=()=>{fs.classList.add("show");apsRender();
+  try{const p=fs.requestFullscreen&&fs.requestFullscreen(); if(p&&p.catch)p.catch(()=>{});}catch(e){}};
+function fsClose(){fs.classList.remove("show");try{if(document.fullscreenElement)document.exitFullscreen();}catch(e){}}
+document.getElementById("fsClose").onclick=fsClose;
+document.getElementById("fsMapLink").onclick=()=>{fsClose();apsToMap();};
+document.getElementById("fsPrev").onclick=()=>apsGo(apsI-1);
+document.getElementById("fsNext").onclick=()=>apsGo(apsI+1);
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement)fs.classList.remove("show")});
+document.addEventListener("keydown",e=>{
+  if(fs.classList.contains("show")){
+    if(e.key==="ArrowRight")apsGo(apsI+1); else if(e.key==="ArrowLeft")apsGo(apsI-1); else if(e.key==="Escape")fsClose();
+    return;
+  }
+  if(document.getElementById("view-apresentacao").classList.contains("active")){
+    if(e.key==="ArrowRight")apsGo(apsI+1); else if(e.key==="ArrowLeft")apsGo(apsI-1);
+  }
+});
+apsRender();
+
+window.addEventListener("resize",()=>{W=innerWidth;H=innerHeight-document.querySelector("header").offsetHeight;});
+applyVP(); render(); reheat(1);
+</script>
+<script id="mobile-patch-js">
+(function(){
+  var h=document.querySelector('header');
+  function set(){document.documentElement.style.setProperty('--hh',h.offsetHeight+'px');}
+  set(); addEventListener('resize',set); addEventListener('orientationchange',set);
+  var lg=document.querySelector('.legend h4');
+  if(lg) lg.addEventListener('click',function(){lg.parentElement.classList.toggle('open');});
+  if(innerWidth>760 && lg) lg.parentElement.classList.add('open');
+})();
+</script>
+</body>
+</html>

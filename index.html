@@ -392,19 +392,19 @@ const NOTA_S1 = "notas/estrategia-operacoes.html";
 
 const S = [
  {n:"Sessão 1", d:"2026-10-10", h:"13h15 – 15h15", t:"Gestão estratégica de operações",
-  leitura:["Notas de Ensino — Estratégia de operações", NOTA_S1], livro:"Cap. 1 — Modelo VCAP", caso:"Rapid Rewards at Southwest Airlines",
+  leitura:["Notas de Ensino — Estratégia de operações", NOTA_S1], mapa:"notas/mapa-estrategia-operacoes.html", livro:"Cap. 1 — Modelo VCAP", caso:"Rapid Rewards at Southwest Airlines",
   prep:"Ao final da sessão, formação dos grupos. Até 17/10, cada grupo indica o processo do Lean Kata."},
  {n:"Sessões 2 e 3", d:"2026-10-24", h:"10h15 – 15h15<br>com almoço", t:"Excelência operacional: Lean e Lean Kata",
-  leitura:["Notas de Ensino — Lean, Kata e Cynefin","notas/lean-kata-cynefin.html"], livro:"Cap. 3 — Gestão ágil: Cynefin, Lean e Kata", caso:"Sem caso: Lean Kata aplicado à organização do grupo",
+  leitura:["Notas de Ensino — Lean, Kata e Cynefin","notas/lean-kata-cynefin.html"], mapa:"notas/mapa-excelencia-operacional.html", livro:"Cap. 3 — Gestão ágil: Cynefin, Lean e Kata", caso:"Sem caso: Lean Kata aplicado à organização do grupo",
   prep:"Lean Kata: problema, Cynefin, VCAP e primeiro ciclo das cinco perguntas.", act:"#kata"},
  {n:"Sessão 4", d:"2026-10-31", h:"13h15 – 15h15", t:"Gestão de serviços",
-  leitura:["Notas de Ensino — Gestão de serviços","notas/servicos.html"], livro:"Cap. 2 — Serviços", caso:"Commerce Bank (615-P04)",
+  leitura:["Notas de Ensino — Gestão de serviços","notas/servicos.html"], mapa:"notas/mapa-servicos.html", livro:"Cap. 2 — Serviços", caso:"Commerce Bank (615-P04)",
   prep:"Seguir com os ciclos semanais do Lean Kata."},
  {n:"Sessões 5 e 6", d:"2026-11-07", h:"8h00 – 12h15", t:"Gestão da cadeia de suprimentos",
-  leitura:["Notas de Ensino — Cadeia de suprimentos","notas/cadeia-de-suprimentos.html"], livro:"Cap. 4 — Supply Chain Management", caso:"WalMart: Managing a global supply chain (traduzido)",
+  leitura:["Notas de Ensino — Cadeia de suprimentos","notas/cadeia-de-suprimentos.html"], mapa:"notas/mapa-cadeia-suprimentos.html", livro:"Cap. 4 — Supply Chain Management", caso:"WalMart: Managing a global supply chain (traduzido)",
   prep:"Pesquisa do Walmart entregue até 06/11: análise à luz de Fisher, VCAP e evidências.", act:"#walmart"},
  {n:"Sessão 7", d:"2026-11-14", h:"10h15 – 12h15", t:"Compras na cadeia de suprimentos",
-  leitura:["Notas de Ensino — Compras estratégicas","notas/compras.html"], livro:"Cap. 4 — Supply Chain Management", caso:"Gestão Estratégica de Suprimentos na Whirlpool China",
+  leitura:["Notas de Ensino — Compras estratégicas","notas/compras.html"], mapa:"notas/mapa-compras.html", livro:"Cap. 4 — Supply Chain Management", caso:"Gestão Estratégica de Suprimentos na Whirlpool China",
   prep:"Análise de uma categoria de compras na plataforma, entregue até 13/11.", act:"#compras",
   extra:["Plataforma de compras","https://tflsixsigma-png.github.io/contrata-o-e-gest-o-de-fornecedores/"]},
  {n:"Sessão 8", d:"2026-11-28", h:"13h15 – 15h15", t:"Cadeia de suprimentos circular",
@@ -425,6 +425,7 @@ route.innerHTML=S.map((s,i)=>{
   const D=dt(s.d), cls=i===nextIdx?"is-next":(nextIdx===-1||i<nextIdx?"is-past":"");
   const btns=[];
   if(s.leitura) btns.push(`<a class="btn primary" href="${s.leitura[1]}"${s.leitura[1].startsWith("http")?' target="_blank" rel="noopener"':''}>${s.leitura[0]}</a>`);
+  if(s.mapa) btns.push(`<a class="btn" href="${s.mapa}">Mapa interativo da aula</a>`);
   if(s.act) btns.push(`<a class="btn" href="${s.act}" data-open="${s.act}">Ver a atividade</a>`);
   if(s.extra) btns.push(`<a class="btn" href="${s.extra[1]}" target="_blank" rel="noopener">${s.extra[0]}</a>`);
   return `<li class="stop ${cls}" id="s${i}">
