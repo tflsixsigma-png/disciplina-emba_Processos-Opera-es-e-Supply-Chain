@@ -851,6 +851,20 @@ background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui
   .section-label,.card-label,.case-label,.syn-framework,.dilema-toggle{font-size:12px!important}
   .dilema-reveal,.step-body,.domain-desc,.domain-approach,.syn-body,cite{font-size:15px!important;line-height:1.6}
 }
+
+/* lean-tres-equacoes */
+.eq-box{font-family:'DM Mono',monospace;background:var(--navy);color:var(--gold-light);text-align:center;padding:1.1rem 1.25rem;margin:1rem 0 1.25rem;border:1px solid rgba(201,168,76,.45);font-size:clamp(1rem,2.1vw,1.45rem);line-height:1.6;letter-spacing:.01em}
+.eq-box small{display:block;font-family:'DM Sans',sans-serif;font-size:.8rem;color:#c7d0e0;margin-top:.45rem;letter-spacing:.02em}
+.vstick{max-width:640px;margin:1.25rem auto 1.5rem}
+.vs-edge{display:flex;align-items:center;gap:.75rem;font-family:'DM Mono',monospace;font-size:.78rem;font-weight:500;color:var(--navy);letter-spacing:.03em}
+.vs-edge::after{content:"";flex:1;border-top:2px solid var(--navy)}
+.vs-seg{margin-left:auto;width:58%;padding:.9rem 1rem;color:#fff;font-weight:600;font-size:.95rem;line-height:1.3}
+.vs-seg small{display:block;font-family:'DM Mono',monospace;font-weight:400;font-size:.75rem;opacity:.9;margin-top:.2rem}
+.vs-c1{background:#1d3461}.vs-c2{background:#8a6d1f}.vs-c3{background:#2f5d50}
+.chain{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.75rem 0 1rem}
+.chain span{background:var(--gold-pale);border:1px solid var(--border);padding:.45rem .75rem;font-size:.9rem;font-weight:600;color:var(--navy)}
+.chain span:not(:last-child)::after{content:" →";color:var(--gold)}
+@media (max-width:640px){.vs-seg{width:64%}.vs-edge{font-size:.72rem}}
 </style>
 </head>
 <body>
@@ -881,11 +895,12 @@ background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui
     <button class="tab-btn active" onclick="showModule(0)">M1 · Novo Paradigma</button>
     <button class="tab-btn" onclick="showModule(1)">M2 · Cynefin</button>
     <button class="tab-btn" onclick="showModule(2)">M3 · Lean Thinking</button>
-    <button class="tab-btn" onclick="showModule(3)">M4 · Lean Startup</button>
-    <button class="tab-btn" onclick="showModule(4)">M5 · Toyota Kata</button>
-    <button class="tab-btn" onclick="showModule(5)">M6 · Aprendizagem Org.</button>
-    <button class="tab-btn" onclick="showModule(6)">M7 · Síntese</button>
-    <button class="tab-btn" onclick="showModule(7)">Conclusão</button>
+    <button class="tab-btn" onclick="showModule(3)">M4 · Três Equações</button>
+    <button class="tab-btn" onclick="showModule(4)">M5 · Lean Startup</button>
+    <button class="tab-btn" onclick="showModule(5)">M6 · Toyota Kata</button>
+    <button class="tab-btn" onclick="showModule(6)">M7 · Aprendizagem Org.</button>
+    <button class="tab-btn" onclick="showModule(7)">M8 · Síntese</button>
+    <button class="tab-btn" onclick="showModule(8)">Conclusão</button>
   </div>
 </nav>
 
@@ -1147,11 +1162,379 @@ background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui
   </section>
 
   <!-- ═══════════════════════════════
-       M4 — LEAN STARTUP
+       M4 — LEAN E AS TRÊS EQUAÇÕES
   ════════════════════════════════ -->
   <section class="module" id="mod-3">
     <div class="mod-header">
       <div class="mod-number">04</div>
+      <div>
+        <div class="mod-title">Lean e as Três Equações — Da Linha do Tempo de Ohno ao Balanço</div>
+        <div class="mod-subtitle">Bastão de valor, ROIC e VCAP: como a operação enxuta aparece na disposição a pagar, no capital e na capacidade da organização</div>
+      </div>
+    </div>
+
+    <div class="quote-block">
+      <blockquote>"Tudo o que estamos fazendo é olhar para a linha do tempo, do momento em que o cliente nos faz um pedido até o momento em que recebemos o dinheiro. E estamos reduzindo essa linha do tempo, removendo os desperdícios que não agregam valor."</blockquote>
+      <cite>— Taiichi Ohno, <em>Sistema Toyota de Produção</em> (1988)</cite>
+    </div>
+
+    <div class="section-block gold-accent">
+      <div class="section-label">Conceito Central</div>
+      <h2>A Ponte entre Operações e Finanças</h2>
+      <p>Quase toda decisão de negócio vira, em algum momento, uma decisão sobre capital. O lean costuma ser defendido em linguagem operacional — fluxo, desperdício, qualidade — para quem decide em linguagem financeira. É nessa distância que muitos bons argumentos operacionais morrem na sala do conselho.</p>
+      <p>Este módulo constrói a ponte nos dois sentidos, com três equações: o <strong>bastão de valor</strong>, que mostra onde o lean cria valor; o <strong>retorno sobre o capital investido (ROIC)</strong>, que mostra como esse valor aparece no resultado e no balanço; e o <strong>modelo VCAP</strong>, que mostra quem fica com o ganho.</p>
+      <p>Um detalhe de partida: a linha do tempo de Ohno tem nome em finanças. É o <strong>ciclo de conversão de caixa</strong> (<em>cash-to-cash</em>). Um engenheiro definiu um ciclo financeiro sem abrir um livro de contabilidade — encurtar o tempo entre o pedido e o recebimento é, ao mesmo tempo, melhoria operacional e decisão sobre capital.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Antes da Ferramenta, a Escolha</div>
+      <h2>Para ser excelente, é preciso escolher onde ser ruim</h2>
+      <p>Estratégia traduzida em operações significa não fazer tudo: decidir onde ser excelente e, com a mesma deliberação, onde não ser (Frei &amp; Morriss, 2012). Nenhuma ferramenta lean corrige a ausência dessa escolha.</p>
+    </div>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-label">Ganhador de pedido</div>
+        <h3>O que faz o cliente escolher você</h3>
+        <p>O atributo em que você é o melhor da categoria e que decide a compra (Hill, 2000). A distância entre a sua nota e a do segundo colocado nesse atributo é a vantagem competitiva.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Qualificador</div>
+        <h3>O que não atrai, mas elimina</h3>
+        <p>Ninguém escolhe um restaurante porque o banheiro é o melhor da cidade — mas deixa de voltar se estiver sujo. Esforço despejado em qualificadores consome recursos sem gerar preferência.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Sacrifício deliberado</div>
+        <h3>O que a escolha financia</h3>
+        <p>A Southwest abriu mão de refeições, assento marcado e conexão de bagagem; os sacrifícios financiam preço e pontualidade. A empresa presa no meio, sem ser a melhor em nada, raramente é a primeira escolha.</p>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Valor, Definido a Partir do Cliente</div>
+      <h2>Três tipos de atividade na linha do tempo</h2>
+      <table class="data-table">
+        <thead>
+          <tr><th>Tipo</th><th>Teste</th><th>Exemplo no trânsito</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Agrega valor</td><td>Transforma o produto ou serviço de um jeito pelo qual o cliente pagaria, se soubesse</td><td>Dirigir enquanto o carro de fato avança rumo ao destino</td></tr>
+          <tr><td>Necessária, sem valor</td><td>O cliente não pagaria, mas lei, tecnologia ou contrato exigem</td><td>Parar no sinal vermelho: não ajuda o motorista, mas sem ele o trânsito colapsa</td></tr>
+          <tr><td>Desperdício</td><td>Nem uma coisa nem outra</td><td>A conversão errada, o caminho mais longo, o pneu furado</td></tr>
+        </tbody>
+      </table>
+      <p>Em fluxos de valor ainda não melhorados, o tempo que agrega valor costuma ser uma pequena fração do tempo total — frequentemente menos de 5%. Duas horas no hospital para obter uma receita que se escreve em minutos. O padrão se repete em qualquer negócio.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">A Anatomia do Desperdício</div>
+      <h2>Muda é a febre; mura e muri são a infecção</h2>
+      <p>Os sete desperdícios de Ohno: transporte, estoque, movimentação, espera, processamento excessivo, superprodução e defeitos. A <strong>superprodução</strong> é o maior deles, porque cria e alimenta os outros seis.</p>
+    </div>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-label">Muda · desperdício</div>
+        <h3>O sintoma visível</h3>
+        <p>O que se enxerga e se toca: filas, retrabalho, estoque parado. Atacar só a muda é colocar um curativo.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Mura · irregularidade</div>
+        <h3>A variação que gera filas</h3>
+        <p>Demanda e ritmo desiguais criam filas e obrigam a manter estoques de segurança.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Muri · sobrecarga</div>
+        <h3>O excesso que gera defeitos</h3>
+        <p>Pessoas e máquinas acima da capacidade produzem defeitos e quebras.</p>
+      </div>
+    </div>
+    <div class="section-block">
+      <p><strong>Por que tantos programas estagnam.</strong> Atacar apenas a muda produz uma onda de ganhos e depois para. A cura para mura e muri é nivelar e fazer fluir — tratar a causa, não o sintoma.</p>
+    </div>
+
+    <div class="section-block gold-accent">
+      <div class="section-label">Filosofia Antes de Sistema</div>
+      <h2>A Casa Toyota é um sistema de complementaridades</h2>
+      <p>A Casa do TPS é fácil de vender e perigosa em mãos desavisadas: promete-se o telhado — menor custo, maior qualidade, menor lead time — e entrega-se um kit de ferramentas. Ter as ferramentas não é ter lean. Por isso, em implantações corporativas, a cultura vem primeiro: mudar o comportamento exige mudar a forma de pensar, e isso inclui tornar seguro dizer "não sei".</p>
+      <p>Uma definição de trabalho: <strong>lean é a busca sistemática da perfeição, de forma incremental</strong>. Incremental porque a melhoria se apoia em evidência, pensamento científico e análise de causa raiz; perfeição porque é o retrato do processo sem muda, sem mura e sem muri.</p>
+    </div>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-label">Telhado</div>
+        <h3>As metas, nos termos do cliente</h3>
+        <p>Maior qualidade, menor custo, menor lead time, segurança e moral.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Pilar esquerdo</div>
+        <h3>Just-in-Time</h3>
+        <p>Takt, fluxo contínuo, limite de estoque em processo (WIP), troca rápida (SMED) e logística integrada.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Pilar direito</div>
+        <h3>Jidoka</h3>
+        <p>Qualidade construída no processo: parar e corrigir, andon, poka-yoke.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Base</div>
+        <h3>Estabilidade</h3>
+        <p>Heijunka (nivelamento), trabalho padronizado e estabilidade dos 4M.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Centro</div>
+        <h3>Pessoas e trabalho em equipe</h3>
+        <p>O coração do sistema e o multiplicador. Dá para ter uma casa com um pilar só? Ou sem base?</p>
+      </div>
+    </div>
+    <div class="section-block">
+      <p><strong>A evidência.</strong> Milgrom e Roberts (1990) formalizaram a manufatura moderna como um sistema de complementaridades, em que o retorno de cada prática cresce com a adoção das demais. MacDuffie (1995) mostrou que pacotes de práticas alinhadas, e não ferramentas isoladas, explicam o desempenho. Shah e Ward (2007) construíram os instrumentos de medição do campo sobre a mesma lógica. Boa parte dos fracassos de programas lean vem de aplicá-lo como um kit isolado.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">O Paradoxo da Eficiência</div>
+      <h2>Ocupar todo mundo o tempo todo não deixa o cliente mais feliz</h2>
+      <p>O lean costuma ser apresentado como "fazer mais com menos". Isso é eficiência — e, perseguida sozinha, vira otimização de recursos: manter cada pessoa e cada máquina ocupada no ritmo máximo. Taxa de utilização e custo por unidade dão uma falsa sensação de bom resultado; são resultados apenas operacionais (Modig &amp; Åhlström, 2012).</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Eficiência de recursos</th><th>Eficiência de fluxo</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Mantém cada pessoa e cada máquina ocupada</td><td>Otimiza a jornada da unidade pelo sistema</td></tr>
+          <tr><td>Otimiza o que a contabilidade de custos mede</td><td>Mede o pedido, não o recurso</td></tr>
+          <tr><td>Gera filas, retrabalho e urgências</td><td>Costuma melhorar o uso dos recursos quando as filas desaparecem</td></tr>
+          <tr><td>Parece eficiente localmente e destrói o desempenho global</td><td>Quase ninguém reporta</td></tr>
+        </tbody>
+      </table>
+      <p><strong>A física do lead time.</strong> Pela relação VUT (Hopp &amp; Spearman, 2011), o tempo em fila cresce de forma não linear com a utilização, na proporção de u/(1 − u): a 80% de utilização o fator é 4; a 90%, 9; a 95%, 19. Aumentar a utilização não aumenta a vazão do sistema — aumenta a fila na frente dele. A variabilidade precisa ser absorvida por estoque, por capacidade ou por tempo, e só o primeiro aparece no balanço.</p>
+      <p>E sobre o "menos": a palavra é uma armadilha. Lean não é fazer as coisas com menos; é fazer o que importa — e o que importa é definido pelo cliente, não pelo gestor.</p>
+    </div>
+    <div class="dilema-grid">
+      <div class="dilema-card" onclick="toggleDilema(this)">
+        <div class="dilema-num">EXERCÍCIO · O GARGALO</div>
+        <p>Três recursos em sequência: o primeiro processa 10 unidades por hora, o segundo 20 e o terceiro 30. Quantas unidades por hora você deve liberar no sistema?</p>
+        <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+        <div class="dilema-reveal">Dez. Libere vinte e o sistema continua entregando dez — o resto vira estoque em processo parado. O gargalo dita o ritmo de todo o sistema. Se o cliente precisa de vinte, a resposta não é empurrar mais trabalho; é remover o desperdício na frente do gargalo — burocracia, inspeções, retrabalho — até que ele consiga, de fato, fazer vinte. Produtividade é resultado de capacidade, e capacidade é resultado de como os recursos são alocados.</div>
+      </div>
+      <div class="dilema-card" onclick="toggleDilema(this)">
+        <div class="dilema-num">PROVOCAÇÃO · A MÉTRICA</div>
+        <p>Sua organização reporta a taxa de utilização. Ela reporta a eficiência de fluxo em algum lugar? Se não, que comportamento essa ausência está recompensando em silêncio?</p>
+        <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+        <div class="dilema-reveal">O que se mede vira o que se otimiza. Se só a utilização aparece no painel, os gestores serão premiados por manter as pessoas ocupadas, mesmo que o pedido do cliente espere em filas. Medir a eficiência de fluxo — a fração do tempo em que a unidade de fato recebe valor — desloca a conversa do recurso para o cliente.</div>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Os Dois Pilares</div>
+      <h2>Just-in-Time é fluxo; Jidoka é qualidade na origem</h2>
+    </div>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-label">Pilar esquerdo · Just-in-Time</div>
+        <h3>Não é estoque zero. É eficiência de fluxo.</h3>
+        <p><strong>Fluxo unitário:</strong> a unidade de trabalho que o sistema processa sem interrupção, definida pela restrição.<br><strong>Limite de WIP:</strong> um sistema puxado é definido por um teto explícito de estoque em processo. Kanban é um mecanismo; CONWIP é outro. Confundir os cartões com o sistema é o erro executivo mais comum (Hopp &amp; Spearman, 2004).<br><strong>SMED:</strong> lotes são grandes porque a troca é cara. Reduza a troca de trinta minutos para um dígito e o lote econômico tende a um.<br><strong>Heijunka:</strong> por baixo de tudo, o nivelamento que estabiliza o sinal puxado.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Pilar direito · Jidoka</div>
+        <h3>Detectar a anormalidade o mais cedo possível</h3>
+        <p>O custo de um defeito cresce a cada etapa que ele sobrevive. Você pede massa com camarão; o prato chega errado e o problema estava na massa. Detectar antes custaria o preço da massa no supermercado. Agora custa o prato, o jantar, a noite — e a foto que o cliente acabou de postar.<br><strong>Poka-yoke:</strong> tornar o erro impossível. No caixa eletrônico, você retira o cartão antes do dinheiro.<br><strong>Andon e parar-e-corrigir:</strong> sinalizar na hora e parar, em vez de passar adiante. O desperdício não pode caminhar pelo processo.</p>
+      </div>
+    </div>
+    <div class="section-block">
+      <p><strong>Por que é um problema de pessoas.</strong> Não dá para colocar câmeras e sensores em tudo; a detecção depende dos colaboradores. Em muitas organizações, as pessoas não se sentem à vontade para dizer "há um problema aqui", ou não acreditam que são pagas para resolvê-lo. É aí que o lean de fato mora: pessoas com autonomia e com o comportamento de resolver problemas de forma científica — exatamente o que o Toyota Kata desenvolve (M6).</p>
+    </div>
+
+    <div class="section-block gold-accent">
+      <div class="section-label">Equação 1 · O Bastão de Valor</div>
+      <h2>O lean empurra as duas pontas ao mesmo tempo</h2>
+      <div class="eq-box">Valor criado = WTP − Custo de oportunidade do fornecedor<small>Brandenburger &amp; Stuart (1996)</small></div>
+      <p>A disposição a pagar do cliente (WTP) é o teto. Preço e custo são linhas divisórias dentro dele: a distância entre WTP e preço é o valor que fica com o cliente; entre preço e custo, a margem da empresa; entre custo e o custo de oportunidade do fornecedor, o excedente do fornecedor. Só dois movimentos criam valor: <strong>subir a WTP</strong> ou <strong>baixar o custo de oportunidade do fornecedor</strong>. Mexer no preço apenas transfere valor de um lado para o outro.</p>
+      <div class="vstick" role="img" aria-label="Bastão de valor: do topo para a base, WTP, preço, custo e custo de oportunidade do fornecedor, com as faixas de valor para o cliente, margem da empresa e excedente do fornecedor">
+        <div class="vs-edge"><span>WTP · disposição a pagar</span></div>
+        <div class="vs-seg vs-c1">Valor para o cliente<small>WTP − Preço</small></div>
+        <div class="vs-edge"><span>Preço</span></div>
+        <div class="vs-seg vs-c2">Margem da empresa<small>Preço − Custo</small></div>
+        <div class="vs-edge"><span>Custo</span></div>
+        <div class="vs-seg vs-c3">Excedente do fornecedor<small>Custo − COF</small></div>
+        <div class="vs-edge"><span>COF · custo de oportunidade do fornecedor</span></div>
+      </div>
+      <p>Um notebook de mil dólares não é erro de preço: o comprador paga porque a sua disposição a pagar está acima disso. O lean é incomum porque empurra as duas pontas para fora de uma só vez. E a qualidade reduz o custo duas vezes: menos inspeção e menos logística reversa (Garvin, 1987).</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Pilar</th><th>Ponta do bastão</th><th>Como o movimento acontece</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Jidoka</td><td>Custo ↓</td><td>Defeitos removidos na origem; o custo da má qualidade despenca</td></tr>
+          <tr><td>Jidoka</td><td>WTP ↑</td><td>Entrega com zero defeito permite ao cliente B2B eliminar a inspeção de recebimento e o estoque de segurança — um argumento de WTP com número</td></tr>
+          <tr><td>Just-in-Time</td><td>Custo ↓</td><td>Menos estoque, manuseio, urgências, obsolescência e área ocupada</td></tr>
+          <tr><td>Just-in-Time</td><td>WTP ↑</td><td>O cliente paga por velocidade e previsibilidade; lead time curto reduz o risco de previsão dele</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-block gold-accent">
+      <div class="section-label">Equação 2 · Retorno sobre o Capital Investido</div>
+      <h2>A métrica que arbitra o conflito entre as áreas</h2>
+      <p>Três gestores, três métricas, uma discussão sem fim:</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Área</th><th>O que otimiza</th><th>Onde colide</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Operações</td><td>Custo operacional</td><td>Lotes grandes e mais produto no mercado pioram o giro</td></tr>
+          <tr><td>Marketing</td><td>Nível de serviço por disponibilidade</td><td>Exige mais estoque</td></tr>
+          <tr><td>Finanças</td><td>Capital de giro e caixa</td><td>Mais estoque faz exatamente o contrário</td></tr>
+        </tbody>
+      </table>
+      <p>Isoladas, nenhuma está certa. Que métrica dá o melhor equilíbrio entre finanças, operações e marketing?</p>
+      <div class="eq-box">ROIC = NOPAT ÷ Capital Investido<br>= (NOPAT ÷ Receita) × (Receita ÷ Capital Investido)<small>Margem × Giro do capital · a receita se cancela; é só o pivô que separa as duas alavancas</small></div>
+      <p>Sob o ROIC, os três argumentos passam a ser precificados na mesma moeda. Estoque de menos aparece como venda perdida no numerador; estoque demais aparece como capital no denominador. Não otimizamos a cozinha — otimizamos a casa inteira.</p>
+    </div>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-label">Alavanca do numerador · margem</div>
+        <h3>NOPAT ÷ Receita</h3>
+        <p>Refugo, retrabalho, rendimento, OEE. É onde todo business case lean costuma ser escrito.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Alavanca do denominador · giro</div>
+        <h3>Receita ÷ Capital Investido</h3>
+        <p>Estoques (matéria-prima, em processo e acabados), área ocupada, buffers de capacidade, ciclo de caixa. É para onde ninguém olha na reunião de operações.</p>
+      </div>
+    </div>
+    <div class="section-block">
+      <div class="section-label">A Lei de Little · a linha de transmissão</div>
+      <div class="eq-box">WIP = Vazão × Lead time<small>Little (1961)</small></div>
+      <div class="chain"><span>Menos atividade sem valor</span><span>Lead time ↓</span><span>WIP ↓</span><span>Estoque ↓</span><span>Capital investido ↓</span><span>ROIC ↑</span></div>
+      <p>Cada seta é aritmética, não aspiração. Estoque é capital investido; melhorar o fluxo é uma intervenção no balanço que, por acaso, acontece no chão de fábrica.</p>
+      <h2 style="margin-top:1.5rem">Exemplo numérico</h2>
+      <table class="data-table">
+        <thead>
+          <tr><th>Indicador</th><th>Antes</th><th>Depois</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Lead time</td><td>20 dias</td><td>8 dias</td></tr>
+          <tr><td>Estoque</td><td>300</td><td>120</td></tr>
+          <tr><td>Capital investido</td><td>800</td><td>620</td></tr>
+          <tr><td>NOPAT</td><td>80</td><td>100</td></tr>
+          <tr><td>Margem / giro do capital</td><td>—</td><td>+25% / +29%</td></tr>
+          <tr><td>ROIC</td><td>10,0%</td><td>16,1%</td></tr>
+          <tr><td>Lucro econômico (WACC de 10%)</td><td>0</td><td>38</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Premissas.</strong> Receita e vazão constantes. Pela Lei de Little, com a vazão constante o estoque cai na mesma proporção do lead time (300 × 8/20 = 120), e o capital investido cai pelo mesmo valor (800 − 180 = 620). Os +20 de NOPAT vêm da redução de defeitos — uma melhoria de competência, que entra no resultado. Lucro econômico = (ROIC − WACC) × Capital investido = (16,1% − 10%) × 620 ≈ 38. Repare: o giro do capital melhorou mais do que a margem, e é justamente a metade que o business case tradicional não mostra.</p>
+    </div>
+    <div class="dilema-grid">
+      <div class="dilema-card" onclick="toggleDilema(this)">
+        <div class="dilema-num">RESSALVA · LER O ROIC NO CONTEXTO</div>
+        <p>Um ROIC de 16% é bom? Uma empresa que investe de propósito para entregar uma experiência excepcional deve ser avaliada pelo mesmo número de quem compete em preço?</p>
+        <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+        <div class="dilema-reveal">O ROIC não se julga isolado: precisa ser lido contra o setor e contra a estratégia. O critério de criação de valor é o ROIC acima do WACC — o custo médio ponderado de capital, ou seja, quanto custa à empresa se financiar. Uma empresa que escolheu não ser barata não deve ser avaliada como se tentasse ser.</div>
+      </div>
+      <div class="dilema-card" onclick="toggleDilema(this)">
+        <div class="dilema-num">PROVOCAÇÃO · A METADE INVISÍVEL</div>
+        <p>Quando foi a última vez que um projeto lean na sua empresa foi aprovado pelo capital que libera, e não pelo custo que corta? O que precisaria mudar para esse argumento ser ouvido?</p>
+        <div class="dilema-toggle">▸ Ver perspectiva analítica</div>
+        <div class="dilema-reveal">A maior parte dos business cases lean é escrita no numerador (custo, refugo, produtividade). O efeito no denominador — estoque, área, capital de giro — costuma ficar de fora porque não aparece no orçamento de despesas da área. Levar o argumento para o ROIC e para o lucro econômico é o que coloca operações e finanças na mesma mesa.</div>
+      </div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-label">Além da empresa</div>
+        <h3>A cadeia de suprimentos</h3>
+        <p>A melhoria interna acaba encontrando retornos decrescentes; o desperdício que resta se concentra nos pontos de contato entre organizações. Se o fornecedor é lean e entrega peça de alta qualidade, a inspeção de recebimento pode ser reduzida ou eliminada — uma atividade a menos antes da aprovação do pagamento, e o ciclo de caixa encolhe para os dois lados. O tema volta nas Sessões 5 e 6.</p>
+      </div>
+      <div class="card">
+        <div class="card-label">Lean e resiliência</div>
+        <h3>Buffers escolhidos, não acumulados</h3>
+        <p>Lean não é contra resiliência. A resiliência tem dois pilares que podem ser desenhados junto com o Just-in-Time: <strong>robustez</strong> (antecipação e estoques posicionados de propósito) e <strong>agilidade</strong> (capacidade de reserva no fornecedor, mobilizável quando preciso). Antes da pandemia, muitas cadeias tinham eliminado a robustez; o que veio depois foi uma combinação deliberada das duas.</p>
+      </div>
+    </div>
+
+    <div class="section-block gold-accent">
+      <div class="section-label">Equação 3 · VCAP</div>
+      <h2>Quem fica com o ganho</h2>
+      <div class="eq-box">V = C × (A + P)<small>Valor = Capacidades × (Ativos + Processos) · Lima (2026), Cap. 1</small></div>
+      <p>Ativos e processos são o desenho da empresa, e os dois se somam. A capacidade os multiplica. Processo certo e ativo certo são necessários, mas não suficientes: é possível comprar ativos, comprar processos e até contratar alguém para desenhar o processo — mas não existe capacidade pronta na prateleira. Se C tende a zero, V tende a zero, qualquer que seja o valor de A e P.</p>
+    </div>
+    <div class="case-study">
+      <div class="case-label">O Enigma da NUMMI</div>
+      <h3>Mesma fábrica, mesmas pessoas, outro resultado</h3>
+      <p>Em 1982, a GM fechou a fábrica de Fremont, na Califórnia: absenteísmo perto de 20%, o sindicato mais combativo do sistema e a pior qualidade da GM. Dois anos depois, reaberta como NUMMI em parceria com a Toyota, com boa parte da mesma força de trabalho e o mesmo prédio, a fábrica passou a produzir em níveis comparáveis aos da Toyota no Japão.</p>
+      <p>Na leitura do VCAP: <strong>A</strong> ficou praticamente constante; <strong>P</strong> foi redesenhado pelos princípios da Toyota; <strong>C</strong> foi transformado. V se multiplicou — e isso ficou invisível no balanço, que registra apenas ativos. A GM conseguia observar e copiar P: os cordões de andon, os quadros, o trabalho padronizado. Não conseguia transferir C, porque não conseguia transferir a cultura (Spear &amp; Bowen, 1999; Shook, 2010). Eficácia operacional é imitável; não é sustentável sem a cultura por baixo.</p>
+      <p><strong>O mesmo enigma no supermercado.</strong> Um aluno vindo da Alemanha comparou filas de caixa de 12 a 16 minutos aqui com 1 a 2 minutos lá — com o mesmo layout, as mesmas prateleiras, o mesmo autoatendimento e os mesmos carrinhos. Mesmos ativos, mesmos processos, resultados radicalmente diferentes. A ressalva honesta: o que parece ineficiência numa cultura às vezes é tempo social em outra, e custo do trabalho, salários e história moldam o trade-off que cada operação faz.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Síntese · Três Equações, Um Sistema</div>
+      <h2>Do chão de fábrica ao balanço</h2>
+    </div>
+    <div class="synthesis-grid">
+      <div class="syn-cell dark">
+        <p class="syn-framework">Equação 1</p>
+        <h3 class="syn-title">Bastão de valor</h3>
+        <p class="syn-body">Jidoka e Just-in-Time empurram as duas pontas para fora: a WTP sobe e o custo desce. A distância entre elas é o valor criado.</p>
+        <div class="syn-metric"><span class="syn-metric-label">Pergunta</span><span class="syn-metric-value">Que movimento de WTP ou de custo esta melhoria provoca?</span></div>
+      </div>
+      <div class="syn-cell">
+        <p class="syn-framework">Equação 2</p>
+        <h3 class="syn-title">ROIC</h3>
+        <p class="syn-body">O lean eleva o numerador e reduz o denominador. Pela Lei de Little, menos lead time é menos capital investido.</p>
+        <div class="syn-metric"><span class="syn-metric-label">Pergunta</span><span class="syn-metric-value">O ROIC fica acima do WACC?</span></div>
+      </div>
+      <div class="syn-cell">
+        <p class="syn-framework">Equação 3</p>
+        <h3 class="syn-title">VCAP</h3>
+        <p class="syn-body">Ativos e processos somam e podem ser comprados; a capacidade multiplica e precisa ser construída.</p>
+        <div class="syn-metric"><span class="syn-metric-label">Pergunta</span><span class="syn-metric-value">Estamos construindo C ou só comprando A e P?</span></div>
+      </div>
+    </div>
+    <div class="quote-block">
+      <blockquote>"O lean alarga a distância entre WTP e custo e eleva o ROIC acima do WACC. Mas, como V = C × (A + P), só faz isso nas organizações que constroem o multiplicador em vez de comprar o que está entre parênteses."</blockquote>
+      <cite>— Síntese do módulo</cite>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Perguntas para Levar ao Seu Lean Kata</div>
+      <h2>Não são tarefas — são perguntas para pensar</h2>
+      <ol class="principles">
+        <li><div class="prin-content"><strong>O teste do banheiro</strong><span>Cite um atributo em que sua organização investe pesado e que, honestamente, é um qualificador. O que mudaria se esse investimento fosse para um ganhador de pedido?</span></div></li>
+        <li><div class="prin-content"><strong>O sacrifício</strong><span>Onde sua organização é deliberadamente ruim — e isso é uma decisão ou algo apenas tolerado? Uma empresa boa em tudo não fez escolha nenhuma.</span></div></li>
+        <li><div class="prin-content"><strong>O gargalo</strong><span>Onde está a restrição no processo que você conduz? A organização empurra mais trabalho para ela ou remove o desperdício na frente dela?</span></div></li>
+        <li><div class="prin-content"><strong>As três métricas</strong><span>Pense na última discussão entre áreas de que você participou. O ROIC a teria resolvido — e alguém na sala teria aceitado essa arbitragem?</span></div></li>
+        <li><div class="prin-content"><strong>A segurança</strong><span>Na sua última falha operacional séria, quanto tempo alguém sabia antes de a gestão saber? O que fez essa pessoa esperar?</span></div></li>
+        <li><div class="prin-content"><strong>O multiplicador</strong><span>Se todos executassem exatamente o que está escrito e ninguém melhorasse nada, quanto tempo levaria para isso aparecer nos resultados? Se a resposta for "muito tempo", essa demora é o problema.</span></div></li>
+      </ol>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Glossário</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Termo</th><th>Definição</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Muda / Mura / Muri</td><td>Desperdício / irregularidade / sobrecarga. O primeiro é a febre; os dois últimos, a infecção.</td></tr>
+          <tr><td>Heijunka</td><td>Nivelamento de volume e mix para estabilizar o sinal de demanda.</td></tr>
+          <tr><td>Jidoka</td><td>Qualidade construída no processo: detectar a anormalidade no ponto mais cedo e parar.</td></tr>
+          <tr><td>Poka-yoke</td><td>Dispositivo à prova de erro, que torna o engano fisicamente impossível.</td></tr>
+          <tr><td>SMED</td><td>Troca rápida de ferramenta (<em>Single-Minute Exchange of Die</em>), que reduz o lote econômico.</td></tr>
+          <tr><td>Sistema puxado</td><td>Sistema que limita explicitamente o estoque em processo. Kanban é um mecanismo, não a definição.</td></tr>
+          <tr><td>Eficiência de fluxo</td><td>Fração do tempo total em que a unidade de fato recebe valor.</td></tr>
+          <tr><td>NOPAT</td><td>Lucro operacional líquido após impostos. Não é o lucro líquido, que já carrega a despesa de juros.</td></tr>
+          <tr><td>ROIC / WACC</td><td>Retorno sobre o capital investido / custo médio ponderado de capital. Cria-se valor acima da diferença.</td></tr>
+          <tr><td>Ganhador de pedido / qualificador</td><td>O que faz o cliente escolher você / o patamar cuja ausência elimina você.</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.85rem;color:var(--text-light);margin-top:1rem">Referências: Brandenburger &amp; Stuart (1996); Frei &amp; Morriss (2012); Garvin (1987); Hill (2000); Hopp &amp; Spearman (2004, 2011); Lima (2026); Little (1961); MacDuffie (1995); Milgrom &amp; Roberts (1990); Modig &amp; Åhlström (2012); Ohno (1988); Shah &amp; Ward (2007); Shook (2010); Spear &amp; Bowen (1999). Referências completas no mapa conceitual da sessão.</p>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════
+       M4 — LEAN STARTUP
+  ════════════════════════════════ -->
+  <section class="module" id="mod-4">
+    <div class="mod-header">
+      <div class="mod-number">05</div>
       <div>
         <div class="mod-title">Lean Startup — Gerenciando Hipóteses em Incerteza Extrema</div>
         <div class="mod-subtitle">Por que a inovação não falha por falta de criatividade — e o sistema de gestão que corrige esse erro categórico</div>
@@ -1230,9 +1613,9 @@ background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui
   <!-- ═══════════════════════════════
        M5 — TOYOTA KATA
   ════════════════════════════════ -->
-  <section class="module" id="mod-4">
+  <section class="module" id="mod-5">
     <div class="mod-header">
-      <div class="mod-number">05</div>
+      <div class="mod-number">06</div>
       <div>
         <div class="mod-title">Toyota Kata — Quando a Melhoria se Torna Comportamento</div>
         <div class="mod-subtitle">A rotina diária que transforma filosofia em cultura — e cultura em vantagem competitiva composta</div>
@@ -1324,9 +1707,9 @@ background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui
   <!-- ═══════════════════════════════
        M6 — APRENDIZAGEM ORGANIZACIONAL
   ════════════════════════════════ -->
-  <section class="module" id="mod-5">
+  <section class="module" id="mod-6">
     <div class="mod-header">
-      <div class="mod-number">06</div>
+      <div class="mod-number">07</div>
       <div>
         <div class="mod-title">Kata e Aprendizagem Organizacional</div>
         <div class="mod-subtitle">A conexão com Argyris — como as rotinas da Toyota institucionalizam os três níveis de aprendizagem</div>
@@ -1414,9 +1797,9 @@ background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui
   <!-- ═══════════════════════════════
        M7 — SÍNTESE
   ════════════════════════════════ -->
-  <section class="module" id="mod-6">
+  <section class="module" id="mod-7">
     <div class="mod-header">
-      <div class="mod-number">07</div>
+      <div class="mod-number">08</div>
       <div>
         <div class="mod-title">A Grande Síntese — Sistema Unificado para a Complexidade</div>
         <div class="mod-subtitle">Como Cynefin, Lean, Lean Startup e Toyota Kata operam como camadas de um único sistema integrado</div>
@@ -1505,7 +1888,7 @@ background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui
   <!-- ═══════════════════════════════
        CONCLUSÃO
   ════════════════════════════════ -->
-  <section class="module" id="mod-7">
+  <section class="module" id="mod-8">
     <div class="mod-header">
       <div class="mod-number">✦</div>
       <div>

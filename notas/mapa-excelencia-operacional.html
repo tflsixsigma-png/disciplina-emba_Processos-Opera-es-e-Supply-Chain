@@ -385,6 +385,23 @@ background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui
   .apsnext{right:calc(50% - 88px)!important}
   .apscounter{bottom:14px!important}
 }
+
+/* slides · lean e as três equações */
+.slide .tb{width:100%;border-collapse:collapse}
+.slide .tb th{font-family:var(--f-data);font-size:1.55cqw;letter-spacing:.08em;text-transform:uppercase;color:var(--core);text-align:left;padding:.55cqw 1cqw;border-bottom:2px solid var(--core)}
+.slide .tb td{font-size:1.95cqw;padding:.45cqw 1cqw;border-bottom:1px solid var(--line);color:var(--body);line-height:1.3}
+.slide .tb td:first-child{color:var(--ink);font-weight:600}
+.slide .chain{display:flex;flex-wrap:wrap;gap:.9cqw;align-items:center}
+.slide .chain span{border:1.5px solid var(--core);border-radius:6px;padding:.7cqw 1.2cqw;font-size:2.05cqw;color:var(--ink)}
+.slide .chain i{color:var(--core);font-style:normal;font-size:2.6cqw;font-weight:700}
+.slide .stickrow{align-items:center}
+.slide .stickrow>div{border-top:none;padding-top:0}
+.slide .stick{display:flex;flex-direction:column}
+.slide .stick .e{font-family:var(--f-data);font-size:1.55cqw;color:var(--muted);border-top:2px solid var(--ink);padding:.3cqw 0 .2cqw}
+.slide .stick .s{margin-left:34%;padding:1.3cqw 1.4cqw;font-size:2cqw;font-weight:600;color:#fff}
+.slide .stick .s1{background:#1d4ed8}.slide .stick .s2{background:#a16207}.slide .stick .s3{background:#047857}
+.slide .stickrow .formula{margin-bottom:1.4cqw}
+.slide .formula.sm{font-size:2.4cqw}
 </style>
 </head>
 <body>
@@ -675,6 +692,16 @@ const SHORT = {
   "Womack et al. · 1990":"Womack · 1990",
   "Womack & Jones · 1996":"Womack · 1996",
   "Repenning & Sterman · 2001":"Repenning · 2001",
+  "Bastão de valor · WTP − COF":"Bastão de valor",
+  "Lei de Little · WIP = vazão × lead time":"Lei de Little",
+  "Ganhadores de pedido e qualificadores":"Ganhador × qualificador",
+  "Just-in-Time · pilar esquerdo":"Just-in-Time",
+  "Jidoka · pilar direito":"Jidoka",
+  "Confundir kanban com sistema puxado":"Kanban ≠ puxado",
+  "Brandenburger & Stuart · 1996":"Brandenburger · 1996",
+  "Milgrom & Roberts · 1990":"Milgrom · 1990",
+  "Modig & Åhlström · 2012":"Modig · 2012",
+  "Hopp & Spearman · 2004":"Hopp · 2004",
 };
 
 const NODES = [
@@ -790,6 +817,49 @@ const NODES = [
    desc:"A base sobre o Kata vem sobretudo de livros de praticantes e estudos de caso. Faltam estudos longitudinais que comparem equipes com e sem coaching.",bullets:[]},
   {id:"contingencia", label:"Contingência na adoção lean", cat:"lacuna", r:18, author:"Shah & Ward, 2003 · Netland, 2016",
    desc:"O efeito das práticas lean varia com o contexto. Uma pergunta aberta é se o domínio Cynefin do problema ajuda a prever o sucesso de cada método.",bullets:[]},
+  // ---- lean e as três equações
+  {id:"tres_eq", label:"Lean e as três equações", cat:"core", r:26, author:"Lima, 2026 · Brandenburger & Stuart, 1996 · Little, 1961",
+   desc:"Leitura do lean na linguagem do capital. Três equações conectam o chão de fábrica ao balanço: o bastão de valor mostra onde o lean cria valor, o ROIC mostra como esse valor aparece no resultado e no capital, e o VCAP mostra quem fica com o ganho.",
+   bullets:["Equação 1 · Valor criado = WTP − custo de oportunidade do fornecedor","Equação 2 · ROIC = NOPAT ÷ Capital investido = margem × giro","Equação 3 · V = C × (A + P)","A linha do tempo de Ohno é, em finanças, o ciclo de conversão de caixa"]},
+  {id:"bastao", label:"Bastão de valor · WTP − COF", cat:"core", r:22, author:"Brandenburger & Stuart, 1996",
+   desc:"A disposição a pagar do cliente (WTP) é o teto; o custo de oportunidade do fornecedor (COF), o piso. Preço e custo dividem o valor criado entre cliente, empresa e fornecedor. Só subir a WTP ou baixar o COF cria valor; mexer no preço apenas o transfere. O lean é incomum porque empurra as duas pontas ao mesmo tempo.",
+   bullets:["WTP − Preço: valor que fica com o cliente","Preço − Custo: margem da empresa","Custo − COF: excedente do fornecedor","Jidoka e JIT baixam o custo e sobem a WTP"]},
+  {id:"roic", label:"ROIC = margem × giro", cat:"core", r:22, author:"Koller, Goedhart & Wessels, 2020",
+   desc:"Retorno sobre o capital investido: NOPAT ÷ Capital investido, decomposto em margem (NOPAT ÷ Receita) e giro do capital (Receita ÷ Capital investido). Põe operações, marketing e finanças na mesma moeda: estoque de menos aparece como venda perdida no numerador; estoque demais, como capital no denominador. Cria-se valor quando o ROIC supera o WACC.",
+   bullets:["Numerador: refugo, retrabalho, rendimento, OEE","Denominador: estoques, área, buffers, ciclo de caixa","Lucro econômico = (ROIC − WACC) × Capital investido","Ler sempre contra o setor e a estratégia"]},
+  {id:"little", label:"Lei de Little · WIP = vazão × lead time", cat:"teoria", r:18, author:"Little, 1961",
+   desc:"Com a vazão constante, o estoque em processo é proporcional ao lead time. É a linha de transmissão entre operações e finanças: menos atividade sem valor reduz o lead time, que reduz o WIP e o estoque, que reduz o capital investido e eleva o ROIC.",
+   bullets:["Exemplo: lead time de 20 para 8 dias leva o estoque de 300 para 120","Cada seta da cadeia é aritmética, não aspiração"]},
+  {id:"paradoxo", label:"Paradoxo da eficiência", cat:"teoria", r:18, author:"Modig & Åhlström, 2012 · Hopp & Spearman, 2011",
+   desc:"Perseguir a eficiência de recursos — cada pessoa e máquina ocupada — degrada a eficiência de fluxo, a que o cliente percebe. Pela relação VUT, o tempo em fila cresce na proporção de u/(1 − u) à medida que a utilização se aproxima de 100%.",
+   bullets:["Eficiência de recursos: mede o recurso","Eficiência de fluxo: mede o pedido","O gargalo dita o ritmo do sistema"]},
+  {id:"mudamura", label:"Muda, mura e muri", cat:"teoria", r:18, author:"Ohno, 1988",
+   desc:"Muda é o desperdício visível — os sete desperdícios, liderados pela superprodução. Mura (irregularidade) cria filas e estoques de segurança; muri (sobrecarga) cria defeitos e quebras. Muda é a febre; mura e muri são a infecção.",
+   bullets:["Sete desperdícios: transporte, estoque, movimentação, espera, processamento excessivo, superprodução, defeitos","Atacar só a muda faz o programa estagnar"]},
+  {id:"ganhador", label:"Ganhadores de pedido e qualificadores", cat:"teoria", r:16, author:"Hill, 2000 · Frei & Morriss, 2012",
+   desc:"Ganhador de pedido é o que faz o cliente escolher você; qualificador é o patamar que não atrai, mas cuja ausência elimina. Ser excelente exige escolher onde ser ruim; os ganhadores de pedido definem quanto a WTP sobe.",bullets:[]},
+  {id:"jit", label:"Just-in-Time · pilar esquerdo", cat:"pratica", r:17, author:"Ohno, 1988 · Hopp & Spearman, 2004",
+   desc:"Não é estoque zero: é um programa de eficiência de fluxo. Fluxo unitário, teto explícito de estoque em processo (WIP), troca rápida (SMED) e nivelamento (heijunka). Reduz custo e aumenta a WTP pela velocidade e previsibilidade.",
+   bullets:["Sistema puxado = limite explícito de WIP","SMED reduz o lote econômico","Heijunka estabiliza o sinal puxado"]},
+  {id:"jidoka", label:"Jidoka · pilar direito", cat:"pratica", r:17, author:"Ohno, 1988 · Garvin, 1987",
+   desc:"Qualidade construída no processo: detectar a anormalidade no ponto mais cedo e parar, porque o custo do defeito cresce a cada etapa que ele sobrevive. Poka-yoke, andon e parar-e-corrigir. Reduz o custo e aumenta a WTP.",
+   bullets:["Poka-yoke: tornar o erro impossível","Andon: sinalizar na hora","Depende de pessoas que se sentem seguras para apontar problemas"]},
+  {id:"utilizacao", label:"Maximizar a utilização", cat:"barreira", r:17, author:"Modig & Åhlström, 2012",
+   desc:"Gerir por taxa de utilização e custo por unidade dá a falsa sensação de bom resultado. Aumentar a utilização não aumenta a vazão do sistema; aumenta a fila na frente dele.",bullets:[]},
+  {id:"kanbancartao", label:"Confundir kanban com sistema puxado", cat:"barreira", r:16, author:"Hopp & Spearman, 2004",
+   desc:"Tratar os cartões como a essência do sistema é o erro conceitual mais comum na sala do conselho. O que define um sistema puxado é o limite explícito de WIP; kanban é um mecanismo, CONWIP é outro.",bullets:[]},
+  {id:"brandenburger", label:"Brandenburger & Stuart · 1996", cat:"autor", r:15, author:"Estratégia baseada em valor",
+   desc:"No Journal of Economics & Management Strategy, definem o valor criado como a diferença entre a disposição a pagar do cliente e o custo de oportunidade do fornecedor — a base do bastão de valor.",bullets:[]},
+  {id:"little61", label:"Little · 1961", cat:"autor", r:15, author:"Prova da fórmula L = λW",
+   desc:"Na Operations Research, prova que o número médio de itens num sistema estável é igual à taxa de chegada vezes o tempo médio de permanência. Em operações: WIP = vazão × lead time.",bullets:[]},
+  {id:"milgrom", label:"Milgrom & Roberts · 1990", cat:"autor", r:15, author:"Complementaridades",
+   desc:"Na American Economic Review, formalizam a manufatura moderna como um sistema de complementaridades: o retorno de cada prática cresce com a adoção das demais. Adoção parcial rende pouco ou nada.",bullets:[]},
+  {id:"macduffie", label:"MacDuffie · 1995", cat:"autor", r:15, author:"Pacotes de práticas",
+   desc:"Na ILR Review, mostra em montadoras do mundo inteiro que pacotes de práticas de produção e de gestão de pessoas, e não práticas isoladas, explicam o desempenho.",bullets:[]},
+  {id:"modig", label:"Modig & Åhlström · 2012", cat:"autor", r:15, author:"This is Lean",
+   desc:"Distinguem eficiência de recursos de eficiência de fluxo e mostram por que perseguir a primeira sozinha produz o paradoxo da eficiência.",bullets:[]},
+  {id:"hopp", label:"Hopp & Spearman · 2004", cat:"autor", r:15, author:"To pull or not to pull",
+   desc:"Na Manufacturing & Service Operations Management, definem sistema puxado pelo limite explícito de WIP, separando o conceito do mecanismo kanban. Em Factory Physics, formalizam a relação VUT entre variabilidade, utilização e tempo.",bullets:[]},
 ];
 
 const LINKS = [
@@ -815,6 +885,7 @@ const LINKS = [
   ["leansaude","lean","estende"],["lean40","lean","estende"],
   ["exop","lacunas","limitado por"],["lacunas","evidkata","frente de"],["lacunas","contingencia","frente de"],["lacunas","lean40","frente de"],["lacunas","leansaude","frente de"],
   ["evidkata","rother","testaria"],["contingencia","shah","parte de"],["contingencia","cynefin","pode usar"],
+  ["lean","tres_eq","lido em"],["exop","tres_eq","traduzida em"],["tres_eq","bastao","equação 1"],["tres_eq","roic","equação 2"],["tres_eq","vcap","equação 3"],["bastao","brandenburger","proposto por"],["ganhador","bastao","eleva a WTP"],["jidoka","bastao","move as duas pontas"],["jit","bastao","move as duas pontas"],["tps","jit","pilar"],["tps","jidoka","pilar"],["tps","milgrom","sistema de complementaridades"],["tps","macduffie","pacotes de práticas"],["ohno","mudamura","descreve"],["mudamura","tps","eliminados pelo"],["roic","little","ligado por"],["little","little61","proposta por"],["jit","little","reduz o lead time"],["paradoxo","modig","proposto por"],["paradoxo","hopp","explicado por (VUT)"],["paradoxo","utilizacao","armadilha"],["jit","kanbancartao","armadilha"],["kanbancartao","hopp","esclarecido por"],["vcap","roic","explica quem retém"]
 ];
 
 /* timeline: fases e marcos */
@@ -822,13 +893,17 @@ const TIMELINE = [
   {phase:"Fase I · Raízes: método científico e Toyota (1939–1978)", sub:"O ciclo de melhoria nasce no controle estatístico e é absorvido pela indústria japonesa, que constrói um sistema de produção próprio."},
   {yr:"1939",node:"pdca",t:"O ciclo especificação–produção–inspeção",who:"Shewhart, W. A.",d:"O controle de qualidade é tratado como processo científico iterativo, embrião do PDCA."},
   {yr:"1950",node:"deming",t:"Deming no Japão",who:"Deming, W. E.",d:"Seminários para a JUSE difundem o ciclo de melhoria, que os japoneses reinterpretam como PDCA."},
+  {yr:"1961",node:"little61",t:"A Lei de Little",who:"Little, J. D. C.",d:"A prova de L = λW dá às operações a ponte aritmética entre lead time, estoque e capital."},
   {yr:"1977",node:"tps",t:"O TPS e o kanban descritos em inglês",who:"Sugimori, Y. et al.",d:"Engenheiros da Toyota apresentam just-in-time e respeito ao ser humano no International Journal of Production Research."},
   {yr:"1978",node:"ohno",t:"O livro de Ohno no Japão",who:"Ohno, T.",d:"O arquiteto do TPS publica sua síntese; a edição em inglês sai em 1988."},
   {phase:"Fase II · O Ocidente descobre o lean (1986–1999)", sub:"A crise de competitividade leva pesquisadores a estudar a Toyota. O lean ganha nome, princípios e ferramentas."},
   {yr:"1986",node:"deming",t:"Out of the crisis",who:"Deming, W. E.",d:"Os 14 pontos colocam a responsabilidade pela qualidade no sistema de gestão."},
   {yr:"1988",node:"krafcik",t:"Nasce o termo lean production",who:"Krafcik, J. F.",d:"O triunfo do sistema enxuto, medido em montadoras do mundo inteiro."},
+  {yr:"1990",node:"milgrom",t:"A manufatura como sistema de complementaridades",who:"Milgrom, P. & Roberts, J.",d:"O retorno de cada prática cresce com a adoção das demais: lean é pacote, não cardápio."},
   {yr:"1990",node:"womack90",t:"A máquina que mudou o mundo",who:"Womack, J. P., Jones, D. T. & Roos, D.",d:"O estudo do MIT populariza a produção enxuta como sucessora da produção em massa."},
   {yr:"1990",node:"cooper",t:"Stage-gate",who:"Cooper, R. G.",d:"Desenvolvimento de produtos em estágios e portões: o planejamento sequencial como padrão."},
+  {yr:"1995",node:"macduffie",t:"Pacotes de práticas explicam o desempenho",who:"MacDuffie, J. P.",d:"Em montadoras do mundo inteiro, práticas de produção e de pessoas alinhadas superam ferramentas isoladas."},
+  {yr:"1996",node:"brandenburger",t:"Estratégia baseada em valor",who:"Brandenburger, A. M. & Stuart, H. W.",d:"Valor criado = disposição a pagar − custo de oportunidade do fornecedor: a base do bastão de valor."},
   {yr:"1996",node:"womack96",t:"Lean Thinking",who:"Womack, J. P. & Jones, D. T.",d:"Cinco princípios levam o lean para fora da fábrica."},
   {yr:"1998",node:"vsm",t:"Learning to see",who:"Rother, M. & Shook, J.",d:"O mapeamento do fluxo de valor vira a ferramenta de entrada do lean."},
   {yr:"1999",node:"spear",t:"Decodificando o DNA do TPS",who:"Spear, S. & Bowen, H. K.",d:"Quatro regras implícitas: cada atividade é um experimento."},
@@ -837,6 +912,7 @@ const TIMELINE = [
   {yr:"2003",node:"kurtz",t:"O framework Cynefin",who:"Kurtz, C. F. & Snowden, D. J.",d:"Sensemaking num mundo complexo e complicado."},
   {yr:"2003",node:"shah",t:"Práticas lean em pacotes",who:"Shah, R. & Ward, P. T.",d:"Contexto e pacotes de práticas explicam o desempenho."},
   {yr:"2004",node:"liker",t:"The Toyota Way",who:"Liker, J. K.",d:"Os 14 princípios de gestão da Toyota."},
+  {yr:"2004",node:"hopp",t:"Puxar ou não puxar?",who:"Hopp, W. J. & Spearman, M. L.",d:"Sistema puxado é definido pelo limite explícito de WIP; kanban é só um mecanismo."},
   {yr:"2007",node:"lean",t:"A genealogia da produção enxuta",who:"Holweg, M.",d:"Reconstrói como o conceito lean se formou a partir da Toyota e do programa do MIT."},
   {yr:"2007",node:"snowden",t:"Cynefin para líderes",who:"Snowden, D. J. & Boone, M. E.",d:"Um framework de decisão com resposta e perigos próprios de cada domínio."},
   {phase:"Fase IV · Aprender sob incerteza (2010–2013)", sub:"O foco passa das ferramentas para as rotinas de aprendizado, dentro da fábrica e no desenvolvimento de negócios."},
@@ -844,6 +920,7 @@ const TIMELINE = [
   {yr:"2010",node:"copiaferr",t:"Lições da NUMMI",who:"Shook, J.",d:"Mudar o comportamento muda a cultura; copiar ferramentas não."},
   {yr:"2011",node:"ries",t:"The Lean Startup",who:"Ries, E.",d:"Construir-medir-aprender aplicado a negócios sob incerteza extrema."},
   {yr:"2011",node:"leansaude",t:"Lean no hospital",who:"Kenney, C.",d:"A trajetória do Virginia Mason Medical Center com o sistema inspirado no TPS."},
+  {yr:"2012",node:"modig",t:"O paradoxo da eficiência",who:"Modig, N. & Åhlström, P.",d:"Eficiência de recursos e eficiência de fluxo: por que ocupar todos o tempo todo não serve o cliente."},
   {yr:"2013",node:"mvp",t:"A Lean Startup muda tudo",who:"Blank, S.",d:"Na HBR, o método sai do nicho das startups para empresas estabelecidas."},
   {phase:"Fase V · Integração: ágil, digital e cultura (2016–2026)", sub:"Métodos passam a ser combinados por contexto, e a pesquisa pergunta quando cada um funciona."},
   {yr:"2016",node:"stagegate",t:"Híbridos agile–stage-gate",who:"Cooper, R. G.",d:"O criador do stage-gate propõe combiná-lo com métodos ágeis."},
@@ -865,7 +942,7 @@ const CASES = [
    tag:"A mesma fábrica, outra gestão.",
    desc:"A joint venture de GM e Toyota reabriu uma fábrica da GM na Califórnia, com boa parte da força de trabalho anterior, sob o sistema de gestão da Toyota, e a qualidade melhorou. A GM teve dificuldade de levar o aprendizado a outras fábricas. Shook (2010), que participou do projeto, conclui que a cultura mudou porque mudou o comportamento gerencial, não porque se copiaram ferramentas.",
    practice:"Transferência do TPS para uma fábrica ocidental",
-   theory:"<b>Copiar ferramentas sem rotina</b> · no VCAP, P sem C",
+   theory:"<b>Copiar ferramentas sem rotina</b> · no VCAP: A constante, P redesenhado, C transformado — e a GM só conseguiu copiar P",
    author:"Shook, 2010 · Rother, 2010", node:"copiaferr"},
   {title:"Danaher Business System", loc:"Conglomerado industrial · EUA", loop:"Lean como sistema de gestão",
    tag:"Lean como rotina de gestão do grupo.",
@@ -907,6 +984,21 @@ const APS = [
   {t:"Cynefin · cinco domínios", nodes:["cynefin","claro","complicado","complexo","caotico","desordem"], h:`<div class="eyebrow">Snowden &amp; Boone (2007)</div><h2>Cinco domínios, cinco respostas</h2><ul><li><b>Claro:</b> sentir → categorizar → responder · boa prática; Kata desnecessário</li><li><b>Complicado:</b> sentir → analisar → responder · especialistas</li><li><b>Complexo:</b> sondar → sentir → responder · Kata, Lean Startup</li><li><b>Caótico:</b> agir → sentir → responder · estabilizar primeiro</li><li><b>Desordem:</b> decompor e classificar cada parte</li></ul>`},
   {t:"Lean · do TPS aos cinco princípios", nodes:["lean","tps","cincop"], h:`<div class="eyebrow">Ohno (1988) · Womack &amp; Jones (1996)</div><h2>Lean Thinking</h2><div class="cols2"><div><h3>Dois pilares do TPS</h3><p>Just-in-time: produzir o necessário, quando necessário. Jidoka: parar ao detectar anormalidade.</p></div><div><h3>Cinco princípios</h3><p>Valor · fluxo de valor · fluxo · puxada · perfeição</p></div></div><p class="note">Krafcik (1988) cunha o termo; Womack et al. (1990) o difundem.</p>`},
   {t:"Sistema, não caixa de ferramentas", nodes:["spear","shah","copiaferr"], h:`<div class="eyebrow">Por trás das ferramentas</div><h2>Lean é sistema, não kit</h2><ul><li><b>Spear &amp; Bowen (1999):</b> cada atividade é um experimento, feito no nível mais baixo</li><li><b>Shah &amp; Ward (2003):</b> práticas funcionam em pacotes, e o contexto importa</li><li><b>Liker (2004):</b> filosofia, processo, pessoas e solução de problemas</li><li>Copiar kanban e andon sem a rotina de gestão não reproduz o resultado</li></ul>`},
+  {t:"Lean na linguagem do capital", nodes:["tres_eq"], h:`<div class="sl-cover"><div class="eyebrow">Bloco · Lean e as três equações</div><h2>Lean na linguagem do capital</h2><p class="big">Bastão de valor, ROIC e VCAP: como o fluxo aparece na disposição a pagar, no balanço e na capacidade da organização</p><div class="sl-foot">Lean não é kit de ferramentas nem programa de corte de custos. É um sistema.</div></div>`},
+  {t:"A linha do tempo de Ohno", nodes:["ohno","mudamura"], h:`<div class="eyebrow">Ohno (1988) · em finanças, o ciclo de conversão de caixa</div><h2>Do pedido ao caixa</h2><p class="big">“Olhar a linha do tempo, do pedido ao recebimento, e reduzi-la removendo o que não agrega valor.”</p><div class="cols3"><div><h3>Agrega valor</h3><p>O cliente pagaria, se soubesse. Em geral, menos de 5% do tempo total.</p></div><div><h3>Necessária, sem valor</h3><p>Lei, tecnologia ou contrato exigem. O sinal vermelho.</p></div><div><h3>Desperdício</h3><p>Nem uma coisa nem outra. O caminho errado, o pneu furado.</p></div></div>`},
+  {t:"Anatomia do desperdício", nodes:["mudamura"], h:`<div class="eyebrow">Ohno (1988)</div><h2>Muda é a febre; mura e muri, a infecção</h2><div class="cols3"><div><h3>Muda · desperdício</h3><p>Transporte, estoque, movimentação, espera, processamento excessivo, superprodução e defeitos. A superprodução gera as outras seis.</p></div><div><h3>Mura · irregularidade</h3><p>Demanda e ritmo desiguais criam filas e estoques de segurança.</p></div><div><h3>Muri · sobrecarga</h3><p>Pessoas e máquinas acima da capacidade geram defeitos e quebras.</p></div></div><p class="note">Atacar só a muda dá uma onda de ganhos e depois estagna. A cura é nivelar e fazer fluir.</p>`},
+  {t:"Casa Toyota · um sistema", nodes:["tps","jit","jidoka","milgrom","macduffie"], h:`<div class="eyebrow">Milgrom &amp; Roberts (1990) · MacDuffie (1995)</div><h2>A Casa Toyota é um sistema</h2><ul><li><b>Telhado:</b> qualidade, custo, lead time, segurança e moral, nos termos do cliente</li><li><b>Pilar esquerdo · Just-in-Time:</b> fluxo contínuo, limite de WIP, SMED</li><li><b>Pilar direito · Jidoka:</b> parar e corrigir, andon, poka-yoke</li><li><b>Base:</b> heijunka, trabalho padronizado, estabilidade 4M</li><li><b>Centro:</b> pessoas e trabalho em equipe — o multiplicador</li></ul><p class="note">O retorno de cada prática cresce com a adoção das demais.</p>`},
+  {t:"O paradoxo da eficiência", nodes:["paradoxo","utilizacao","modig","hopp"], h:`<div class="eyebrow">Modig &amp; Åhlström (2012)</div><h2>O paradoxo da eficiência</h2><div class="cols2"><div><h3>Eficiência de recursos</h3><p>Cada pessoa e cada máquina ocupada. Otimiza o que a contabilidade de custos mede e gera filas, retrabalho e urgências.</p></div><div><h3>Eficiência de fluxo</h3><p>Otimiza a jornada do pedido pelo sistema. Mede o cliente, não o recurso — e quase ninguém reporta.</p></div></div><p class="note">Pela relação VUT, o tempo em fila cresce na proporção de u/(1 − u): fator 4 a 80% de utilização, 9 a 90%, 19 a 95%.</p>`},
+  {t:"Exercício · o gargalo", nodes:["paradoxo"], h:`<div class="eyebrow">Exercício</div><h2>Quantas unidades liberar?</h2><p class="big">Três recursos em sequência processam 10, 20 e 30 unidades por hora.</p><div class="formula">10 → 20 → 30 unid./h</div><p class="note">Responda antes de avançar.</p>`},
+  {t:"Resposta · o gargalo", nodes:["paradoxo"], h:`<div class="eyebrow">Resposta</div><h2>Dez. O gargalo dita o ritmo.</h2><ul><li>Libere vinte e o sistema continua entregando dez; o resto vira estoque em processo parado</li><li>Se o cliente precisa de vinte, não empurre mais trabalho: <b>remova o desperdício na frente do gargalo</b></li><li>Produtividade é resultado de capacidade; capacidade, de como os recursos são alocados</li></ul>`},
+  {t:"Os pilares por dentro", nodes:["jit","jidoka","kanbancartao"], h:`<div class="eyebrow">Just-in-Time · Jidoka</div><h2>Fluxo de um lado, qualidade na origem do outro</h2><div class="cols2"><div><h3>Just-in-Time</h3><p>Não é estoque zero. Fluxo unitário, teto explícito de WIP, SMED e heijunka. Kanban é um mecanismo de sistema puxado, não o sistema (Hopp &amp; Spearman, 2004).</p></div><div><h3>Jidoka</h3><p>Detectar a anormalidade o mais cedo possível: o custo do defeito cresce a cada etapa. Poka-yoke torna o erro impossível; andon sinaliza e para.</p></div></div><p class="note">Problema que para a linha é resolvido; problema contornado, nunca.</p>`},
+  {t:"Equação 1 · o bastão de valor", nodes:["bastao","brandenburger","ganhador"], h:`<div class="eyebrow">Equação 1 · Brandenburger &amp; Stuart (1996)</div><h2>O bastão de valor</h2><div class="cols2 stickrow"><div class="stick"><div class="e">WTP · disposição a pagar</div><div class="s s1">Valor para o cliente</div><div class="e">Preço</div><div class="s s2">Margem da empresa</div><div class="e">Custo</div><div class="s s3">Excedente do fornecedor</div><div class="e">COF · custo de oportunidade do fornecedor</div></div><div><div class="formula sm">Valor criado = WTP − COF</div><ul><li>Só dois movimentos criam valor: <b>subir a WTP</b> ou <b>baixar o COF</b></li><li>Mexer no preço só transfere valor</li><li>Ganhadores de pedido definem quanto a WTP sobe (Hill, 2000)</li></ul></div></div>`},
+  {t:"Os pilares movem as duas pontas", nodes:["jidoka","jit","bastao"], h:`<div class="eyebrow">Equação 1 · Garvin (1987)</div><h2>Os pilares movem as duas pontas</h2><table class="tb"><thead><tr><th>Pilar</th><th>Ponta</th><th>Mecanismo</th></tr></thead><tbody><tr><td>Jidoka</td><td>Custo ↓</td><td>Defeito removido na origem; o custo da má qualidade despenca</td></tr><tr><td>Jidoka</td><td>WTP ↑</td><td>Zero defeito dispensa a inspeção e o estoque de segurança do cliente</td></tr><tr><td>Just-in-Time</td><td>Custo ↓</td><td>Menos estoque, manuseio, urgências e obsolescência</td></tr><tr><td>Just-in-Time</td><td>WTP ↑</td><td>O cliente paga por velocidade e previsibilidade</td></tr></tbody></table><p class="note">A qualidade reduz o custo duas vezes: menos inspeção e menos logística reversa.</p>`},
+  {t:"Equação 2 · ROIC", nodes:["roic"], h:`<div class="eyebrow">Equação 2 · retorno sobre o capital investido</div><h2>ROIC = margem × giro</h2><div class="formula sm">ROIC = NOPAT/Receita × Receita/Capital investido</div><div class="cols2"><div><h3>Numerador · margem</h3><p>Refugo, retrabalho, rendimento, OEE. Onde todo business case lean é escrito.</p></div><div><h3>Denominador · giro</h3><p>Estoques, área, buffers de capacidade, ciclo de caixa. Para onde ninguém olha na reunião de operações.</p></div></div>`},
+  {t:"Lei de Little", nodes:["little","little61"], h:`<div class="eyebrow">Little (1961)</div><h2>A linha de transmissão</h2><div class="formula">WIP = vazão × lead time</div><div class="chain"><span>Menos atividade sem valor</span><i>›</i><span>Lead time ↓</span><i>›</i><span>WIP ↓</span><i>›</i><span>Estoque ↓</span><i>›</i><span>Capital investido ↓</span><i>›</i><span>ROIC ↑</span></div><p class="note">Cada seta é aritmética, não aspiração. Estoque é capital investido.</p>`},
+  {t:"Exemplo · 20 para 8 dias", nodes:["roic","little"], h:`<h2>Exemplo: lead time de 20 para 8 dias</h2><table class="tb"><thead><tr><th>Indicador</th><th>Antes</th><th>Depois</th></tr></thead><tbody><tr><td>Lead time</td><td>20 dias</td><td>8 dias</td></tr><tr><td>Estoque</td><td>300</td><td>120</td></tr><tr><td>Capital investido</td><td>800</td><td>620</td></tr><tr><td>NOPAT</td><td>80</td><td>100</td></tr><tr><td>ROIC</td><td>10,0%</td><td>16,1%</td></tr><tr><td>Lucro econômico (WACC 10%)</td><td>0</td><td>38</td></tr></tbody></table><p class="note">Vazão e receita constantes. Margem +25%, giro +29%: o giro fez mais trabalho que a margem.</p>`},
+  {t:"Equação 3 · VCAP e a NUMMI", nodes:["vcap","copiaferr"], h:`<div class="eyebrow">Equação 3 · Lima (2026), Cap. 1</div><h2>Quem fica com o ganho</h2><div class="formula">V = C × (A + P)</div><div class="cols2"><div><h3>1982 · o colapso</h3><p>A GM fecha Fremont: absenteísmo perto de 20%, pior qualidade da GM.</p></div><div><h3>1984 · a NUMMI</h3><p>Mesmo prédio, boa parte das mesmas pessoas, sistema Toyota: nível Toyota em dois anos.</p></div></div><p class="note">A constante, P redesenhado, C transformado. A GM copiou P; não conseguiu transferir C.</p>`},
+  {t:"Três equações, um sistema", nodes:["tres_eq","bastao","roic","vcap"], h:`<div class="eyebrow">Síntese</div><h2>Três equações, um sistema</h2><div class="cols3"><div><h3>Bastão de valor</h3><p>WTP sobe, custo desce. A distância é o valor criado.</p></div><div><h3>ROIC</h3><p>Margem sobe, capital cai. Valor só quando o ROIC supera o WACC.</p></div><div><h3>VCAP</h3><p>A e P somam e se compram. C multiplica e se constrói.</p></div></div><p class="big">Só funciona onde se constrói o multiplicador, em vez de comprar o que está entre parênteses.</p>`},
   {t:"Improvement Kata", nodes:["ikata","kata"], h:`<div class="eyebrow">Rother (2010)</div><h2>Improvement Kata</h2><div class="phases"><div><b>1</b><span>Entender a direção</span><em>desafio</em></div><div><b>2</b><span>Condição atual</span><em>fatos e dados</em></div><div><b>3</b><span>Próxima condição-alvo</span><em>onde queremos estar</em></div><div><b>4</b><span>Experimentar</span><em>ciclos PDCA</em></div></div><p class="note">O caminho entre a condição atual e a condição-alvo não é conhecido de antemão: é descoberto por experimentos.</p>`},
   {t:"Coaching Kata · as cinco perguntas", nodes:["ckata"], h:`<div class="eyebrow">Coaching Kata</div><h2>As cinco perguntas</h2><ol><li>Qual é a condição-alvo?</li><li>Qual é a condição atual agora?</li><li>Quais obstáculos impedem que você chegue à condição-alvo? Em qual você está trabalhando agora?</li><li>Qual é o seu próximo passo (experimento)? O que você espera que aconteça?</li><li>Quando podemos ver o que você aprendeu com esse passo?</li></ol>`},
   {t:"Kata é rotina, não evento", nodes:["prazocurto","armadilha"], h:`<div class="eyebrow">Prática deliberada</div><h2>Semanas, não horas</h2><ul><li>Kata é hábito construído por repetição, em ciclos curtos e frequentes</li><li>Coach e aprendiz: o líder ensina fazendo perguntas, não dando respostas</li><li>Com prazo de horas, vira formulário e não desenvolve capacidade</li><li><b>Repenning &amp; Sterman (2001):</b> sob pressão, corta-se o tempo de melhoria</li></ul>`},
@@ -916,7 +1008,7 @@ const APS = [
   {t:"Agenda e debates", nodes:["lacunas"], h:`<div class="eyebrow">Onde a pesquisa está aberta</div><h2>Três debates</h2><div class="cols3"><div><h3>Ferramenta ou rotina?</h3><p>O que se transfere entre empresas: as ferramentas ou o comportamento?</p></div><div><h3>Lean fora da fábrica</h3><p>Serviços, saúde e trabalho do conhecimento</p></div><div><h3>Planejar ou testar?</h3><p>Stage-gate, Lean Startup e os híbridos</p></div></div>`},
   {t:"Explore o mapa conceitual", nodes:[], h:`<div class="sl-cover"><div class="eyebrow">Ferramenta interativa</div><h2>Explore o mapa</h2><p class="big">Domínios, métodos, autores, casos e referências conectados. Clique em qualquer slide para saltar ao conceito correspondente.</p></div>`},
 ];
-const NODE2SLIDE = {exop:1, contexto:2, cynefin:4, claro:4, complicado:4, complexo:4, caotico:4, desordem:4, kurtz:4, snowden:4, dominioerrado:2, lean:5, tps:5, cincop:5, ohno:5, krafcik:5, womack90:5, womack96:5, vsm:5, spear:6, shah:6, liker:6, copiaferr:6, contingencia:6, ikata:7, kata:7, rother:7, pdca:7, deming:7, ckata:8, seguranca:8, prazocurto:9, armadilha:9, repenning:9, leanstartup:10, stagegate:10, mvp:10, ries:10, cooper:10, vcap:11, atividade:12, lacunas:13, evidkata:13, leansaude:13, lean40:13};
+const NODE2SLIDE = {exop:1, contexto:2, cynefin:4, claro:4, complicado:4, complexo:4, caotico:4, desordem:4, kurtz:4, snowden:4, dominioerrado:2, lean:5, tps:5, cincop:5, ohno:5, krafcik:5, womack90:5, womack96:5, vsm:5, spear:6, shah:6, liker:6, copiaferr:6, contingencia:6, ikata:22, kata:22, rother:22, pdca:22, deming:22, ckata:23, seguranca:23, prazocurto:24, armadilha:24, repenning:24, leanstartup:25, stagegate:25, mvp:25, ries:25, cooper:25, vcap:20, atividade:27, lacunas:28, evidkata:28, leansaude:28, lean40:28, tres_eq:7, mudamura:8, jit:10, jidoka:10, milgrom:10, macduffie:10, paradoxo:11, utilizacao:11, modig:11, hopp:11, kanbancartao:14, bastao:15, brandenburger:15, ganhador:15, roic:17, little:18, little61:18};
 
 const QUADRO = [
   {concept:"Framework Cynefin", cat:"core", author:"Kurtz, C. F. & Snowden, D. J. (2003)",
@@ -979,6 +1071,30 @@ const QUADRO = [
    paper:"Excelência operacional: da estratégia à execução (Atena Editora), Cap. 1 e Cap. 3",
    contribution:"V = C × (A + P): capacidades multiplicam ativos e processos; gestão ágil com Cynefin, Lean e Kata.",
    practice:"Diagnosticar se o gargalo do problema está em capacidades, ativos ou processos.", node:"vcap"},
+  {concept:"Bastão de valor", cat:"core", author:"Brandenburger, A. M. & Stuart, H. W. (1996)",
+   paper:"Value-based business strategy. (Journal of Economics & Management Strategy)",
+   contribution:"Define o valor criado como WTP menos o custo de oportunidade do fornecedor e mostra como ele se divide entre os participantes.",
+   practice:"Perguntar se uma melhoria sobe a WTP, baixa o custo ou apenas transfere valor.", node:"bastao"},
+  {concept:"Lei de Little", cat:"teoria", author:"Little, J. D. C. (1961)",
+   paper:"A proof for the queuing formula: L = λW. (Operations Research)",
+   contribution:"Prova a relação entre itens no sistema, taxa de chegada e tempo de permanência.",
+   practice:"Traduzir redução de lead time em redução de estoque e de capital investido.", node:"little"},
+  {concept:"Complementaridades", cat:"teoria", author:"Milgrom, P. & Roberts, J. (1990)",
+   paper:"The economics of modern manufacturing: Technology, strategy, and organization. (American Economic Review)",
+   contribution:"Formaliza a manufatura moderna como sistema em que o retorno de cada prática depende das demais.",
+   practice:"Implantar pacotes coerentes de práticas, não ferramentas isoladas.", node:"milgrom"},
+  {concept:"Pacotes de práticas", cat:"teoria", author:"MacDuffie, J. P. (1995)",
+   paper:"Human resource bundles and manufacturing performance. (ILR Review)",
+   contribution:"Mostra que pacotes de práticas de produção e de pessoas explicam o desempenho das montadoras.",
+   practice:"Alinhar gestão de pessoas ao sistema de produção.", node:"macduffie"},
+  {concept:"Sistema puxado", cat:"pratica", author:"Hopp, W. J. & Spearman, M. L. (2004)",
+   paper:"To pull or not to pull: What is the question? (Manufacturing & Service Operations Management)",
+   contribution:"Define sistema puxado pelo limite explícito de WIP e separa o conceito do mecanismo kanban.",
+   practice:"Estabelecer um teto de WIP antes de discutir cartões e quadros.", node:"jit"},
+  {concept:"Paradoxo da eficiência", cat:"teoria", author:"Modig, N. & Åhlström, P. (2012)",
+   paper:"This is lean: Resolving the efficiency paradox. (Rheologica)",
+   contribution:"Distingue eficiência de recursos de eficiência de fluxo.",
+   practice:"Medir a jornada do pedido, não só a ocupação dos recursos.", node:"paradoxo"}
 ];
 
 const REF_GROUPS = [
@@ -1016,6 +1132,19 @@ const REF_GROUPS = [
   {apa:"Ries, E. (2011). <i>The lean startup: How today's entrepreneurs use continuous innovation to create radically successful businesses</i>. Crown Business.", doi:""},
   {apa:"Rother, M. (2010). <i>Toyota kata: Managing people for improvement, adaptiveness, and superior results</i>. McGraw-Hill.", doi:""},
   {apa:"Rother, M., & Aulinger, G. (2017). <i>Toyota kata culture: Building organizational capability and mindset through kata coaching</i>. McGraw-Hill Education.", doi:""},
+ ]},
+ {title:"Lean, valor e capital", refs:[
+  {apa:"Brandenburger, A. M., & Stuart, H. W. (1996). Value-based business strategy. <i>Journal of Economics &amp; Management Strategy, 5</i>(1), 5–24.", doi:"https://doi.org/10.1111/j.1430-9134.1996.00005.x"},
+  {apa:"Frei, F., & Morriss, A. (2012). <i>Uncommon service: How to win by putting customers at the core of your business</i>. Harvard Business Review Press.", doi:""},
+  {apa:"Garvin, D. A. (1987). Competing on the eight dimensions of quality. <i>Harvard Business Review, 65</i>(6), 101–109.", doi:""},
+  {apa:"Hill, T. (2000). <i>Manufacturing strategy: Text and cases</i> (3rd ed.). McGraw-Hill.", doi:""},
+  {apa:"Hopp, W. J., & Spearman, M. L. (2004). To pull or not to pull: What is the question? <i>Manufacturing &amp; Service Operations Management, 6</i>(2), 133–148.", doi:"https://doi.org/10.1287/msom.1030.0028"},
+  {apa:"Hopp, W. J., & Spearman, M. L. (2011). <i>Factory physics</i> (3rd ed.). Waveland Press.", doi:""},
+  {apa:"Koller, T., Goedhart, M., & Wessels, D. (2020). <i>Valuation: Measuring and managing the value of companies</i> (7th ed.). Wiley.", doi:""},
+  {apa:"Little, J. D. C. (1961). A proof for the queuing formula: L = λW. <i>Operations Research, 9</i>(3), 383–387.", doi:"https://doi.org/10.1287/opre.9.3.383"},
+  {apa:"MacDuffie, J. P. (1995). Human resource bundles and manufacturing performance: Organizational logic and flexible production systems in the world auto industry. <i>ILR Review, 48</i>(2), 197–221.", doi:"https://doi.org/10.1177/001979399504800201"},
+  {apa:"Milgrom, P., & Roberts, J. (1990). The economics of modern manufacturing: Technology, strategy, and organization. <i>American Economic Review, 80</i>(3), 511–528.", doi:""},
+  {apa:"Modig, N., & Åhlström, P. (2012). <i>This is lean: Resolving the efficiency paradox</i>. Rheologica.", doi:""},
  ]},
  {title:"Obra de apoio da disciplina", refs:[
   {apa:"Lima, T. F. (2026). <i>Excelência operacional: da estratégia à execução — operações, serviços, melhoria contínua e inteligência artificial</i>. Atena Editora. ISBN 978-65-258-4105-2.", doi:""},
@@ -1060,8 +1189,16 @@ const nodeEls=NODES.map(n=>{
 
 /* physics */
 let alpha=1;
+let userMoved=false;
+function fitToNodes(minS){
+  if(!NODES.length)return;
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  NODES.forEach(n=>{x0=Math.min(x0,n.x-n.r-70);x1=Math.max(x1,n.x+n.r+70);y0=Math.min(y0,n.y-n.r-30);y1=Math.max(y1,n.y+n.r+40);});
+  const bw=x1-x0,bh=y1-y0; scale=Math.max(minS||0.3,Math.min(1,W/bw,H/bh));
+  tx=W/2-(x0+bw/2)*scale; ty=H/2-(y0+bh/2)*scale; applyVP();
+}
 function tick(){
-  if(alpha<0.005){return;}
+  if(alpha<0.005){if(!userMoved&&W>760)fitToNodes(0.8);return;}
   alpha*=0.985;
   const k=alpha;
   // repulsion
@@ -1113,7 +1250,7 @@ function reheat(v){alpha=Math.max(alpha,v||0.6);requestAnimationFrame(tick);}
 let tx=0,ty=0,scale=1;
 function applyVP(){vp.setAttribute("transform",`translate(${tx},${ty}) scale(${scale})`)}
 stage.addEventListener("wheel",e=>{
-  e.preventDefault();
+  e.preventDefault(); userMoved=true;
   const r=stage.getBoundingClientRect();
   const mx=e.clientX-r.left,my=e.clientY-r.top;
   const ds=e.deltaY<0?1.12:0.893;
@@ -1123,7 +1260,7 @@ stage.addEventListener("wheel",e=>{
 
 let panning=false,sx,sy,stx,sty,dragNode=null,downNode=null,downX=0,downY=0;
 stage.addEventListener("pointerdown",e=>{
-  downX=e.clientX;downY=e.clientY;
+  downX=e.clientX;downY=e.clientY; userMoved=true;
   const g=e.target.closest(".node");
   if(g){downNode=g._n;dragNode=g._n;dragNode._fix=true;stage.setPointerCapture(e.pointerId);}
   else{downNode=null;panning=true;stage.classList.add("grabbing");sx=e.clientX;sy=e.clientY;stx=tx;sty=ty;stage.setPointerCapture(e.pointerId);}
@@ -1190,12 +1327,13 @@ function applyFilter(){
 
 /* zoom buttons */
 function zoomBy(f){
+  userMoved=true;
   const ns=Math.min(2.6,Math.max(0.3,scale*f));
   tx=W/2-(W/2-tx)*(ns/scale);ty=H/2-(H/2-ty)*(ns/scale);scale=ns;applyVP();
 }
 document.getElementById("zin").onclick=()=>zoomBy(1.2);
 document.getElementById("zout").onclick=()=>zoomBy(0.83);
-document.getElementById("zfit").onclick=()=>{tx=0;ty=0;scale=1;applyVP();reheat(0.5)};
+document.getElementById("zfit").onclick=()=>{userMoved=false;fitToNodes();};
 
 /* ====================== DETAIL PANEL ====================== */
 const panel=document.getElementById("panel");
