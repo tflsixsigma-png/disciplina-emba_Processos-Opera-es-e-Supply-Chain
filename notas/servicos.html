@@ -720,6 +720,17 @@ background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui
   .bottom-nav::-webkit-scrollbar{display:none}
   .bnav-btn{flex:1 0 44px!important;min-width:44px;padding:.7rem .15rem!important}
 }
+
+/* desktop-layout: so em telas largas; celular inalterado */
+@media (min-width:1024px){
+  header,.hero,.mod-selector,.footer,.bottom-nav{padding-left:max(24px,calc(50% - 580px))!important;padding-right:max(24px,calc(50% - 580px))!important}
+  .main{max-width:1160px;margin-left:auto;margin-right:auto;padding-left:0;padding-right:0}
+  .hero-stats{grid-template-columns:repeat(4,1fr)}
+  p,.dilema-answer,.mod-subtitle,.var-desc,.principle-text,.funding-desc{font-size:17px!important;line-height:1.7}
+  td{font-size:15.5px!important}
+  .main li{font-size:16.5px!important;line-height:1.65}
+  .acc-label,.mod-eyebrow,.card-item-label,.chain-label,.mf-header{font-size:13px!important}
+}
 </style>
 </head>
 <body>

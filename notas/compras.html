@@ -841,6 +841,15 @@ background:#e3b54e;color:#0a1628!important;font:700 13px/1.1 'DM Sans',system-ui
   p{font-size:15px!important;line-height:1.65}
   .stat-label,.q-ex{font-size:13.5px!important}
 }
+
+/* desktop-layout: so em telas largas; celular inalterado */
+@media (min-width:1024px){
+  .topbar,.hero-banner,.content,.tab-bar{padding-left:max(24px,calc(50% - 580px))!important;padding-right:max(24px,calc(50% - 580px))!important}
+  p{font-size:17px!important;line-height:1.7}
+  td{font-size:15.5px!important}
+  .content li{font-size:15.5px!important;line-height:1.6}
+  .section-title,.hero-eyebrow,h4,.case-label,.eq-group-label,.cmp-head,.tactic{font-size:13px!important}
+}
 </style>
 </head>
 <body>
