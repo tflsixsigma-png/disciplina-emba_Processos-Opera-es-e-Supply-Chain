@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador · Lei de Little e ROIC — EMBA Processos, Operações e Supply Chain</title>
+<meta name="description" content="Simulador em sala: WIP = vazão × lead time (Lei de Little) e o efeito da redução do lead time no estoque, no capital investido, no ROIC e no lucro econômico.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #0a1628; --panel: #122240; --panel2: #1a2f52; --line: #2a3f66;
+    --fg: #ffffff; --muted: #b8c0d0; --cream: #ede6d6;
+    --gold: #e3b54e; --blue: #7ea0d6; --green: #5fae86; --red: #d46a66;
+    --display: "Playfair Display", Georgia, "Times New Roman", serif;
+    --body: "DM Sans", "Segoe UI", Roboto, Arial, sans-serif;
+    --mono: "DM Mono", "Courier New", monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.45; -webkit-text-size-adjust: 100%;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 32px; }
+  .top { position: sticky; top: 0; z-index: 20; margin: 0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))) 18px calc(-1 * max(16px, env(safe-area-inset-right, 0px))); background: var(--bg); border-bottom: 2px solid var(--gold); padding: 10px max(16px, env(safe-area-inset-left, 0px)); }
+  .top .in { max-width: 760px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .top a { color: var(--gold); text-decoration: none; font-weight: 700; font-size: 14px; }
+  .top .mark { font-family: var(--display); font-size: 15px; color: var(--fg); }
+  .wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 16px; }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+  h1 { font-family: var(--display); font-size: clamp(26px, 6vw, 36px); line-height: 1.1; margin: 4px 0 0; text-wrap: balance; }
+  h2 { font-family: var(--display); font-size: 20px; margin: 0 0 10px; }
+  h3 { font-family: var(--display); font-size: 16px; margin: 0 0 6px; color: var(--gold); }
+  .lead { color: var(--cream); margin: 6px 0 0; font-size: 15px; max-width: 65ch; }
+  .steps { display: flex; gap: 6px; flex-wrap: wrap; }
+  .steps a { font: 500 13px var(--body); color: var(--cream); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; text-decoration: none; }
+  .steps a b { color: var(--gold); font-family: var(--mono); font-weight: 500; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .panel.gold { border-color: var(--gold); background: #1c2a1e; }
+  .hint { color: var(--muted); font-size: 13px; }
+  .ctrl { display: grid; gap: 8px; }
+  .ctrl + .ctrl { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .ctrl label { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 500; }
+  .ctrl label output { font-family: var(--mono); color: var(--gold); font-size: 18px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  input[type=range] { width: 100%; accent-color: var(--gold); height: 32px; margin: 0; }
+  .scale { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .tabs { display: flex; gap: 6px; background: var(--panel); padding: 4px; border-radius: 10px; border: 1px solid var(--line); }
+  .tabs button { flex: 1; background: transparent; border: 0; color: var(--muted); font: 500 14px var(--body); padding: 10px 8px; border-radius: 7px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--panel2); color: var(--fg); box-shadow: inset 0 0 0 1px var(--gold); }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chips button { background: transparent; border: 1px solid var(--line); color: var(--cream); border-radius: 999px; padding: 6px 12px; font: 500 13px var(--body); cursor: pointer; }
+  .chips button[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); background: #1c2a1e; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .field { display: grid; gap: 4px; min-width: 0; }
+  .field label { font-size: 12px; color: var(--muted); }
+  .field input, .field select { background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; font: 500 16px var(--mono); width: 100%; min-width: 0; }
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 10px; min-width: 0; }
+  .tile.hi { border-color: var(--gold); background: #1c2a1e; }
+  .tile .k { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .tile .v { font-family: var(--display); font-size: clamp(22px, 6.5vw, 32px); font-weight: 700; color: var(--gold); line-height: 1.1; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .tile .d { font-size: 12px; color: var(--cream); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .tile.bad .v { color: var(--red); }
+  .formula { font-family: var(--mono); font-size: clamp(16px, 4.6vw, 22px); color: var(--gold); text-align: center; padding: 10px; border: 1px solid var(--gold); border-radius: 10px; background: var(--bg); }
+  .formula b { color: var(--fg); font-weight: 500; }
+  .pipe { margin-top: 12px; }
+  .pipe svg { width: 100%; height: auto; display: block; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 14.5px; }
+  th { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); text-align: right; font-weight: 500; padding: 0 6px 8px; }
+  th:first-child, td:first-child { text-align: left; padding-left: 0; }
+  td { padding: 8px 6px; border-top: 1px solid var(--line); text-align: right; }
+  td.after { color: var(--gold); font-weight: 700; }
+  td.neg { color: var(--red); }
+  .msg { font-size: 15px; margin: 0; }
+  .msg b { color: var(--gold); }
+  svg.chart { width: 100%; height: auto; display: block; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .legend i { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 6px; border-radius: 2px; }
+  .ask { display: grid; gap: 8px; }
+  .ask p { margin: 0; color: var(--cream); font-size: 14.5px; }
+  .ask p::before { content: "→ "; color: var(--gold); }
+  .btn { background: transparent; color: var(--gold); border: 1px solid var(--gold); border-radius: 8px; padding: 9px 14px; font: 500 13.5px var(--body); cursor: pointer; }
+  .btn.primary { background: var(--gold); color: var(--bg); font-weight: 700; }
+  .btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .refs { font-size: 12.5px; color: var(--muted); }
+  .refs p { margin: 4px 0; }
+  footer { color: var(--muted); font-size: 11.5px; text-align: center; margin-top: 8px; }
+  footer a { color: var(--gold); }
+  .toast { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--gold); color: var(--bg); font-weight: 700; padding: 10px 16px; border-radius: 8px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .toast.on { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+  @media (max-width: 420px) { .tiles { grid-template-columns: 1fr 1fr; } .tiles .tile:first-child { grid-column: 1 / -1; } }
+</style>
+</head>
+<body>
+<div class="top"><div class="in"><span class="mark">EMBA · Processos, Operações e Supply Chain</span><a href="../index.html">← Página da disciplina</a></div></div>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Sessões 2 e 3 · Lean na linguagem do capital</div>
+    <h1>Lei de Little e o denominador do ROIC</h1>
+    <p class="lead">Dois simuladores em sequência. No primeiro, você vê por que o estoque é uma consequência do lead time. No segundo, o que isso faz com o balanço e com o retorno sobre o capital.</p>
+    <div class="steps" style="margin-top:12px"><a href="#little"><b>1</b> Lei de Little</a><a href="#roic"><b>2</b> Lead time → ROIC</a><a href="#discussao"><b>3</b> Para discutir</a></div>
+  </header>
+
+  <!-- ===================== 1 · LEI DE LITTLE ===================== -->
+  <section class="panel" id="little">
+    <div class="eyebrow">1 · Little (1961)</div>
+    <h2>Quanto está parado no sistema?</h2>
+    <div class="formula"><b>WIP</b> = vazão × lead time &nbsp;·&nbsp; <span id="f-live">L = λ × W</span></div>
+    <p class="hint" style="margin:10px 0 6px">Escolha a unidade de fluxo. A lei vale para peças, pacientes, propostas ou pratos: o que está "em processo" é sempre vazão vezes tempo de atravessamento.</p>
+    <div class="chips" id="presets" role="group" aria-label="Exemplos">
+      <button type="button" data-p="fabrica" aria-pressed="true">Fábrica</button>
+      <button type="button" data-p="hospital" aria-pressed="false">Hospital</button>
+      <button type="button" data-p="banco" aria-pressed="false">Banco</button>
+      <button type="button" data-p="restaurante" aria-pressed="false">Restaurante</button>
+      <button type="button" data-p="projetos" aria-pressed="false">Projetos</button>
+    </div>
+    <div class="ctrl" style="margin-top:14px">
+      <label for="lam">Vazão <output id="lam-out">120 peças/dia</output></label>
+      <input id="lam" type="range" min="1" max="500" step="1" value="120">
+      <div class="scale"><span id="lam-min">1</span><span id="lam-max">500</span></div>
+    </div>
+    <div class="ctrl">
+      <label for="w">Lead time <output id="w-out">20 dias</output></label>
+      <input id="w" type="range" min="0.5" max="60" step="0.5" value="20">
+      <div class="scale"><span>0,5 dia</span><span id="w-max">60 dias</span></div>
+    </div>
+    <div class="tiles" style="margin-top:14px">
+      <div class="tile hi"><div class="k" id="k-wip">Peças em processo</div><div class="v" id="t-wip">2.400</div><div class="d" id="d-wip">cada uma esperou, em média, 20 dias</div></div>
+      <div class="tile"><div class="k">Se cortar o lead time pela metade</div><div class="v" id="t-half">1.200</div><div class="d">mesma vazão, metade do WIP</div></div>
+      <div class="tile"><div class="k">Dias de estoque</div><div class="v" id="t-days">20</div><div class="d">WIP ÷ vazão = lead time</div></div>
+    </div>
+    <div class="pipe" aria-hidden="true"><svg id="pipe" viewBox="0 0 360 90"></svg></div>
+    <p class="hint" id="pipe-cap">Cada ponto representa 40 unidades em processo.</p>
+    <details style="margin-top:10px"><summary style="cursor:pointer;color:var(--gold);font-weight:500">Uso diagnóstico: descubra o lead time sem cronômetro</summary>
+      <p class="hint" style="margin-top:8px">Conte o que está parado (pedidos abertos, pacientes internados, propostas em análise) e divida pela vazão diária. O resultado é o lead time médio real do seu processo — em geral, muito maior do que o "tempo de processamento" que todo mundo cita.</p>
+      <div class="grid2" style="margin-top:8px">
+        <div class="field"><label for="dg-wip">Itens em processo agora</label><input id="dg-wip" type="number" inputmode="decimal" value="3600" min="0"></div>
+        <div class="field"><label for="dg-lam">Vazão por dia</label><input id="dg-lam" type="number" inputmode="decimal" value="300" min="0.01" step="any"></div>
+      </div>
+      <p class="msg" style="margin-top:8px" id="dg-out">Lead time médio: <b>12 dias</b>.</p>
+    </details>
+  </section>
+
+  <!-- ===================== 2 · LEAD TIME → ROIC ===================== -->
+  <section id="roic" style="display:grid;gap:16px">
+    <div>
+      <div class="eyebrow">2 · Equação 2 · ROIC = margem × giro</div>
+      <h2 style="margin-top:4px">O denominador trabalha mais</h2>
+      <p class="lead">Reduza o lead time e veja o que acontece com o estoque, o capital investido e o ROIC. Vazão e receita ficam constantes.</p>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-aula" aria-selected="true" aria-controls="base-aula">Caso da aula</button>
+      <button role="tab" id="tab-empresa" aria-selected="false" aria-controls="base-empresa">Sua empresa</button>
+    </div>
+
+    <section class="panel" id="base-empresa" hidden>
+      <h2>Ponto de partida da sua empresa</h2>
+      <p class="hint">Valores anuais, na mesma unidade (R$ mil, R$ milhões). Estoque é tudo o que está parado entre o pedido e a entrega: matéria-prima, WIP e produto acabado. Em serviços, use o capital de giro preso em contas a receber e trabalho em andamento.</p>
+      <div class="grid2" style="margin-top:10px">
+        <div class="field"><label for="in-rec">Receita</label><input id="in-rec" type="number" inputmode="decimal" value="1000" min="1"></div>
+        <div class="field"><label for="in-nopat">NOPAT (lucro operacional após impostos)</label><input id="in-nopat" type="number" inputmode="decimal" value="80"></div>
+        <div class="field"><label for="in-fixo">Capital fixo (sem estoque)</label><input id="in-fixo" type="number" inputmode="decimal" value="500" min="0"></div>
+        <div class="field"><label for="in-est">Estoque atual</label><input id="in-est" type="number" inputmode="decimal" value="300" min="0"></div>
+        <div class="field"><label for="in-lt">Lead time atual (dias)</label><input id="in-lt" type="number" inputmode="decimal" value="20" min="1" max="365"></div>
+        <div class="field"><label for="in-wacc">WACC (%)</label><input id="in-wacc" type="number" inputmode="decimal" value="10" min="0" max="40" step="0.5"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="base-aula">
+      <h2>Ponto de partida (o caso do slide)</h2>
+      <p class="hint">Receita 1.000 · NOPAT 80 · capital fixo 500 · estoque 300 · lead time 20 dias · WACC 10%. Margem 8%, giro 1,25×, ROIC 10% — exatamente o custo do capital. Lucro econômico zero.</p>
+    </section>
+
+    <section class="panel gold">
+      <div class="ctrl">
+        <label for="lt">Lead time alvo <output id="lt-out">20 dias</output></label>
+        <input id="lt" type="range" min="1" max="40" step="1" value="20">
+        <div class="scale"><span>1 dia</span><span id="lt-mid">20</span><span id="lt-max">40 dias</span></div>
+        <div class="hint">Pela Lei de Little, com vazão constante o estoque cai na mesma proporção do lead time.</div>
+      </div>
+      <div class="ctrl">
+        <label for="def">Ganho de NOPAT por menos defeitos <output id="def-out">+0</output></label>
+        <input id="def" type="range" min="0" max="60" step="1" value="0">
+        <div class="scale"><span>0</span><span>20 (caso da aula)</span><span>60</span></div>
+        <div class="hint">Menos refugo e retrabalho elevam o numerador. É o único efeito que o business case clássico costuma contar.</div>
+      </div>
+    </section>
+
+    <section class="tiles" aria-live="polite">
+      <div class="tile hi"><div class="k">ROIC</div><div class="v" id="t-roic">10,0%</div><div class="d" id="t-roic-d">antes: 10,0% · WACC 10,0%</div></div>
+      <div class="tile" id="tile-eva"><div class="k">Lucro econômico</div><div class="v" id="t-eva">0</div><div class="d" id="t-eva-d">NOPAT − WACC × capital</div></div>
+      <div class="tile"><div class="k">Caixa liberado</div><div class="v" id="t-cash">0</div><div class="d" id="t-cash-d">estoque que virou caixa, uma vez</div></div>
+    </section>
+
+    <section class="panel"><p class="msg" id="msg">Mova o lead time para 8 dias e compare com o slide.</p></section>
+
+    <section class="panel">
+      <h2>Antes vs. depois</h2>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Indicador</th><th>Antes</th><th>Depois</th></tr></thead>
+          <tbody id="tbl"></tbody>
+        </table>
+      </div>
+      <div class="btns"><button class="btn" type="button" id="copy">Copiar resultado para o template do Kata</button><button class="btn" type="button" id="reset">Voltar ao ponto de partida</button></div>
+    </section>
+
+    <section class="panel">
+      <h2>ROIC em função do lead time</h2>
+      <svg class="chart" id="chart" viewBox="0 0 360 230" role="img" aria-label="Curva do ROIC conforme o lead time, com a linha do WACC"></svg>
+      <div class="legend"><span><i style="background:var(--gold)"></i>ROIC</span><span><i style="background:var(--red)"></i>WACC</span><span><i style="background:var(--blue)"></i>lead time atual</span></div>
+      <p class="hint" id="slope" style="margin-top:8px"></p>
+    </section>
+  </section>
+
+  <!-- ===================== 3 · DISCUSSÃO ===================== -->
+  <section class="panel ask" id="discussao">
+    <div class="eyebrow">3 · Para discutir em dupla</div>
+    <p>No simulador 1, troque "fábrica" por "hospital". O que é o estoque de um hospital — e quem é o responsável por ele?</p>
+    <p>No simulador 2, com o ganho de defeitos em zero: quantos dias de lead time valem um ponto percentual de ROIC? (A resposta está na inclinação da curva.)</p>
+    <p>Quanto do ganho total veio da margem e quanto veio do giro? Quem, na sua empresa, é dono de cada alavanca?</p>
+    <p>O caixa liberado aparece uma vez; o ROIC maior aparece todo ano. Qual dos dois o seu CFO enxerga?</p>
+  </section>
+
+  <section class="panel refs">
+    <h3>Referências</h3>
+    <p>Little, J. D. C. (1961). A proof for the queuing formula: L = λW. <i>Operations Research</i>, 9(3), 383–387.</p>
+    <p>Hopp, W. J., &amp; Spearman, M. L. (2011). <i>Factory Physics</i> (3rd ed.). Waveland Press.</p>
+    <p>Lima, T. F. (2026). <i>Excelência operacional: da estratégia à execução</i>. Atena Editora — cap. 3.</p>
+    <p>Modelo do simulador 2: estoque = estoque base × (lead time alvo ÷ lead time atual); capital investido = capital fixo + estoque; ROIC = NOPAT ÷ capital investido; lucro econômico = NOPAT − WACC × capital investido. Receita e vazão constantes.</p>
+  </section>
+
+  <footer>Material pedagógico para uso exclusivo em sala de aula · MBA Executive · Prof. Dr. Thiago Lima · <a href="../index.html">página da disciplina</a></footer>
+</div>
+<div class="toast" id="toast" role="status">Copiado</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const fmtN = (v) => new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(Math.round(v));
+  const fmt1 = (v) => new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(v);
+  const fmtP = (v) => fmt1(v) + "%";
+  const fmtX = (v) => new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v) + "×";
+
+  /* ---------- 1 · Lei de Little ---------- */
+  const PRESETS = {
+    fabrica:     { unit: "peças",     per: "dia", lam: 120, w: 20, lamMax: 500, wMax: 60, k: "Peças em processo",         note: "matéria-prima, WIP e acabados esperando" },
+    hospital:    { unit: "pacientes", per: "dia", lam: 40,  w: 5,  lamMax: 200, wMax: 30, k: "Leitos ocupados",           note: "pacientes internados = admissões/dia × permanência" },
+    banco:       { unit: "propostas", per: "dia", lam: 300, w: 12, lamMax: 1000, wMax: 60, k: "Propostas em carteira",     note: "cada uma esperou, em média, o lead time" },
+    restaurante: { unit: "pedidos",   per: "hora", lam: 60, w: 0.75, lamMax: 200, wMax: 3, k: "Pedidos na cozinha",      note: "pedidos/hora × horas de espera" },
+    projetos:    { unit: "projetos",  per: "mês", lam: 6,   w: 9,  lamMax: 40,  wMax: 36, k: "Projetos em andamento",     note: "a carteira que ninguém fecha porque todos estão abertos" },
+  };
+  let P = PRESETS.fabrica;
+  function setPreset(name) {
+    P = PRESETS[name];
+    document.querySelectorAll("#presets button").forEach(b => b.setAttribute("aria-pressed", b.dataset.p === name));
+    $("lam").max = P.lamMax; $("lam").value = P.lam; $("lam-max").textContent = fmtN(P.lamMax);
+    $("w").max = P.wMax; $("w").step = P.wMax <= 5 ? 0.25 : 0.5; $("w").value = P.w; $("w-max").textContent = fmt1(P.wMax).replace(",0", "") + " " + (P.per === "hora" ? "h" : P.per === "mês" ? "meses" : "dias");
+    renderLittle();
+  }
+  function tUnit(w) { const u = P.per === "hora" ? ["hora", "horas"] : P.per === "mês" ? ["mês", "meses"] : ["dia", "dias"]; return w === 1 ? u[0] : u[1]; }
+  function renderLittle() {
+    const lam = parseFloat($("lam").value), w = parseFloat($("w").value);
+    const wip = lam * w;
+    $("lam-out").textContent = fmtN(lam) + " " + P.unit + "/" + P.per;
+    $("w-out").textContent = fmt1(w).replace(",0", "") + " " + tUnit(w);
+    $("f-live").textContent = fmtN(wip) + " = " + fmtN(lam) + " × " + fmt1(w).replace(",0", "");
+    $("k-wip").textContent = P.k;
+    $("t-wip").textContent = fmtN(wip);
+    $("d-wip").textContent = P.note;
+    $("t-half").textContent = fmtN(wip / 2);
+    $("t-days").textContent = fmt1(w).replace(",0", "");
+    drawPipe(wip);
+  }
+  function drawPipe(wip) {
+    const svg = $("pipe"); const W = 360, H = 90;
+    const maxDots = 120; let per = 1;
+    while (wip / per > maxDots) per *= (per === 1 ? 5 : 2);
+    const n = Math.max(0, Math.round(wip / per));
+    const cols = 30, r = 4, gx = (W - 40) / cols, gy = 11;
+    let s = `<rect x="12" y="8" width="${W - 24}" height="${H - 16}" rx="8" fill="#0a1628" stroke="#2a3f66"/>`;
+    s += `<text x="18" y="22" font-size="9" fill="#b8c0d0" font-family="DM Mono, monospace">entra →</text><text x="${W - 18}" y="22" font-size="9" fill="#b8c0d0" font-family="DM Mono, monospace" text-anchor="end">→ sai</text>`;
+    for (let i = 0; i < n; i++) { const c = i % cols, rI = Math.floor(i / cols); if (rI > 3) break; s += `<circle cx="${22 + c * gx}" cy="${32 + rI * gy}" r="${r}" fill="${rI === 0 && c < 3 ? "#e3b54e" : "#7ea0d6"}" opacity="${0.55 + 0.45 * (1 - rI / 4)}"/>`; }
+    svg.innerHTML = s;
+    $("pipe-cap").textContent = "Cada ponto representa " + fmtN(per) + (per === 1 ? " unidade" : " unidades") + " em processo" + (n > 120 ? " (mostrando as primeiras 120)" : "") + ".";
+  }
+  document.querySelectorAll("#presets button").forEach(b => b.addEventListener("click", () => setPreset(b.dataset.p)));
+  ["lam", "w"].forEach(id => $(id).addEventListener("input", renderLittle));
+  function renderDiag() {
+    const wip = parseFloat($("dg-wip").value), lam = parseFloat($("dg-lam").value);
+    $("dg-out").innerHTML = (isFinite(wip) && lam > 0) ? `Lead time médio: <b>${fmt1(wip / lam)} dias</b>. É o tempo que um item novo vai esperar, em média, se nada mudar.` : "Informe itens em processo e a vazão diária.";
+  }
+  ["dg-wip", "dg-lam"].forEach(id => $(id).addEventListener("input", renderDiag));
+
+  /* ---------- 2 · Lead time → ROIC ---------- */
+  let mode = "aula";
+  const AULA = { rec: 1000, nopat: 80, fixo: 500, est: 300, lt: 20, wacc: 10 };
+  function base() {
+    if (mode === "aula") return { ...AULA };
+    const g = (id, d) => { const v = parseFloat($(id).value); return isFinite(v) ? v : d; };
+    return { rec: Math.max(1, g("in-rec", 1000)), nopat: g("in-nopat", 80), fixo: Math.max(0, g("in-fixo", 500)), est: Math.max(0, g("in-est", 300)), lt: Math.max(1, g("in-lt", 20)), wacc: g("in-wacc", 10) };
+  }
+  function calc(b, ltNew, gain) {
+    const est = b.est * (ltNew / b.lt);
+    const cap0 = b.fixo + b.est, cap1 = b.fixo + est;
+    const nop0 = b.nopat, nop1 = b.nopat + gain;
+    const r = (n, c) => (c > 0 ? (n / c) * 100 : 0);
+    return { est, cap0, cap1, nop0, nop1, m0: (nop0 / b.rec) * 100, m1: (nop1 / b.rec) * 100, g0: b.rec / cap0, g1: b.rec / cap1,
+      roic0: r(nop0, cap0), roic1: r(nop1, cap1), eva0: nop0 - (b.wacc / 100) * cap0, eva1: nop1 - (b.wacc / 100) * cap1, cash: b.est - est };
+  }
+  let last = null;
+  function render() {
+    const b = base();
+    const ltMax = Math.max(40, Math.ceil(b.lt * 2));
+    $("lt").max = ltMax; $("lt-max").textContent = ltMax + " dias"; $("lt-mid").textContent = b.lt;
+    const ltNew = Math.min(parseFloat($("lt").value), ltMax);
+    const gain = parseFloat($("def").value);
+    $("lt-out").textContent = ltNew + (ltNew === 1 ? " dia" : " dias");
+    $("def-out").textContent = "+" + fmtN(gain);
+    const c = calc(b, ltNew, gain); last = { b, ltNew, gain, c };
+
+    $("t-roic").textContent = fmtP(c.roic1);
+    $("t-roic-d").textContent = "antes: " + fmtP(c.roic0) + " · WACC " + fmtP(b.wacc);
+    $("t-eva").textContent = (c.eva1 < 0 ? "−" : "") + fmtN(Math.abs(c.eva1));
+    $("t-eva-d").textContent = "antes: " + (c.eva0 < 0 ? "−" : "") + fmtN(Math.abs(c.eva0));
+    $("tile-eva").classList.toggle("bad", c.eva1 < 0);
+    $("t-cash").textContent = (c.cash < 0 ? "−" : "") + fmtN(Math.abs(c.cash));
+    $("t-cash-d").textContent = c.cash >= 0 ? "estoque que virou caixa, uma vez" : "estoque adicional imobilizado";
+
+    const dm = c.m0 ? ((c.m1 / c.m0) - 1) * 100 : 0, dg = ((c.g1 / c.g0) - 1) * 100;
+    let msg;
+    if (ltNew === b.lt && gain === 0) msg = mode === "aula" ? "Mova o lead time para 8 dias e compare com o slide." : "Mova o lead time alvo e veja o efeito no seu balanço.";
+    else {
+      const who = Math.abs(dg) > Math.abs(dm) + 0.05 ? "o giro fez mais trabalho que a margem" : (Math.abs(dm) > Math.abs(dg) + 0.05 ? "a margem fez mais trabalho que o giro" : "margem e giro contribuíram por igual");
+      msg = `Margem: <b>${dm >= 0 ? "+" : ""}${fmt1(dm)}%</b>. Giro do capital: <b>${dg >= 0 ? "+" : ""}${fmt1(dg)}%</b>. ROIC de ${fmtP(c.roic0)} para <b>${fmtP(c.roic1)}</b> — ${who}.`;
+      if (c.roic0 <= b.wacc && c.roic1 > b.wacc) msg += " <b>O ROIC cruzou o WACC: a operação passou a criar valor.</b>";
+      if (c.roic0 > b.wacc && c.roic1 <= b.wacc) msg += " <b>O ROIC caiu abaixo do WACC: a operação passou a destruir valor.</b>";
+    }
+    $("msg").innerHTML = msg;
+
+    const rows = [
+      ["Lead time", b.lt + " dias", ltNew + " dias"], ["Estoque", fmtN(b.est), fmtN(c.est)], ["Capital investido", fmtN(c.cap0), fmtN(c.cap1)],
+      ["NOPAT", fmtN(c.nop0), fmtN(c.nop1)], ["Margem", fmtP(c.m0), fmtP(c.m1)], ["Giro do capital", fmtX(c.g0), fmtX(c.g1)], ["ROIC", fmtP(c.roic0), fmtP(c.roic1)],
+      ["Lucro econômico (WACC " + fmtP(b.wacc) + ")", (c.eva0 < 0 ? "−" : "") + fmtN(Math.abs(c.eva0)), (c.eva1 < 0 ? "−" : "") + fmtN(Math.abs(c.eva1))],
+    ];
+    $("tbl").innerHTML = rows.map((r, i) => `<tr><td>${r[0]}</td><td>${r[1]}</td><td class="after${i === 7 && c.eva1 < 0 ? " neg" : ""}">${r[2]}</td></tr>`).join("");
+
+    // slope: days of lead time per 1 p.p. of ROIC around the base point (gain = 0)
+    const d = 1, rA = calc(b, b.lt, 0).roic0, rB = calc(b, Math.max(1, b.lt - d), 0).roic1;
+    const perPt = (rB - rA) > 0 ? d / (rB - rA) : Infinity;
+    $("slope").textContent = isFinite(perPt) ? `Perto do ponto de partida, cada ${fmt1(perPt)} ${perPt < 1.05 ? "dia" : "dias"} de lead time a menos vale cerca de 1 ponto percentual de ROIC (sem contar o ganho por defeitos).` : "";
+    drawChart(b, ltNew, gain, ltMax);
+  }
+  function drawChart(b, ltNew, gain, ltMax) {
+    const W = 360, H = 230, L = 44, R = 12, T = 14, B = 34;
+    const pts = []; let ymax = b.wacc;
+    for (let lt = 1; lt <= ltMax; lt++) { const r = calc(b, lt, gain).roic1; pts.push([lt, r]); if (r > ymax) ymax = r; }
+    ymax = Math.min(Math.ceil(ymax / 5) * 5 + 5, 400);
+    const ymin = Math.min(0, Math.floor(Math.min(...pts.map(p => p[1]), b.wacc) / 5) * 5);
+    const x = (lt) => L + ((lt - 1) / (ltMax - 1)) * (W - L - R);
+    const y = (v) => T + (1 - (v - ymin) / (ymax - ymin)) * (H - T - B);
+    let s = "";
+    const span = ymax - ymin, step = span > 150 ? 50 : span > 60 ? 20 : span > 30 ? 10 : 5;
+    for (let v = ymin; v <= ymax; v += step) s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#2a3f66" stroke-width="1"/><text x="${L - 6}" y="${y(v) + 4}" font-size="10" fill="#b8c0d0" text-anchor="end" font-family="DM Mono, monospace">${v}%</text>`;
+    [1, Math.round(ltMax / 4), Math.round(ltMax / 2), Math.round(3 * ltMax / 4), ltMax].forEach(lt => { s += `<text x="${x(lt)}" y="${H - 14}" font-size="10" fill="#b8c0d0" text-anchor="middle" font-family="DM Mono, monospace">${lt}</text>`; });
+    s += `<text x="${(L + W - R) / 2}" y="${H - 2}" font-size="10" fill="#b8c0d0" text-anchor="middle" font-family="DM Sans, sans-serif">lead time (dias)</text>`;
+    s += `<line x1="${L}" x2="${W - R}" y1="${y(b.wacc)}" y2="${y(b.wacc)}" stroke="#d46a66" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+    s += `<path d="${pts.map((p, i) => (i ? "L" : "M") + x(p[0]).toFixed(1) + " " + y(p[1]).toFixed(1)).join(" ")}" fill="none" stroke="#e3b54e" stroke-width="2.5"/>`;
+    const cur = calc(b, ltNew, gain).roic1;
+    s += `<line x1="${x(ltNew)}" x2="${x(ltNew)}" y1="${T}" y2="${H - B}" stroke="#7ea0d6" stroke-width="1" stroke-dasharray="3 3"/>`;
+    s += `<circle cx="${x(ltNew)}" cy="${y(cur)}" r="5" fill="#e3b54e" stroke="#0a1628" stroke-width="2"/>`;
+    const lx = x(ltNew) > W * 0.6 ? x(ltNew) - 8 : x(ltNew) + 8, anc = x(ltNew) > W * 0.6 ? "end" : "start";
+    s += `<text x="${lx}" y="${Math.max(T + 10, y(cur) - 10)}" font-size="11" fill="#ffffff" text-anchor="${anc}" font-family="DM Mono, monospace" font-weight="500">${fmtP(cur)}</text>`;
+    $("chart").innerHTML = s;
+  }
+  function setMode(m) {
+    mode = m;
+    $("tab-aula").setAttribute("aria-selected", m === "aula"); $("tab-empresa").setAttribute("aria-selected", m === "empresa");
+    $("base-aula").hidden = m !== "aula"; $("base-empresa").hidden = m !== "empresa";
+    $("lt").value = base().lt; $("def").value = 0;
+    try { localStorage.setItem("sim-mode", m); } catch (e) {}
+    render();
+  }
+  $("tab-aula").addEventListener("click", () => setMode("aula"));
+  $("tab-empresa").addEventListener("click", () => setMode("empresa"));
+  ["lt", "def"].forEach(id => $(id).addEventListener("input", render));
+  ["in-rec", "in-nopat", "in-fixo", "in-est", "in-lt", "in-wacc"].forEach(id => $(id).addEventListener("input", () => { $("lt").value = base().lt; render(); }));
+  $("reset").addEventListener("click", () => { $("lt").value = base().lt; $("def").value = 0; render(); });
+  $("copy").addEventListener("click", () => {
+    if (!last) return; const { b, ltNew, gain, c } = last;
+    const txt = `Simulação Lei de Little → ROIC (${mode === "aula" ? "caso da aula" : "minha empresa"})
+Lead time: ${b.lt} → ${ltNew} dias | Estoque: ${fmtN(b.est)} → ${fmtN(c.est)} | Capital investido: ${fmtN(c.cap0)} → ${fmtN(c.cap1)}
+NOPAT: ${fmtN(c.nop0)} → ${fmtN(c.nop1)} (ganho por defeitos: +${fmtN(gain)}) | Margem: ${fmtP(c.m0)} → ${fmtP(c.m1)} | Giro: ${fmtX(c.g0)} → ${fmtX(c.g1)}
+ROIC: ${fmtP(c.roic0)} → ${fmtP(c.roic1)} | WACC: ${fmtP(b.wacc)} | Lucro econômico: ${fmtN(c.eva0)} → ${fmtN(c.eva1)} | Caixa liberado: ${fmtN(c.cash)}`;
+    const toast = (m) => { $("toast").textContent = m; $("toast").classList.add("on"); setTimeout(() => $("toast").classList.remove("on"), 1600); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => toast("Copiado"), () => toast("Não foi possível copiar"));
+    else toast("Não foi possível copiar");
+  });
+  let saved = "aula"; try { saved = localStorage.getItem("sim-mode") || "aula"; } catch (e) {}
+  setPreset("fabrica"); renderDiag(); setMode(saved === "empresa" ? "empresa" : "aula");
+})();
+</script>
+</body>
+</html>
