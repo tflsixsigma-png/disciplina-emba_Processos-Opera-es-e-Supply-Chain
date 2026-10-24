@@ -249,6 +249,7 @@
 
     <details class="panel" id="como">
       <summary>Como chegamos a esses números · passo a passo, com os seus valores</summary>
+      <p class="hint" style="margin-top:8px">Cinco quantidades explicam tudo: <b>lead time</b> (do início ao fim, somando trabalho e espera), <b>valor agregado</b> (a parte do lead time pela qual o cliente paga), <b>WIP</b> (o que está em processo ao mesmo tempo), <b>capital investido</b> (fixo + o que está preso em processo) e <b>ROIC</b> (resultado ÷ capital). Abaixo, cada uma com os seus valores atuais.</p>
       <div id="como-body" style="margin-top:10px"></div>
     </details>
 
@@ -473,14 +474,21 @@
     $("tbl").innerHTML = rows.map((r, i) => `<tr><td>${r[0]}</td><td>${r[1]}</td><td class="after${i === 9 && fc.eva < 0 ? " neg" : ""}">${r[2]}</td></tr>`).join("");
 
     // como calculamos
-    const stepRows = S.steps.map((s2, i) => `<tr><td>${s2.n}</td><td>${c.rows[i].act ? fmt1(c.rows[i].act) : "—"}</td><td>${c.rows[i].q ? fmt1(c.rows[i].q) : "—"}</td><td>${fmt1(c.rows[i].act + c.rows[i].q)}</td></tr>`).join("");
+    const tipo = { va: "Valor", bv: "Necessário", nva: "Desperdício" }, tcol = { va: "var(--gold)", bv: "var(--blue)", nva: "var(--red)" };
+    const stepRows = S.steps.map((s2, i) => `<tr><td>${s2.n}</td><td style="color:${tcol[s2.t]}">${tipo[s2.t]}</td><td>${c.rows[i].act ? fmt1(c.rows[i].act) : "—"}</td><td>${c.rows[i].q ? fmt1(c.rows[i].q) : "—"}</td></tr>`).join("");
+    const vaNames = S.steps.filter((s2, i) => s2.t === "va" && c.rows[i].act > 0).map(s2 => s2.n).join(", ");
     const horasSalvas = Math.max(0, b.work - c.work);
     $("como-body").innerHTML = `<div class="calc">
       <div class="st"><div class="t">1 · Fator de fila (Princípio 3)</div><div class="f">Q = u ÷ (1 − u) × (c² + 1) ÷ 2 = ${fmt1(st.rho * 100).replace(",0", "")}% ÷ ${fmt1((1 - st.rho) * 100).replace(",0", "")}% × ${fmt1((st.cv2 + 1) / 2)} = <b>${fmt1(c.Q)}</b></div><div class="e">Cada hora de trabalho numa etapa gera ${fmt1(c.Q)} h de espera antes dela. Utilização (muri) e variabilidade (mura) entram aqui — e em nenhum outro lugar.</div></div>
-      <div class="st"><div class="t">2 · Tempo por etapa (Princípios 2 e 5)</div><div class="e">Trabalho = tempo da etapa × (1 + retrabalho ${Math.round(st.rw * 100)}%) × 0 se eliminada, × 0,5 se simplificada. Fila = trabalho × Q (etapas sem fila: transporte, tratamento).</div>
-        <div style="overflow-x:auto"><table><thead><tr><th>Etapa</th><th>Trabalho (h)</th><th>Fila (h)</th><th>Total (h)</th></tr></thead><tbody>${stepRows}<tr><td><b>Soma</b></td><td><b>${fmt1(c.work)}</b></td><td><b>${fmt1(c.fila)}</b></td><td><b>${fmt1(c.work + c.fila)}</b></td></tr></tbody></table></div></div>
+      <div class="st"><div class="t">2 · Tempo de trabalho e de fila em cada etapa (Princípios 2 e 5)</div><div class="e">Trabalho da etapa = tempo-padrão × (1 + retrabalho de ${Math.round(st.rw * 100)}%); vale 0 se você eliminou e metade se simplificou. Fila da etapa = trabalho × Q (${fmt1(c.Q)}). Transporte e tratamento não têm fila.</div>
+        <div style="overflow-x:auto"><table><thead><tr><th>Etapa</th><th>Tipo</th><th>Trabalho (h)</th><th>Fila (h)</th></tr></thead><tbody>${stepRows}
+        <tr><td><b>Subtotal · Valor</b></td><td></td><td><b>${fmt1(c.va)}</b></td><td></td></tr>
+        <tr><td><b>Subtotal · Necessário</b></td><td></td><td><b>${fmt1(c.bv)}</b></td><td></td></tr>
+        <tr><td><b>Subtotal · Desperdício</b></td><td></td><td><b>${fmt1(c.nva)}</b></td><td></td></tr>
+        <tr><td><b>Soma</b></td><td></td><td><b>${fmt1(c.work)}</b></td><td><b>${fmt1(c.fila)}</b></td></tr></tbody></table></div></div>
       <div class="st"><div class="t">3 · Espera por lote (Princípio 4)</div><div class="f">${S.wave.pts} ponto${S.wave.pts > 1 ? "s" : ""} de lote × ${st.wave} h ÷ 2 = <b>${fmt1(c.lote)} h</b></div><div class="e">Em média, um item espera metade do intervalo entre liberações em cada ponto onde o trabalho “junta volume”.</div></div>
-      <div class="st"><div class="t">4 · Lead time</div><div class="f">(${fmt1(c.work)} + ${fmt1(c.fila)} + ${fmt1(c.lote)}) h ÷ ${S.hpd} h/dia = <b>${fmt1(c.ltd)} dias</b></div><div class="e">Valor agregado = ${fmt1(c.va)} h ÷ ${fmt1(c.lth)} h = <b>${fmtP(vaPct)}</b> do lead time.</div></div>
+      <div class="st"><div class="t">4 · Lead time: as cinco fatias</div><div class="f">valor ${fmt1(c.va)} h + necessário ${fmt1(c.bv)} h + desperdício ${fmt1(c.nva)} h + fila ${fmt1(c.fila)} h + lote ${fmt1(c.lote)} h = <b>${fmt1(c.lth)} h</b> ÷ ${S.hpd} h/dia = <b>${fmt1(c.ltd)} dias</b></div><div class="e">O lead time é o tempo que um ${S.unit} leva do início ao fim, somando tudo: o que é trabalhado e o que fica esperando. ${S.hpd === 24 ? "Em hospital, o dia tem 24 h." : "O dia útil tem 8 h de trabalho."}</div></div>
+      <div class="st"><div class="t">4b · Valor agregado no lead time</div><div class="f">${fmt1(c.va)} h ÷ ${fmt1(c.lth)} h = <b>${fmtP(vaPct)}</b></div><div class="e">O numerador é só o trabalho das etapas marcadas como <b>Valor</b> (${vaNames || "nenhuma"}): o que o cliente pagaria conscientemente. O denominador é o lead time inteiro. É a “linha do tempo” de Ohno: em fluxos não melhorados, esse número é de um dígito — e o resto é fila.</div></div>
       <div class="st"><div class="t">5 · Lei de Little</div><div class="f">WIP = ${fmtN(S.lam)} ${S.item}/dia × ${fmt1(c.ltd)} dias = <b>${fmtN(c.wip)} ${S.item}</b></div><div class="e">Com vazão constante, o que está em processo é proporcional ao lead time. Não é meta: é identidade.</div></div>
       <div class="st"><div class="t">6 · Capital investido</div><div class="f">preso = ${fmtN(c.wip)} × ${money(S.capItem)} = <b>${money(c.preso)}</b> · total = ${money(S.fixo)} fixo + ${money(c.preso)} = <b>${money(c.cap)}</b></div><div class="e">Capital por ${S.unit} em processo: ${S === SCEN.hospital ? "o investimento por leito ocupado" : S === SCEN.onboarding ? "custo de aquisição já pago e receita ainda não iniciada" : "estoque alocado ao pedido aberto"}.</div></div>
       <div class="st"><div class="t">7 · NOPAT</div><div class="f">${money(S.nopat)} + 50% × ${fmt1(horasSalvas)} h × R$ ${fmtN(S.custoHora)}/h × ${fmtN(S.lam)}/dia × ${S.diasAno} dias = <b>${money(fc.nopat)}</b></div><div class="e">Horas de trabalho eliminadas por ${S.unit}: ${fmt1(b.work)} − ${fmt1(c.work)} = ${fmt1(horasSalvas)} h. Só metade vira resultado; a outra metade fica como folga de capacidade. Fila e lote não entram aqui — mexem no capital, não no custo.</div></div>
