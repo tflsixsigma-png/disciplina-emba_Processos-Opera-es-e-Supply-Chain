@@ -119,6 +119,13 @@
   .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
   .field { display: grid; gap: 4px; min-width: 0; } .field label { font-size: 12px; color: var(--muted); }
   .field input { background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; font: 500 16px var(--mono); width: 100%; min-width: 0; }
+  .calc { display: grid; gap: 10px; }
+  .calc .st { border-left: 2px solid var(--gold); padding: 2px 0 2px 12px; min-width: 0; }
+  .wrap > *, #res > *, details.panel { min-width: 0; max-width: 100%; }
+  .calc .st .t { font-weight: 700; font-size: 14px; }
+  .calc .st .f { font-family: var(--mono); font-size: 12.5px; color: var(--gold); margin: 4px 0; white-space: normal; overflow-wrap: anywhere; line-height: 1.5; }
+  .calc .st .e { font-size: 13px; color: var(--cream); }
+  .calc table { font-size: 13px; margin-top: 6px; } .calc td, .calc th { padding: 5px 6px; }
   footer { color: var(--muted); font-size: 11.5px; text-align: center; margin-top: 8px; } footer a { color: var(--gold); }
   /* sticky results bar */
   .bar-fixed { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--panel2); border-top: 2px solid var(--gold); padding: 8px max(16px, env(safe-area-inset-left, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px)); }
@@ -126,6 +133,7 @@
   .bar-fixed .c { min-width: 0; } .bar-fixed .k { font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .bar-fixed .v { font-family: var(--display); font-size: clamp(16px, 4.6vw, 22px); font-weight: 700; color: var(--gold); line-height: 1.1; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .bar-fixed .d { font-size: 10.5px; color: var(--cream); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .bar-fixed .note { grid-column: 1 / -1; font-family: var(--mono); font-size: 9.5px; color: var(--muted); text-align: right; margin-top: -2px; }
   .toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--gold); color: var(--bg); font-weight: 700; padding: 10px 16px; border-radius: 8px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s; }
   .toast.on { opacity: 1; }
   @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
@@ -239,6 +247,11 @@
     </section>
     <section class="panel"><p class="msg" id="fin-msg"></p></section>
 
+    <details class="panel" id="como">
+      <summary>Como chegamos a esses números · passo a passo, com os seus valores</summary>
+      <div id="como-body" style="margin-top:10px"></div>
+    </details>
+
     <section class="panel">
       <h3>Antes vs. depois</h3>
       <div style="overflow-x:auto"><table><thead><tr><th>Indicador</th><th>Antes</th><th>Depois</th></tr></thead><tbody id="tbl"></tbody></table></div>
@@ -246,7 +259,7 @@
     </section>
 
     <section class="panel ask">
-      <h3>Para discutir em dupla</h3>
+      <h3>Reflita</h3>
       <p>Qual alavanca moveu mais o ROIC no seu processo: a margem (retrabalho, desperdício) ou o giro (fila, lote)? Por que isso muda de um setor para outro?</p>
       <p>Que etapa você classificou como “necessária” que, na verdade, só existe porque alguém errou antes? (Dica: conferências.)</p>
       <p>Reduzir a utilização de 85% para 75% parece “comprar ociosidade”. O que o simulador diz sobre isso — e o que a sua controladoria diria?</p>
@@ -277,11 +290,12 @@
   </section>
 </div>
 
-<div class="bar-fixed" aria-live="polite"><div class="in">
+<div class="bar-fixed" aria-live="polite"><div class="in" title="Variação em relação ao ponto de partida do processo">
   <div class="c"><div class="k">Lead time</div><div class="v" id="b-lt">—</div><div class="d" id="b-lt-d"></div></div>
   <div class="c"><div class="k">WIP</div><div class="v" id="b-wip">—</div><div class="d" id="b-wip-d"></div></div>
   <div class="c"><div class="k">Valor agr.</div><div class="v" id="b-va">—</div><div class="d" id="b-va-d"></div></div>
   <div class="c"><div class="k">ROIC</div><div class="v" id="b-roic">—</div><div class="d" id="b-roic-d"></div></div>
+  <div class="note">▲▼ = variação em relação ao ponto de partida · <a href="#como" style="color:var(--gold)">como calculamos</a></div>
 </div></div>
 <div class="toast" id="toast" role="status">Copiado</div>
 
@@ -457,6 +471,21 @@
     $("fin-msg").innerHTML = (c.ltd === b.ltd && fc.nopat === fb.nopat) ? "Mexa nos princípios 2 a 5 e volte aqui." : `Margem: <b>${dM >= 0 ? "+" : ""}${fmt1(dM)}%</b>. Giro do capital: <b>${dG >= 0 ? "+" : ""}${fmt1(dG)}%</b>. ROIC de ${fmtP(fb.roic)} para <b>${fmtP(fc.roic)}</b> — ${who}.` + (fb.roic <= S.wacc && fc.roic > S.wacc ? " <b>O ROIC cruzou o WACC: a operação passou a criar valor.</b>" : "");
     const rows = [["Lead time", fmt1(b.ltd) + " dias", fmt1(c.ltd) + " dias"], ["Valor agregado no lead time", fmtP(b.va / b.lth * 100), fmtP(vaPct)], [`${S.item[0].toUpperCase() + S.item.slice(1)} em processo (WIP)`, fmtN(b.wip), fmtN(c.wip)], ["Capital preso em processo", money(b.preso), money(c.preso)], ["Capital investido", money(b.cap), money(c.cap)], ["NOPAT", money(fb.nopat), money(fc.nopat)], ["Margem", fmtP(fb.margem), fmtP(fc.margem)], ["Giro do capital", fmt1(fb.giro).replace(",", ",") + "×", fmt1(fc.giro) + "×"], ["ROIC", fmtP(fb.roic), fmtP(fc.roic)], [`Lucro econômico (WACC ${fmtP(S.wacc)})`, money(fb.eva), money(fc.eva)]];
     $("tbl").innerHTML = rows.map((r, i) => `<tr><td>${r[0]}</td><td>${r[1]}</td><td class="after${i === 9 && fc.eva < 0 ? " neg" : ""}">${r[2]}</td></tr>`).join("");
+
+    // como calculamos
+    const stepRows = S.steps.map((s2, i) => `<tr><td>${s2.n}</td><td>${c.rows[i].act ? fmt1(c.rows[i].act) : "—"}</td><td>${c.rows[i].q ? fmt1(c.rows[i].q) : "—"}</td><td>${fmt1(c.rows[i].act + c.rows[i].q)}</td></tr>`).join("");
+    const horasSalvas = Math.max(0, b.work - c.work);
+    $("como-body").innerHTML = `<div class="calc">
+      <div class="st"><div class="t">1 · Fator de fila (Princípio 3)</div><div class="f">Q = u ÷ (1 − u) × (c² + 1) ÷ 2 = ${fmt1(st.rho * 100).replace(",0", "")}% ÷ ${fmt1((1 - st.rho) * 100).replace(",0", "")}% × ${fmt1((st.cv2 + 1) / 2)} = <b>${fmt1(c.Q)}</b></div><div class="e">Cada hora de trabalho numa etapa gera ${fmt1(c.Q)} h de espera antes dela. Utilização (muri) e variabilidade (mura) entram aqui — e em nenhum outro lugar.</div></div>
+      <div class="st"><div class="t">2 · Tempo por etapa (Princípios 2 e 5)</div><div class="e">Trabalho = tempo da etapa × (1 + retrabalho ${Math.round(st.rw * 100)}%) × 0 se eliminada, × 0,5 se simplificada. Fila = trabalho × Q (etapas sem fila: transporte, tratamento).</div>
+        <div style="overflow-x:auto"><table><thead><tr><th>Etapa</th><th>Trabalho (h)</th><th>Fila (h)</th><th>Total (h)</th></tr></thead><tbody>${stepRows}<tr><td><b>Soma</b></td><td><b>${fmt1(c.work)}</b></td><td><b>${fmt1(c.fila)}</b></td><td><b>${fmt1(c.work + c.fila)}</b></td></tr></tbody></table></div></div>
+      <div class="st"><div class="t">3 · Espera por lote (Princípio 4)</div><div class="f">${S.wave.pts} ponto${S.wave.pts > 1 ? "s" : ""} de lote × ${st.wave} h ÷ 2 = <b>${fmt1(c.lote)} h</b></div><div class="e">Em média, um item espera metade do intervalo entre liberações em cada ponto onde o trabalho “junta volume”.</div></div>
+      <div class="st"><div class="t">4 · Lead time</div><div class="f">(${fmt1(c.work)} + ${fmt1(c.fila)} + ${fmt1(c.lote)}) h ÷ ${S.hpd} h/dia = <b>${fmt1(c.ltd)} dias</b></div><div class="e">Valor agregado = ${fmt1(c.va)} h ÷ ${fmt1(c.lth)} h = <b>${fmtP(vaPct)}</b> do lead time.</div></div>
+      <div class="st"><div class="t">5 · Lei de Little</div><div class="f">WIP = ${fmtN(S.lam)} ${S.item}/dia × ${fmt1(c.ltd)} dias = <b>${fmtN(c.wip)} ${S.item}</b></div><div class="e">Com vazão constante, o que está em processo é proporcional ao lead time. Não é meta: é identidade.</div></div>
+      <div class="st"><div class="t">6 · Capital investido</div><div class="f">preso = ${fmtN(c.wip)} × ${money(S.capItem)} = <b>${money(c.preso)}</b> · total = ${money(S.fixo)} fixo + ${money(c.preso)} = <b>${money(c.cap)}</b></div><div class="e">Capital por ${S.unit} em processo: ${S === SCEN.hospital ? "o investimento por leito ocupado" : S === SCEN.onboarding ? "custo de aquisição já pago e receita ainda não iniciada" : "estoque alocado ao pedido aberto"}.</div></div>
+      <div class="st"><div class="t">7 · NOPAT</div><div class="f">${money(S.nopat)} + 50% × ${fmt1(horasSalvas)} h × R$ ${fmtN(S.custoHora)}/h × ${fmtN(S.lam)}/dia × ${S.diasAno} dias = <b>${money(fc.nopat)}</b></div><div class="e">Horas de trabalho eliminadas por ${S.unit}: ${fmt1(b.work)} − ${fmt1(c.work)} = ${fmt1(horasSalvas)} h. Só metade vira resultado; a outra metade fica como folga de capacidade. Fila e lote não entram aqui — mexem no capital, não no custo.</div></div>
+      <div class="st"><div class="t">8 · ROIC e lucro econômico</div><div class="f">margem ${fmtP(fc.margem)} × giro ${fmt1(fc.giro)}× = ${money(fc.nopat)} ÷ ${money(c.cap)} = <b>${fmtP(fc.roic)}</b> · LE = ${money(fc.nopat)} − ${fmtP(S.wacc)} × ${money(c.cap)} = <b>${money(fc.eva)}</b></div><div class="e">Antes: margem ${fmtP(fb.margem)} × giro ${fmt1(fb.giro)}× = ROIC ${fmtP(fb.roic)}. Os princípios 2 e 5 movem a margem; os princípios 3 e 4 movem o giro.</div></div>
+    </div>`;
 
     // sticky bar
     const dd = (v, b2, unit, inv) => { const d = v - b2; if (Math.abs(d) < 1e-9) return "= antes"; return (d > 0 ? "▲ " : "▼ ") + (unit === "%" ? fmt1(Math.abs(d)) + " p.p." : unit === "d" ? fmt1(Math.abs(d)) + " d" : fmtN(Math.abs(d))); };
